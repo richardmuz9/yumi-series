@@ -1,0 +1,396 @@
+.app-download-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.app-download-container {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.app-download-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.app-download-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.download-tabs {
+  display: flex;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tab {
+  flex: 1;
+  padding: 16px 24px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+}
+
+.tab:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.tab.active {
+  background: white;
+  color: #667eea;
+  border-bottom: 2px solid #667eea;
+}
+
+.download-content {
+  padding: 32px;
+  height: calc(90vh - 200px);
+  overflow-y: auto;
+}
+
+.mobile-downloads,
+.desktop-downloads,
+.web-app-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.mobile-downloads h3,
+.desktop-downloads h3,
+.web-app-section h3 {
+  text-align: center;
+  margin-bottom: 32px;
+  font-size: 28px;
+  color: #1e293b;
+}
+
+.platform-section {
+  margin-bottom: 48px;
+}
+
+.platform-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.platform-header h4 {
+  margin: 0;
+  font-size: 20px;
+  color: #334155;
+}
+
+.detected {
+  background: #10b981;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.download-options {
+  display: grid;
+  gap: 16px;
+}
+
+.download-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.download-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+}
+
+.download-card.recommended {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+}
+
+.download-card.recommended::before {
+  content: '⭐ Recommended';
+  position: absolute;
+  top: -8px;
+  left: 24px;
+  background: #10b981;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.download-card {
+  position: relative;
+}
+
+.card-icon {
+  font-size: 48px;
+  min-width: 60px;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-content h5 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #1e293b;
+}
+
+.card-content p {
+  margin: 0 0 12px 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.features {
+  font-size: 14px;
+  color: #10b981;
+  font-weight: 500;
+}
+
+.system-requirements {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.download-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.download-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.download-btn.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.download-btn.secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.download-btn.secondary:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.ios-pwa-note {
+  margin-top: 24px;
+  padding: 20px;
+  background: #fef3c7;
+  border-radius: 12px;
+  border-left: 4px solid #f59e0b;
+}
+
+.ios-pwa-note h5 {
+  margin: 0 0 12px 0;
+  color: #92400e;
+}
+
+.ios-pwa-note p {
+  margin: 0 0 12px 0;
+  color: #78350f;
+}
+
+.ios-pwa-note ol {
+  margin: 0;
+  color: #78350f;
+  padding-left: 20px;
+}
+
+.ios-pwa-note li {
+  margin-bottom: 4px;
+}
+
+.embedded-pwa-installer {
+  margin: 24px 0;
+}
+
+.web-app-benefits {
+  margin-top: 32px;
+}
+
+.web-app-benefits h4 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #1e293b;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.benefit-item {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.benefit-icon {
+  font-size: 24px;
+  min-width: 32px;
+}
+
+.benefit-content h5 {
+  margin: 0 0 8px 0;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.benefit-content p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.download-footer {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 32px;
+  text-align: center;
+}
+
+.coming-soon-notice {
+  margin-bottom: 32px;
+}
+
+.coming-soon-notice h4 {
+  margin: 0 0 12px 0;
+  color: #1e293b;
+}
+
+.coming-soon-notice p {
+  margin: 0;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.support-links h5 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+}
+
+.links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.support-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.support-link:hover {
+  color: #4f46e5;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .app-download-container {
+    margin: 10px;
+    max-height: 95vh;
+  }
+  
+  .app-download-header {
+    padding: 16px 20px;
+  }
+  
+  .download-content {
+    padding: 20px;
+  }
+  
+  .download-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .links {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .tab {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+} 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ChargePage from './components/ChargePage';
 import ModelIntroduction from './components/ModelIntroduction';
 import LayoutCustomizer from './components/LayoutCustomizer';
+import AppDownloadSection from './components/AppDownloadSection';
 import { AuthModal } from './components/AuthModal';
 import { billingApi } from './services/billingApi';
 import { getTranslation, type Translation } from './translations';
@@ -82,6 +83,7 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
   const [showModelGuide, setShowModelGuide] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showDownloads, setShowDownloads] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [userTokens, setUserTokens] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -289,6 +291,14 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
                 <span className="model-guide-icon">🤖</span>
                 <span className="model-guide-text">{t.modelGuide}</span>
               </button>
+              <button 
+                className="download-btn"
+                onClick={() => setShowDownloads(true)}
+                title="Download mobile and desktop apps"
+              >
+                <span className="download-icon">📱</span>
+                <span className="download-text">Download</span>
+              </button>
             </div>
           </div>
           
@@ -337,6 +347,13 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
       {showModelGuide && (
         <ModelIntroduction 
           onClose={() => setShowModelGuide(false)} 
+        />
+      )}
+
+      {/* App Download Modal */}
+      {showDownloads && (
+        <AppDownloadSection 
+          onClose={() => setShowDownloads(false)} 
         />
       )}
 
