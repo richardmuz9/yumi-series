@@ -1,6 +1,13 @@
 import express from 'express'
 // @ts-ignore - alipay-sdk doesn't have official types
-const AlipaySdk = require('alipay-sdk').default || require('alipay-sdk')
+let AlipaySdk: any = null
+try {
+  if (process.env.NODE_ENV !== 'production') {
+    AlipaySdk = require('alipay-sdk').default || require('alipay-sdk')
+  }
+} catch (error) {
+  console.log('ℹ️  Alipay SDK not available (production mode or package not installed)')
+}
 import {
   authenticateUser,
   AuthRequest,

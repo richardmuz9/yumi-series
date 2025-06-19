@@ -144,6 +144,10 @@ class Database {
     return await this.getAsync('SELECT * FROM users WHERE email = ?', [email])
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return await this.allAsync('SELECT * FROM users ORDER BY id')
+  }
+
   async updateUserTokens(userId: number, tokensRemaining: number, totalTokensUsed: number): Promise<void> {
     await this.runAsync(
       'UPDATE users SET tokensRemaining = ?, totalTokensUsed = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',

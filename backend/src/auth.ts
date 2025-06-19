@@ -134,6 +134,16 @@ export async function authenticateUser(req: AuthRequest, res: Response, next: Ne
     const user = await db.getUserById(decoded.userId)
     if (!user) {
       console.log('❌ User not found for ID:', decoded.userId)
+      // Let's check if there are any users in the database at all
+      try {
+        const allUsers = await db.getAllUsers()
+        console.log('📊 Total users in database:', allUsers.length)
+        if (allUsers.length > 0) {
+          console.log('👤 Available user IDs:', allUsers.map((u: any) => u.id))
+        }
+      } catch (err) {
+        console.log('❌ Error checking database:', err)
+      }
       return res.status(401).json({ error: 'User not found' })
     }
 
