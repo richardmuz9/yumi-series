@@ -95,6 +95,31 @@ function getQwenClient(): OpenAI {
   return _qwen
 }
 
+// Export lazy-initialized clients for backward compatibility
+export const openai = new Proxy({} as OpenAI, {
+  get(target, prop) {
+    return getOpenAIClient()[prop as keyof OpenAI]
+  }
+})
+
+export const claude = new Proxy({} as Anthropic, {
+  get(target, prop) {
+    return getClaudeClient()[prop as keyof Anthropic]
+  }
+})
+
+export const openrouter = new Proxy({} as OpenAI, {
+  get(target, prop) {
+    return getOpenRouterClient()[prop as keyof OpenAI]
+  }
+})
+
+export const qwen = new Proxy({} as OpenAI, {
+  get(target, prop) {
+    return getQwenClient()[prop as keyof OpenAI]
+  }
+})
+
 // Function to get the appropriate AI client based on provider
 export function getAIClient(provider: string): OpenAI | Anthropic {
   switch (provider) {
