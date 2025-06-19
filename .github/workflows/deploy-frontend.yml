@@ -39,8 +39,8 @@ jobs:
         working-directory: ./frontend
         run: |
           echo "Creating .env.production file..."
-          echo "VITE_API_URL=https://api.yumi77965.online" > .env.production
-          echo "VITE_FRONTEND_URL=https://yumi77965.online" >> .env.production
+          echo "VITE_API_URL=https://yumi-series-production.railway.app" > .env.production
+          echo "VITE_FRONTEND_URL=https://richardmuz9.github.io/yumi-series" >> .env.production
           echo "=== .env.production created ==="
           cat .env.production
           echo "=========================="
@@ -53,8 +53,8 @@ jobs:
           echo "✅ Build completed"
         env:
           NODE_ENV: production
-          VITE_API_URL: https://api.yumi77965.online
-          VITE_FRONTEND_URL: https://yumi77965.online
+          VITE_API_URL: https://yumi-series-production.railway.app
+          VITE_FRONTEND_URL: https://richardmuz9.github.io/yumi-series
       
       - name: Verify build created dist directory
         run: |
