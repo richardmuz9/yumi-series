@@ -193,3 +193,7 @@ For questions or support:
 ---
 
 **Built with ❤️ by Yumi** | Powered by 20+ AI Models | Made for Developers Worldwide 🌟
+
+# Yumi Series - AI-Powered Creative Platform
+
+<!-- Last updated: 2025-06-19 - Fixed mixed content issues -->
