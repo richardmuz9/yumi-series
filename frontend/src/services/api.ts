@@ -1,5 +1,97 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
+// Enhanced fetch with retry logic and better error handling
+async function fetchWithRetry(
+  input: RequestInfo,
+  init?: RequestInit,
+  retries = 3,
+  backoff = 500
+): Promise<Response> {
+  try {
+    const response = await fetch(input, {
+      ...init,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...init?.headers,
+      },
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    
+    return response
+  } catch (error) {
+    console.error(`API request failed:`, error)
+    
+    if (retries > 0 && (error instanceof Error)) {
+      // Retry on network errors or 5xx server errors
+      const isRetryable = 
+        error.message.includes('fetch') || 
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('HTTP 5')
+      
+      if (isRetryable) {
+        console.log(`Retrying in ${backoff}ms... (${retries} attempts left)`)
+        await new Promise(resolve => setTimeout(resolve, backoff))
+        return fetchWithRetry(input, init, retries - 1, backoff * 2)
+      }
+    }
+    
+    throw error
+  }
+}
+
+// Centralized API client
+class ApiClient {
+  private baseUrl: string
+
+  constructor(baseUrl: string = API_BASE_URL) {
+    this.baseUrl = baseUrl
+  }
+
+  private async request<T>(
+    endpoint: string, 
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`
+    
+    try {
+      const response = await fetchWithRetry(url, options)
+      return await response.json()
+    } catch (error) {
+      console.error(`API ${options.method || 'GET'} ${endpoint} failed:`, error)
+      throw error
+    }
+  }
+
+  async get<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET' })
+  }
+
+  async post<T>(endpoint: string, data?: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+    })
+  }
+
+  async put<T>(endpoint: string, data?: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    })
+  }
+
+  async delete<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: 'DELETE' })
+  }
+}
+
+// Global API client instance
+export const apiClient = new ApiClient()
+
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
@@ -181,79 +273,61 @@ export const authService = new AuthService()
 
 export const apiService = {
   async chat(request: ChatRequest): Promise<ChatResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || 'Failed to send message')
+    try {
+      return await apiClient.post<ChatResponse>('/api/chat', request)
+    } catch (error) {
+      console.error('Chat API error:', error)
+      throw new Error(error instanceof Error ? error.message : 'Failed to send message')
     }
-
-    return response.json()
   },
 
   async getModels(): Promise<ModelsResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/models`)
-    
-    if (!response.ok) {
+    try {
+      const data = await apiClient.get<any>('/api/models')
+      
+      console.log('Raw models data from backend:', data)
+      
+      // Handle the backend's complex model structure and extract just the IDs
+      const validatedData: ModelsResponse = {
+        openai: data.openai?.models && Array.isArray(data.openai.models) 
+          ? data.openai.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
+          : [],
+        openrouter: data.openrouter?.models && Array.isArray(data.openrouter.models) 
+          ? data.openrouter.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
+          : [],
+        qwen: data.qwen?.models && Array.isArray(data.qwen.models) 
+          ? data.qwen.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
+          : [],
+        claude: data.claude?.models && Array.isArray(data.claude.models) 
+          ? data.claude.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
+          : []
+      }
+      
+      console.log('Processed models data:', validatedData)
+      
+      return validatedData
+    } catch (error) {
+      console.error('Models API error:', error)
       throw new Error('Failed to fetch models')
     }
-
-    const data = await response.json()
-    
-    console.log('Raw models data from backend:', data)
-    
-    // Handle the backend's complex model structure and extract just the IDs
-    const validatedData: ModelsResponse = {
-      openai: data.openai?.models && Array.isArray(data.openai.models) 
-        ? data.openai.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
-        : [],
-      openrouter: data.openrouter?.models && Array.isArray(data.openrouter.models) 
-        ? data.openrouter.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
-        : [],
-      qwen: data.qwen?.models && Array.isArray(data.qwen.models) 
-        ? data.qwen.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
-        : [],
-      claude: data.claude?.models && Array.isArray(data.claude.models) 
-        ? data.claude.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
-        : []
-    }
-    
-    console.log('Processed models data:', validatedData)
-    
-    return validatedData
   },
 
   async healthCheck(): Promise<{ status: string }> {
-    const response = await fetch(`${API_BASE_URL}/health`)
-    
-    if (!response.ok) {
+    try {
+      return await apiClient.get<{ status: string }>('/health')
+    } catch (error) {
+      console.error('Health check error:', error)
       throw new Error('Health check failed')
     }
-
-    return response.json()
   },
 
   async editWebsite(instructions: string): Promise<string> {
-    const response = await fetch(`${API_BASE_URL}/api/edit-website`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ instructions }),
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || 'Failed to process website editing instructions')
+    try {
+      const result = await apiClient.post<{ response: string }>('/api/edit-website', { instructions })
+      return result.response
+    } catch (error) {
+      console.error('Website edit API error:', error)
+      throw new Error(error instanceof Error ? error.message : 'Failed to process website editing instructions')
     }
-
-    const result = await response.json()
-    return result.response
   }
 } 

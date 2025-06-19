@@ -1,0 +1,9 @@
+# Ignore frontend directory and files
+frontend/
+*.md
+docs/
+.git/
+node_modules/
+.env
+.env.*
+*.log 

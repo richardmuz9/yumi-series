@@ -8,10 +8,6 @@ healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
-# Environment variables that Railway should use
 [variables]
 NODE_ENV = "production"
-PORT = "3000"
-
-# Tell Railway to use the backend directory as root
-workdir = "backend" 
+PORT = "3000" 

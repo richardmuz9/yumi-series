@@ -225,7 +225,7 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
         {error && (
           <div className="error-banner">
             <div className="error-content">
-              <span className="error-icon">⚠️</span>
+            <span className="error-icon">⚠️</span>
               <span className="error-message">{error}</span>
             </div>
             <button 

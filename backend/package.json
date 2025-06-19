@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc && npm run copy-config",
-    "start": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "start:dev": "ts-node src/index.ts",
     "copy-config": "cp -r config dist/ || xcopy config dist\\config\\ /E /I || true"
   },
   "dependencies": {
