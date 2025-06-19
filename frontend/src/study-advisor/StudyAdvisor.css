@@ -1,0 +1,619 @@
+.study-advisor-app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.app-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.app-header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+.step.current .step-number {
+  background: #4CAF50;
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3);
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.step-label {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.app-main {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.step-content h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.step-description {
+  color: #666;
+  margin-bottom: 25px;
+  font-size: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.form-group select,
+.form-group input {
+  padding: 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.range-value {
+  margin-top: 5px;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.score-group {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+}
+
+.score-group label {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.score-group input {
+  padding: 12px;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.score-range {
+  margin-top: 5px;
+  font-size: 0.85rem;
+  color: #6c757d;
+  text-align: center;
+}
+
+.goals-summary {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.goal-item {
+  margin-bottom: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.goal-item:last-child {
+  border-bottom: none;
+}
+
+.scores-summary {
+  background: #e3f2fd;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.scores-summary h3 {
+  margin-bottom: 15px;
+  color: #1976d2;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 5px 0;
+}
+
+.subject {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.score {
+  font-weight: bold;
+  color: #1976d2;
+}
+
+.generate-btn {
+  width: 100%;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+}
+
+.generate-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.results {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.recommendations-section,
+.study-plan-section,
+.textbooks-section {
+  margin-bottom: 40px;
+}
+
+.recommendations-section h3,
+.study-plan-section h3,
+.textbooks-section h3 {
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #667eea;
+}
+
+.university-card {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.university-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.university-card.reach {
+  border-left: 5px solid #f44336;
+}
+
+.university-card.target {
+  border-left: 5px solid #ff9800;
+}
+
+.university-card.safety {
+  border-left: 5px solid #4caf50;
+}
+
+.university-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.university-info h4 {
+  margin: 0 0 5px 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.japanese-name {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 8px 0;
+}
+
+.difficulty-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.difficulty-badge.reach {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.difficulty-badge.target {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.difficulty-badge.safety {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.match-percentage {
+  text-align: center;
+}
+
+.percentage {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #667eea;
+}
+
+.match-label {
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.recommendation {
+  color: #333;
+  margin-bottom: 15px;
+  font-style: italic;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.university-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.detail-item {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.gap-analysis {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+.gap-analysis ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.gap-analysis li {
+  color: #856404;
+  margin-bottom: 4px;
+}
+
+.application-link {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #667eea;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+.application-link:hover {
+  background: #5a67d8;
+}
+
+.study-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.overview-item {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  border: 2px solid #e9ecef;
+}
+
+.subjects-plan {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.subject-card {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.subject-card.priority-high {
+  border-left: 5px solid #f44336;
+}
+
+.subject-card.priority-medium {
+  border-left: 5px solid #ff9800;
+}
+
+.subject-card.priority-low {
+  border-left: 5px solid #4caf50;
+}
+
+.subject-card h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.score-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #555;
+}
+
+.study-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.priority {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.priority.priority-high {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.priority.priority-medium {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.priority.priority-low {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.textbook-subject {
+  margin-bottom: 30px;
+}
+
+.textbook-subject h4 {
+  color: #333;
+  margin-bottom: 15px;
+  text-transform: capitalize;
+  font-size: 1.2rem;
+}
+
+.textbooks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+}
+
+.textbook-card {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 15px;
+  transition: all 0.3s ease;
+}
+
+.textbook-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.textbook-card h5 {
+  margin: 0 0 5px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.japanese-title {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 10px 0;
+  font-style: italic;
+}
+
+.book-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.description {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.practice-problems {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  display: inline-block;
+}
+
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5a67d8;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+  background: #667eea;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .study-advisor-app {
+    padding: 15px;
+  }
+  
+  .step-indicator {
+    gap: 10px;
+  }
+  
+  .step-number {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+  
+  .form-grid,
+  .scores-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .university-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .app-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .textbooks-grid {
+    grid-template-columns: 1fr;
+  }
+} 

@@ -1,0 +1,26 @@
+{
+  "domain": "yumi77965.online",
+  "apiVersion": "v1",
+  "defaultProvider": "qwen",
+  "defaultModel": "qwen-turbo",
+  "maxTokensPerRequest": 2000,
+  "temperature": 0.7,
+  "cookieMaxAge": 604800000,
+  "tokenValidityDays": 7,
+  "minPasswordLength": 6,
+  "freeTier": {
+    "monthlyTokens": 10000,
+    "resetDay": 1
+  },
+  "premium": {
+    "dailyTokenLimit": 30000
+  },
+  "apiKeys": {
+    "required": ["QWEN_API_KEY"],
+    "optional": ["OPENAI_API_KEY", "OPENROUTER_API_KEY"]
+  },
+  "providerAlternatives": {
+    "openai": ["openai/gpt-4", "openai/gpt-4-turbo", "openai/gpt-3.5-turbo"],
+    "claude": ["anthropic/claude-3-opus", "anthropic/claude-3-sonnet", "anthropic/claude-3-haiku"]
+  }
+} 

@@ -1,0 +1,177 @@
+{
+  "blockTypes": {
+    "hooks": {
+      "name": "Hook",
+      "description": "Opening that grabs attention",
+      "icon": "🎣",
+      "templates": {
+        "question": {
+          "name": "Question Hook",
+          "template": "What if {topic} could {benefit}?",
+          "examples": [
+            "What if website building could be as easy as describing your dream?",
+            "What if content creation took 5 minutes instead of 5 hours?",
+            "What if you never had to worry about design again?"
+          ]
+        },
+        "bold_statement": {
+          "name": "Bold Statement",
+          "template": "{topic} is about to change everything.",
+          "examples": [
+            "AI website builders are about to change everything.",
+            "The way we create content is broken.",
+            "Your next post could go viral. Here's how."
+          ]
+        },
+        "personal": {
+          "name": "Personal Hook",
+          "template": "I just {action} and the results were {adjective}.",
+          "examples": [
+            "I just launched my AI tool and the results were mind-blowing.",
+            "I just tested our new feature and the results were incredible.",
+            "I just helped a client and the results were life-changing."
+          ]
+        },
+        "emoji_opener": {
+          "name": "Emoji Opener",
+          "template": "{emoji} {statement}",
+          "examples": [
+            "🚀 Just shipped something incredible",
+            "💡 Had a breakthrough moment today",
+            "🎯 Found the perfect solution"
+          ]
+        },
+        "trend": {
+          "name": "Trend Hook",
+          "template": "Everyone's talking about {trend}, but here's what they're missing:",
+          "examples": [
+            "Everyone's talking about AI, but here's what they're missing:",
+            "Everyone's building websites, but here's what they're missing:",
+            "Everyone's creating content, but here's what they're missing:"
+          ]
+        }
+      }
+    },
+    "bodies": {
+      "name": "Body",
+      "description": "Main content that delivers value",
+      "icon": "📝",
+      "templates": {
+        "tutorial": {
+          "name": "Tutorial",
+          "template": "Here's how to {action}:\n\n1. {step1}\n2. {step2}\n3. {step3}\n\nResult: {outcome}",
+          "examples": [
+            "Here's how to build a website in 5 minutes:\n\n1. Describe your vision\n2. AI generates the design\n3. Customize and publish\n\nResult: Professional website ready!"
+          ]
+        },
+        "story": {
+          "name": "Story",
+          "template": "{timeframe}, I was {situation}. Then {turning_point}. Now {current_state}.",
+          "examples": [
+            "Last month, I was struggling with website design. Then I discovered AI builders. Now I create sites in minutes.",
+            "Yesterday, I was stuck on content creation. Then I tried our new tool. Now I'm posting daily."
+          ]
+        },
+        "data_point": {
+          "name": "Data Point",
+          "template": "{statistic} of {group} struggle with {problem}. Here's the solution:",
+          "examples": [
+            "80% of small businesses struggle with website creation. Here's the solution:",
+            "90% of content creators face writer's block. Here's the solution:"
+          ]
+        },
+        "case_study": {
+          "name": "Case Study",
+          "template": "Client challenge: {problem}\nOur solution: {solution}\nResults: {results}",
+          "examples": [
+            "Client challenge: Needed a professional website in 24 hours\nOur solution: AI-powered website builder\nResults: Beautiful site delivered in 2 hours"
+          ]
+        },
+        "tips_list": {
+          "name": "Tips List",
+          "template": "{number} tips for {goal}:\n\n• {tip1}\n• {tip2}\n• {tip3}\n\nBonus: {bonus_tip}",
+          "examples": [
+            "5 tips for better websites:\n\n• Keep it simple\n• Focus on speed\n• Mobile-first design\n• Clear navigation\n• Strong CTA\n\nBonus: Use AI to automate design"
+          ]
+        },
+        "behind_scenes": {
+          "name": "Behind the Scenes",
+          "template": "Building {product} wasn't easy. Here's what really happened:\n\n{challenge1}\n{challenge2}\n{breakthrough}\n\nLesson learned: {lesson}",
+          "examples": [
+            "Building our AI wasn't easy. Here's what really happened:\n\nFirst attempt failed completely\nTeam worked 16-hour days\nBreakthrough came at 3 AM\n\nLesson learned: Persistence pays off"
+          ]
+        }
+      }
+    },
+    "ctas": {
+      "name": "Call to Action",
+      "description": "Ending that drives engagement",
+      "icon": "📢",
+      "templates": {
+        "question": {
+          "name": "Engagement Question",
+          "template": "What's your experience with {topic}? Share in the comments! 👇",
+          "examples": [
+            "What's your experience with website builders? Share in the comments! 👇",
+            "What's your biggest content creation challenge? Let me know! 👇"
+          ]
+        },
+        "invite_demo": {
+          "name": "Demo Invitation",
+          "template": "Want to try {product}? {action} for a {offer}.",
+          "examples": [
+            "Want to try our AI builder? DM me for a free demo.",
+            "Want to see this in action? Comment 'DEMO' for early access."
+          ]
+        },
+        "share_request": {
+          "name": "Share Request",
+          "template": "Found this helpful? Share it with someone who needs to see this! 🔄",
+          "examples": [
+            "Found this helpful? Share it with someone who needs to see this! 🔄",
+            "Know someone struggling with this? Tag them below! 👇"
+          ]
+        },
+        "follow_up": {
+          "name": "Follow Up",
+          "template": "Follow for more {topic} tips and {frequency} updates! ✨",
+          "examples": [
+            "Follow for more AI tips and weekly updates! ✨",
+            "Follow for more web design insights and daily inspiration! ✨"
+          ]
+        },
+        "link_click": {
+          "name": "Link Click",
+          "template": "Learn more about {topic} → {link_text}",
+          "examples": [
+            "Learn more about our AI builder → Link in bio",
+            "Try it yourself → yumi77965.online"
+          ]
+        }
+      }
+    }
+  },
+  "blockCombinations": {
+    "viral_formula": ["question", "story", "question"],
+    "educational": ["bold_statement", "tutorial", "follow_up"],
+    "personal_brand": ["personal", "behind_scenes", "invite_demo"],
+    "data_driven": ["emoji_opener", "data_point", "share_request"],
+    "trend_riding": ["trend", "tips_list", "link_click"]
+  },
+  "variationTemplates": {
+    "synonyms": {
+      "amazing": ["incredible", "fantastic", "outstanding", "remarkable", "extraordinary"],
+      "build": ["create", "craft", "develop", "design", "construct"],
+      "fast": ["quick", "rapid", "speedy", "instant", "immediate"],
+      "easy": ["simple", "effortless", "straightforward", "intuitive", "user-friendly"],
+      "help": ["assist", "support", "guide", "enable", "empower"],
+      "great": ["excellent", "superb", "wonderful", "brilliant", "impressive"]
+    },
+    "sentenceStarters": {
+      "announcement": ["Excited to share", "Thrilled to announce", "Happy to reveal", "Proud to present"],
+      "tutorial": ["Here's how to", "Let me show you", "Step-by-step guide", "Quick tutorial"],
+      "question": ["What if", "Have you ever", "Why do", "How often do"],
+      "story": ["Last week", "Yesterday", "Recently", "Just finished", "This morning"]
+    }
+  }
+} 

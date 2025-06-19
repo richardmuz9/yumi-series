@@ -1,0 +1,659 @@
+/* PWA Installer Component Styles */
+
+.pwa-installer {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Installation Card */
+.install-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 2rem;
+}
+
+.install-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.install-icon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.install-info {
+  flex: 1;
+}
+
+.install-info h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+}
+
+.install-info p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.install-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  min-height: 44px;
+  min-width: 80px;
+}
+
+.install-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.install-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Benefits Section */
+.install-benefits {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.install-benefits h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+}
+
+.install-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.install-benefits li {
+  padding: 0.5rem 0;
+  color: #4b5563;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Installation Instructions */
+.install-instructions {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fef3c7;
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+}
+
+.install-instructions h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #92400e;
+  margin: 0 0 0.75rem 0;
+}
+
+.install-instructions ol {
+  padding-left: 1.25rem;
+  margin: 0;
+}
+
+.install-instructions li {
+  padding: 0.25rem 0;
+  color: #78350f;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.ios-note,
+.android-note {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #dbeafe;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.ios-note p,
+.android-note p {
+  margin: 0;
+  color: #1e40af;
+  font-size: 0.875rem;
+}
+
+/* Features Grid */
+.install-features {
+  margin-bottom: 1.5rem;
+}
+
+.install-features h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1rem 0;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.feature-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4b5563;
+  text-align: center;
+}
+
+/* Installed Status */
+.pwa-installer.installed .install-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.pwa-installer.installed .install-status .install-icon {
+  font-size: 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+}
+
+.pwa-installer.installed .install-status h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.pwa-installer.installed .install-status p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.875rem;
+}
+
+/* Floating Install Prompt */
+.pwa-install-prompt {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  background: #4f46e5;
+  color: #ffffff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 1080;
+  
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  
+  transform: translateY(calc(100% + 1rem));
+  transition: transform 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.pwa-install-prompt.show {
+  transform: translateY(0);
+}
+
+.pwa-install-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.pwa-install-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-install-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.pwa-install-description {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  line-height: 1.3;
+}
+
+.pwa-install-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.pwa-install-btn {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+  backdrop-filter: blur(10px);
+}
+
+.pwa-install-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.pwa-install-btn-primary {
+  background: rgba(255, 255, 255, 0.9);
+  color: #4f46e5;
+  border-color: transparent;
+}
+
+.pwa-install-btn-primary:hover {
+  background: #ffffff;
+}
+
+/* Browser Support */
+.browser-support {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.browser-support h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1rem 0;
+}
+
+.browser-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.browser-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.browser-icon {
+  font-size: 1.25rem;
+  width: 24px;
+  text-align: center;
+}
+
+.browser-item span:nth-child(2) {
+  flex: 1;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.support-status {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.support-status.supported {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.support-status.partial {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.support-status.manual {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.support-note {
+  margin: 1rem 0 0 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* Troubleshooting */
+.troubleshooting {
+  margin-top: 1.5rem;
+}
+
+.troubleshooting details {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.troubleshooting summary {
+  padding: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: #374151;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+
+.troubleshooting summary:hover {
+  background: #e5e7eb;
+}
+
+.troubleshooting-content {
+  padding: 1rem;
+}
+
+.troubleshooting-content h5 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+}
+
+.troubleshooting-content ul,
+.troubleshooting-content ol {
+  padding-left: 1.25rem;
+  margin: 0 0 1rem 0;
+}
+
+.troubleshooting-content li {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.troubleshooting-content p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .pwa-installer {
+    padding: 0.5rem;
+  }
+  
+  .install-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .install-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .install-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .feature-item {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .feature-name {
+    font-size: 0.7rem;
+  }
+  
+  .pwa-install-prompt {
+    bottom: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .pwa-install-actions {
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 70px;
+  }
+  
+  .pwa-install-btn {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .browser-item {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .browser-item span:nth-child(2) {
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet Responsive */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .feature-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .pwa-install-prompt {
+    left: 2rem;
+    right: 2rem;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+/* Desktop Responsive */
+@media (min-width: 1025px) {
+  .feature-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  .pwa-install-prompt {
+    left: auto;
+    right: 2rem;
+    width: 400px;
+  }
+  
+  .browser-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .install-card {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .install-info h3 {
+    color: #f9fafb;
+  }
+  
+  .install-info p {
+    color: #d1d5db;
+  }
+  
+  .install-benefits {
+    background: #111827;
+  }
+  
+  .install-benefits h4 {
+    color: #f3f4f6;
+  }
+  
+  .install-benefits li {
+    color: #d1d5db;
+  }
+  
+  .feature-item {
+    background: #111827;
+    border-color: #374151;
+  }
+  
+  .feature-item:hover {
+    background: #1f2937;
+  }
+  
+  .feature-name {
+    color: #d1d5db;
+  }
+  
+  .browser-support {
+    background: #111827;
+  }
+  
+  .browser-support h4 {
+    color: #f3f4f6;
+  }
+  
+  .browser-item {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .browser-item span:nth-child(2) {
+    color: #d1d5db;
+  }
+  
+  .troubleshooting details {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .troubleshooting summary {
+    background: #111827;
+    border-color: #374151;
+    color: #f3f4f6;
+  }
+  
+  .troubleshooting summary:hover {
+    background: #1f2937;
+  }
+  
+  .troubleshooting-content h5 {
+    color: #f3f4f6;
+  }
+  
+  .troubleshooting-content li,
+  .troubleshooting-content p {
+    color: #d1d5db;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .pwa-install-prompt,
+  .install-btn-primary,
+  .feature-item {
+    transition: none;
+  }
+  
+  .install-btn-primary:hover,
+  .feature-item:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .install-card,
+  .browser-item,
+  .feature-item {
+    border-width: 2px;
+    border-color: #000000;
+  }
+  
+  .install-btn-primary {
+    border: 2px solid #000000;
+  }
+}
+
+/* Print styles */
+@media print {
+  .pwa-install-prompt {
+    display: none;
+  }
+  
+  .install-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #000000;
+  }
+} 

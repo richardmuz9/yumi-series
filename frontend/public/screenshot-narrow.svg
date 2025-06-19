@@ -1,0 +1,29 @@
+
+<svg width="750" height="1334" viewBox="0 0 750 1334" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="750" height="1334" fill="url(#bgGrad)"/>
+  
+  <!-- Header mockup -->
+  <rect x="0" y="0" width="750" height="60" fill="#7c3aed"/>
+  <text x="20" y="35" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white">
+    Yumi Series - AI Platform
+  </text>
+  
+  <!-- Content mockup -->
+  <rect x="20" y="80" width="710" height="30" fill="#e2e8f0" rx="5"/>
+  <rect x="20" y="130" width="690" height="20" fill="#cbd5e1" rx="3"/>
+  <rect x="20" y="160" width="670" height="20" fill="#cbd5e1" rx="3"/>
+  
+  <!-- Button mockup -->
+  <rect x="20" y="200" width="120" height="40" fill="#7c3aed" rx="8"/>
+  <text x="80" y="225" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">
+    Get Started
+  </text>
+</svg>

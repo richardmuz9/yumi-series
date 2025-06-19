@@ -1,0 +1,85 @@
+{
+  "preferenceTypes": {
+    "style_favorites": {
+      "name": "Style Preferences",
+      "description": "Track which styles users favor most",
+      "dataPoints": ["tone", "stylePack", "animePersona", "platform", "objective"]
+    },
+    "content_patterns": {
+      "name": "Content Patterns",
+      "description": "Analyze user content preferences",
+      "dataPoints": ["hookType", "bodyType", "ctaType", "postLength", "hashtagCount"]
+    },
+    "engagement_history": {
+      "name": "Engagement History",
+      "description": "Track performance of different styles",
+      "dataPoints": ["likes", "comments", "shares", "clicks", "platform", "style_used"]
+    },
+    "generation_history": {
+      "name": "Generation History",
+      "description": "Track what users generate and select",
+      "dataPoints": ["timestamp", "selected_variation", "final_edits", "published"]
+    }
+  },
+  "learningAlgorithms": {
+    "style_recommendation": {
+      "name": "Style Recommender",
+      "description": "Recommend styles based on past preferences",
+      "weight_factors": {
+        "recent_usage": 0.4,
+        "engagement_performance": 0.3,
+        "user_ratings": 0.2,
+        "platform_match": 0.1
+      }
+    },
+    "content_optimization": {
+      "name": "Content Optimizer",
+      "description": "Suggest improvements based on performance",
+      "optimization_factors": [
+        "optimal_post_length",
+        "best_performing_hooks",
+        "engagement_driving_ctas",
+        "hashtag_effectiveness"
+      ]
+    }
+  },
+  "adaptationRules": {
+    "quick_learner": {
+      "posts_threshold": 3,
+      "confidence_level": 0.6,
+      "recommendation_strength": "moderate"
+    },
+    "experienced_user": {
+      "posts_threshold": 10,
+      "confidence_level": 0.8,
+      "recommendation_strength": "strong"
+    },
+    "power_user": {
+      "posts_threshold": 25,
+      "confidence_level": 0.9,
+      "recommendation_strength": "expert"
+    }
+  },
+  "feedbackMechanisms": {
+    "star_rating": {
+      "name": "Star Rating",
+      "description": "Rate generated posts 1-5 stars",
+      "weight": 1.0
+    },
+    "thumbs_feedback": {
+      "name": "Thumbs Up/Down",
+      "description": "Quick binary feedback",
+      "weight": 0.7
+    },
+    "engagement_import": {
+      "name": "Engagement Metrics",
+      "description": "Import actual performance data",
+      "weight": 1.5
+    },
+    "manual_preference": {
+      "name": "Manual Preference",
+      "description": "Explicitly set preferences",
+      "weight": 2.0
+    }
+  }
+} 

@@ -1,0 +1,23 @@
+{
+  "majorOptions": [
+    { "value": "engineering", "label": "Engineering / 工学部" },
+    { "value": "medicine", "label": "Medicine / 医学部" },
+    { "value": "business", "label": "Business / 経営学部" },
+    { "value": "economics", "label": "Economics / 経済学部" }
+  ],
+  "stepLabels": [
+    { "step": 1, "label": "Profile" },
+    { "step": 2, "label": "Scores" },
+    { "step": 3, "label": "Goals" },
+    { "step": 4, "label": "Results" }
+  ],
+  "ejuScoreRanges": {
+    "math2": { "min": 0, "max": 200 },
+    "science": { "min": 0, "max": 200 },
+    "japanese": { "min": 0, "max": 400 }
+  },
+  "studyTimeRange": {
+    "min": 5,
+    "max": 40
+  }
+} 

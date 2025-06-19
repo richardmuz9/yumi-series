@@ -1,0 +1,392 @@
+{
+  "contentTypes": [
+    { 
+      "id": "social-media", 
+      "name": "Social Media Posts", 
+      "icon": "📱", 
+      "description": "LinkedIn, Twitter, 小红书 posts" 
+    },
+    { 
+      "id": "creative-writing", 
+      "name": "Creative Writing", 
+      "icon": "✍️", 
+      "description": "Stories, poems, scripts" 
+    },
+    { 
+      "id": "blog-article", 
+      "name": "Blog Articles", 
+      "icon": "📰", 
+      "description": "Long-form articles and blogs" 
+    },
+    { 
+      "id": "script", 
+      "name": "Galgame Scripts", 
+      "icon": "🎭", 
+      "description": "Visual novel dialogues and scenes" 
+    }
+  ],
+  "platforms": [
+    { 
+      "id": "linkedin", 
+      "name": "LinkedIn", 
+      "icon": "💼", 
+      "description": "Professional networking" 
+    },
+    { 
+      "id": "xiaohongshu", 
+      "name": "小红书 / Rednote", 
+      "icon": "📱", 
+      "description": "Lifestyle & beauty" 
+    },
+    { 
+      "id": "twitter", 
+      "name": "Twitter", 
+      "icon": "🐦", 
+      "description": "Short-form microblog" 
+    }
+  ],
+  "audiences": {
+    "socialMedia": [
+      { 
+        "id": "industry_peers", 
+        "name": "Industry Peers", 
+        "description": "Professionals in your field" 
+      },
+      { 
+        "id": "friends", 
+        "name": "Friends", 
+        "description": "Personal connections" 
+      },
+      { 
+        "id": "potential_customers", 
+        "name": "Potential Customers", 
+        "description": "Target market" 
+      },
+      { 
+        "id": "general_public", 
+        "name": "General Public", 
+        "description": "Broad audience" 
+      },
+      { 
+        "id": "followers", 
+        "name": "Followers", 
+        "description": "Existing audience" 
+      }
+    ],
+    "general": [
+      { 
+        "id": "general", 
+        "name": "General Public", 
+        "desc": "Broad audience appeal" 
+      },
+      { 
+        "id": "young_adults", 
+        "name": "Young Adults (18-30)", 
+        "desc": "College students, early professionals" 
+      },
+      { 
+        "id": "professionals", 
+        "name": "Working Professionals", 
+        "desc": "Career-focused individuals" 
+      },
+      { 
+        "id": "enthusiasts", 
+        "name": "Hobby Enthusiasts", 
+        "desc": "People passionate about specific topics" 
+      },
+      { 
+        "id": "students", 
+        "name": "Students & Learners", 
+        "desc": "Educational content seekers" 
+      }
+    ]
+  },
+  "tones": [
+    { 
+      "id": "Professional", 
+      "name": "Professional", 
+      "icon": "👔", 
+      "description": "Formal, business-appropriate" 
+    },
+    { 
+      "id": "Humorous", 
+      "name": "Humorous", 
+      "icon": "😄", 
+      "description": "Light-hearted, entertaining" 
+    },
+    { 
+      "id": "Gentle", 
+      "name": "Gentle", 
+      "icon": "🤗", 
+      "description": "Warm, caring, supportive" 
+    },
+    { 
+      "id": "Cool", 
+      "name": "Cool", 
+      "icon": "😎", 
+      "description": "Confident, direct, minimal" 
+    },
+    { 
+      "id": "Energetic", 
+      "name": "Energetic", 
+      "icon": "⚡", 
+      "description": "Enthusiastic, exciting" 
+    },
+    { 
+      "id": "Casual", 
+      "name": "Casual", 
+      "icon": "😊", 
+      "description": "Relaxed, friendly, informal" 
+    }
+  ],
+  "stylePacks": [
+    {
+      "id": "tsundere",
+      "name": "Tsundere",
+      "icon": "😤",
+      "description": "Slightly rude but secretly affectionate",
+      "example": "Starts with \"哼...\" but ends warmly"
+    },
+    {
+      "id": "cool",
+      "name": "Cool",
+      "icon": "🧊",
+      "description": "Short, concise, confident",
+      "example": "Direct statements, strong verbs, minimal emojis"
+    },
+    {
+      "id": "gentle",
+      "name": "Gentle",
+      "icon": "🌸",
+      "description": "Warm, reassuring",
+      "example": "Uses \"we\" and \"let's\", encouraging tone"
+    },
+    {
+      "id": "professional",
+      "name": "Professional",
+      "icon": "📊",
+      "description": "Business-appropriate, formal",
+      "example": "Industry terminology, credible tone"
+    },
+    {
+      "id": "humorous",
+      "name": "Humorous",
+      "icon": "🎭",
+      "description": "Light-hearted, entertaining",
+      "example": "Jokes, witty observations, fun analogies"
+    },
+    {
+      "id": "energetic",
+      "name": "Energetic",
+      "icon": "🎉",
+      "description": "Enthusiastic, exciting",
+      "example": "Exclamation points, dynamic language"
+    }
+  ],
+  "objectives": {
+    "common": [
+      { 
+        "id": "Introduce product", 
+        "name": "Introduce Product", 
+        "icon": "🚀", 
+        "description": "Launch or announce a new product/service" 
+      },
+      { 
+        "id": "Share tutorial", 
+        "name": "Share Tutorial", 
+        "icon": "📚", 
+        "description": "Teach or explain how to do something" 
+      },
+      { 
+        "id": "Ask question", 
+        "name": "Ask Question", 
+        "icon": "❓", 
+        "description": "Engage audience with a question" 
+      },
+      { 
+        "id": "Tell a story", 
+        "name": "Tell a Story", 
+        "icon": "📖", 
+        "description": "Share personal experience or narrative" 
+      },
+      { 
+        "id": "Share news", 
+        "name": "Share News", 
+        "icon": "📰", 
+        "description": "Update on industry or company news" 
+      },
+      { 
+        "id": "Review product", 
+        "name": "Review Product", 
+        "icon": "⭐", 
+        "description": "Review or recommend something" 
+      },
+      { 
+        "id": "Motivational", 
+        "name": "Motivational", 
+        "icon": "💪", 
+        "description": "Inspire and motivate your audience" 
+      },
+      { 
+        "id": "Behind the scenes", 
+        "name": "Behind the Scenes", 
+        "icon": "🎬", 
+        "description": "Show process or workplace culture" 
+      }
+    ],
+    "linkedin": [
+      { 
+        "id": "Networking", 
+        "name": "Networking", 
+        "icon": "🤝", 
+        "description": "Connect with professionals" 
+      },
+      { 
+        "id": "Industry insight", 
+        "name": "Industry Insight", 
+        "icon": "💡", 
+        "description": "Share professional expertise" 
+      },
+      { 
+        "id": "Career update", 
+        "name": "Career Update", 
+        "icon": "📈", 
+        "description": "Share career milestone or change" 
+      }
+    ],
+    "xiaohongshu": [
+      { 
+        "id": "Lifestyle sharing", 
+        "name": "Lifestyle Sharing", 
+        "icon": "✨", 
+        "description": "Share daily life or experiences" 
+      },
+      { 
+        "id": "Product recommendation", 
+        "name": "Product Recommendation", 
+        "icon": "💄", 
+        "description": "Recommend beauty/lifestyle products" 
+      },
+      { 
+        "id": "Travel diary", 
+        "name": "Travel Diary", 
+        "icon": "🌍", 
+        "description": "Share travel experiences" 
+      }
+    ],
+    "twitter": [
+      { 
+        "id": "Quick tip", 
+        "name": "Quick Tip", 
+        "icon": "⚡", 
+        "description": "Share brief, actionable advice" 
+      },
+      { 
+        "id": "Hot take", 
+        "name": "Hot Take", 
+        "icon": "🔥", 
+        "description": "Share opinion on trending topic" 
+      },
+      { 
+        "id": "Thread starter", 
+        "name": "Thread Starter", 
+        "icon": "🧵", 
+        "description": "Start a discussion thread" 
+      }
+    ],
+    "creative-writing": [
+      { 
+        "id": "Tell a story", 
+        "name": "Tell a Story", 
+        "icon": "📚", 
+        "description": "Create narrative fiction or non-fiction" 
+      },
+      { 
+        "id": "Express emotion", 
+        "name": "Express Emotion", 
+        "icon": "💭", 
+        "description": "Convey feelings through poetry or prose" 
+      },
+      { 
+        "id": "Create atmosphere", 
+        "name": "Create Atmosphere", 
+        "icon": "🌙", 
+        "description": "Set mood and environment" 
+      },
+      { 
+        "id": "Develop character", 
+        "name": "Develop Character", 
+        "icon": "👤", 
+        "description": "Explore character depth and growth" 
+      }
+    ],
+    "blog-article": [
+      { 
+        "id": "Educate readers", 
+        "name": "Educate Readers", 
+        "icon": "🎓", 
+        "description": "Teach concepts or skills" 
+      },
+      { 
+        "id": "Share expertise", 
+        "name": "Share Expertise", 
+        "icon": "💡", 
+        "description": "Demonstrate knowledge and experience" 
+      },
+      { 
+        "id": "Solve problems", 
+        "name": "Solve Problems", 
+        "icon": "🔧", 
+        "description": "Address common challenges" 
+      },
+      { 
+        "id": "Inspire action", 
+        "name": "Inspire Action", 
+        "icon": "🚀", 
+        "description": "Motivate readers to take next steps" 
+      }
+    ],
+    "script": [
+      { 
+        "id": "Introduce character", 
+        "name": "Introduce Character", 
+        "icon": "👋", 
+        "description": "Present new character to player" 
+      },
+      { 
+        "id": "Develop relationship", 
+        "name": "Develop Relationship", 
+        "icon": "💕", 
+        "description": "Build character connections" 
+      },
+      { 
+        "id": "Create tension", 
+        "name": "Create Tension", 
+        "icon": "⚡", 
+        "description": "Build dramatic conflict" 
+      },
+      { 
+        "id": "Resolve conflict", 
+        "name": "Resolve Conflict", 
+        "icon": "✨", 
+        "description": "Conclude story arcs" 
+      }
+    ]
+  },
+  "sentimentAnalysis": {
+    "positiveWords": ["great", "amazing", "excellent", "love", "excited", "happy", "success", "awesome", "fantastic", "wonderful", "brilliant", "perfect", "outstanding", "superb", "incredible"],
+    "negativeWords": ["bad", "terrible", "hate", "angry", "sad", "fail", "problem", "awful", "horrible", "disappointing", "frustrating", "difficult", "challenging", "struggle", "issue"]
+  },
+  "platformIcons": {
+    "linkedin": "💼",
+    "xiaohongshu": "📱", 
+    "twitter": "🐦",
+    "default": "📊"
+  },
+  "platformNames": {
+    "linkedin": "LinkedIn",
+    "xiaohongshu": "小红书 / Rednote",
+    "twitter": "Twitter"
+  },
+  "crossPlatformPreview": ["linkedin", "twitter", "xiaohongshu"]
+} 

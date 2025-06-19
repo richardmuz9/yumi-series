@@ -1,0 +1,453 @@
+import express from 'express'
+import {
+  openai as openaiClient,
+  openrouter,
+  qwen,
+  modelsConfig,
+  promptsConfig,
+  appConfig,
+  authenticateUser,
+  optionalAuth,
+  calculateTokenCost,
+  deductTokens,
+  AuthRequest
+} from './shared'
+
+interface WritingRequest {
+  contentType: 'social-media' | 'creative-writing' | 'blog-article' | 'script'
+  platform?: string
+  audience: string
+  objective: string
+  tone: string
+  stylePack?: string
+  animePersona?: string
+  topic: string
+  keyPoints: string[]
+  pastPost?: string
+  trendingHashtags?: string[]
+  customInstructions?: string
+  generateVariations?: boolean
+  variationCount?: number
+  model?: string
+  provider?: string
+}
+
+interface WritingVariation {
+  id: string
+  content: string
+  changes: string[]
+  confidence: number
+}
+
+interface WritingResponse {
+  content: string
+  contentType: string
+  platform?: string
+  characterCount: number
+  maxLength: number
+  withinLimit: boolean
+  provider: string
+  model: string
+  tokensUsed?: number
+  tokensRemaining?: number
+  variations?: WritingVariation[]
+  variationCount?: number
+}
+
+// Creative writing templates and prompts
+const contentTypePrompts = {
+  'social-media': {
+    systemPrompt: 'You are a social media expert who creates engaging, authentic posts.',
+    basePrompt: (req: WritingRequest) => `Create a ${req.platform} post for ${req.audience} audience with ${req.objective} objective and ${req.tone} tone.`
+  },
+  'creative-writing': {
+    systemPrompt: 'You are a creative writing assistant who helps craft compelling stories, poems, and narratives.',
+    basePrompt: (req: WritingRequest) => `Create a creative piece for ${req.audience} with ${req.objective} objective in a ${req.tone} tone.`
+  },
+  'blog-article': {
+    systemPrompt: 'You are a professional content writer who creates informative and engaging blog articles.',
+    basePrompt: (req: WritingRequest) => `Write a blog article for ${req.audience} about ${req.topic} with ${req.objective} objective in a ${req.tone} tone.`
+  },
+  'script': {
+    systemPrompt: 'You are a visual novel and galgame script writer who creates engaging character dialogues and scenes.',
+    basePrompt: (req: WritingRequest) => `Write a galgame/visual novel script scene for ${req.audience} with ${req.objective} objective in a ${req.tone} tone.`
+  }
+}
+
+// Enhanced variation generation for different content types
+function generateContentVariations(baseContent: string, contentType: string, count: number): WritingVariation[] {
+  const variations: WritingVariation[] = []
+  
+  const variationStrategies = {
+    'social-media': [
+      { name: 'Emoji enhancement', apply: (text: string) => text.replace(/\./g, ' ✨').replace(/!/g, ' 🚀') },
+      { name: 'Question addition', apply: (text: string) => text + '\n\nWhat are your thoughts? 💭' },
+      { name: 'Call-to-action', apply: (text: string) => text + '\n\nShare if you agree! 👇' }
+    ],
+    'creative-writing': [
+      { name: 'Sensory details', apply: (text: string) => text.replace(/\./g, ', with vivid details.') },
+      { name: 'Emotional depth', apply: (text: string) => text.replace(/said/g, 'whispered') },
+      { name: 'Pacing variation', apply: (text: string) => text.replace(/\. /g, '.\n\n') }
+    ],
+    'blog-article': [
+      { name: 'Subheading structure', apply: (text: string) => text.replace(/\n\n/g, '\n\n## ') },
+      { name: 'Data inclusion', apply: (text: string) => text + '\n\n*According to recent studies...*' },
+      { name: 'Reader engagement', apply: (text: string) => text + '\n\nWhat has your experience been?' }
+    ],
+    'script': [
+      { name: 'Character emotion', apply: (text: string) => text.replace(/:/g, ' (smiling):') },
+      { name: 'Scene direction', apply: (text: string) => '[Scene: ' + text + ']' },
+      { name: 'Dialogue variation', apply: (text: string) => text.replace(/\./g, '...') }
+    ]
+  }
+
+  const strategies = variationStrategies[contentType as keyof typeof variationStrategies] || variationStrategies['social-media']
+  
+  for (let i = 0; i < Math.min(count, strategies.length); i++) {
+    const strategy = strategies[i]
+    const variationContent = strategy.apply(baseContent)
+    
+    variations.push({
+      id: `var_${i + 1}`,
+      content: variationContent,
+      changes: [strategy.name],
+      confidence: Math.random() * 0.3 + 0.7 // 70-100% confidence
+    })
+  }
+  
+  return variations
+}
+
+// Anime persona integration
+const animePersonaPrompts = {
+  gojo_satoru: "Write with Gojo Satoru's confident, playful, and slightly arrogant personality. Use phrases like 'Throughout Heaven and Earth, I alone am the honored one' style confidence.",
+  rem: "Write with Rem's devoted, gentle, and emotionally expressive personality. Show loyalty and care in the tone.",
+  tanjiro: "Write with Tanjiro's kind, determined, and empathetic personality. Show compassion and strong moral values.",
+  default: ""
+}
+
+export function setupWritingHelperRoutes(app: express.Application) {
+  // Get writing templates and configuration
+  app.get('/api/writing-helper/templates', optionalAuth, (req, res) => {
+    try {
+      const templates = {
+        contentTypes: {
+          'social-media': {
+            name: 'Social Media Posts',
+            description: 'Engaging posts for social platforms',
+            maxLength: 3000,
+            templates: [
+              {
+                id: 'announcement',
+                name: 'Product Announcement',
+                objective: 'Introduce product',
+                tone: 'Professional',
+                template: 'Exciting news! We\'re launching {product}...'
+              },
+              {
+                id: 'thought_leadership',
+                name: 'Thought Leadership',
+                objective: 'Share insights',
+                tone: 'Authoritative',
+                template: 'Here\'s what I\'ve learned about {topic}...'
+              }
+            ]
+          },
+          'creative-writing': {
+            name: 'Creative Writing',
+            description: 'Stories, poems, and creative narratives',
+            maxLength: 10000,
+            templates: [
+              {
+                id: 'short_story',
+                name: 'Short Story',
+                objective: 'Tell a story',
+                tone: 'Narrative',
+                template: 'In a world where {setting}, {character} discovers...'
+              },
+              {
+                id: 'poem',
+                name: 'Poetry',
+                objective: 'Express emotion',
+                tone: 'Lyrical',
+                template: 'Like {metaphor}, the {subject} {action}...'
+              }
+            ]
+          },
+          'blog-article': {
+            name: 'Blog Articles',
+            description: 'Long-form informative content',
+            maxLength: 20000,
+            templates: [
+              {
+                id: 'how_to',
+                name: 'How-To Guide',
+                objective: 'Educate readers',
+                tone: 'Instructional',
+                template: 'Learn how to {skill} with these proven steps...'
+              },
+              {
+                id: 'opinion',
+                name: 'Opinion Piece',
+                objective: 'Share perspective',
+                tone: 'Persuasive',
+                template: 'Why {topic} matters more than you think...'
+              }
+            ]
+          },
+          'script': {
+            name: 'Galgame Scripts',
+            description: 'Visual novel dialogues and scenes',
+            maxLength: 5000,
+            templates: [
+              {
+                id: 'character_intro',
+                name: 'Character Introduction',
+                objective: 'Introduce character',
+                tone: 'Character-driven',
+                template: '[Character enters scene]\n{Character}: "Hello, I\'m {name}..."'
+              },
+              {
+                id: 'dramatic_scene',
+                name: 'Dramatic Scene',
+                objective: 'Create tension',
+                tone: 'Dramatic',
+                template: '[Music: Tense]\n{Character}: "I never thought it would come to this..."'
+              }
+            ]
+          }
+        },
+        animePersonas: Object.keys(animePersonaPrompts)
+      }
+      
+      res.json(templates)
+    } catch (error) {
+      console.error('Writing templates error:', error)
+      res.status(500).json({ error: 'Failed to load writing templates' })
+    }
+  })
+
+  // Generate content
+  app.post('/api/generate-content', authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const {
+        contentType = 'social-media',
+        platform,
+        audience,
+        objective,
+        tone,
+        stylePack,
+        animePersona,
+        topic,
+        keyPoints,
+        pastPost,
+        trendingHashtags,
+        customInstructions,
+        generateVariations = false,
+        variationCount = 3,
+        model,
+        provider = appConfig.defaults.provider
+      }: WritingRequest = req.body
+
+      const userId = req.user?.id
+
+      // Get content type configuration
+      const contentConfig = contentTypePrompts[contentType]
+      if (!contentConfig) {
+        return res.status(400).json({ error: 'Invalid content type' })
+      }
+
+      // Build the enhanced prompt
+      let prompt = contentConfig.basePrompt(req.body)
+      
+      prompt += `\n\nTopic: ${topic}`
+      
+      if (keyPoints.length > 0) {
+        prompt += `\nKey Points: ${keyPoints.join(', ')}`
+      }
+
+      if (stylePack) {
+        prompt += `\nStyle Pack: ${stylePack}`
+      }
+
+      // Add anime persona influence
+      if (animePersona && animePersonaPrompts[animePersona as keyof typeof animePersonaPrompts]) {
+        prompt += `\n\nPersonality Influence: ${animePersonaPrompts[animePersona as keyof typeof animePersonaPrompts]}`
+      }
+
+      if (pastPost) {
+        prompt += `\nReference style from this past content: ${pastPost}`
+      }
+
+      if (trendingHashtags && trendingHashtags.length > 0 && contentType === 'social-media') {
+        prompt += `\nInclude relevant hashtags: ${trendingHashtags.join(', ')}`
+      }
+
+      if (customInstructions) {
+        prompt += `\nAdditional instructions: ${customInstructions}`
+      }
+
+      // Content type specific instructions
+      switch (contentType) {
+        case 'social-media':
+          if (platform) {
+            prompt += `\nPlatform: ${platform} - follow ${platform} best practices and formatting`
+          }
+          prompt += `\nMake it engaging, authentic, and valuable to the audience.`
+          break
+        case 'creative-writing':
+          prompt += `\nFocus on vivid imagery, character development, and emotional resonance. Use creative language and storytelling techniques.`
+          break
+        case 'blog-article':
+          prompt += `\nStructure as a well-organized article with clear sections, informative content, and actionable insights. Include introduction, body, and conclusion.`
+          break
+        case 'script':
+          prompt += `\nFormat as a visual novel script with character names, dialogue, and scene directions. Make it engaging and true to the visual novel format.`
+          break
+      }
+
+      // Select AI client
+      let aiClient
+      let selectedModel: string
+
+      switch (provider) {
+        case 'openai':
+          aiClient = openaiClient
+          selectedModel = model || modelsConfig.providers.openai.defaultModel
+          break
+        case 'openrouter':
+          aiClient = openrouter
+          selectedModel = model || modelsConfig.providers.openrouter.defaultModel
+          break
+        case 'qwen':
+          aiClient = qwen
+          selectedModel = model || modelsConfig.providers.qwen.defaultModel
+          break
+        default:
+          aiClient = qwen
+          selectedModel = modelsConfig.providers.qwen.defaultModel
+      }
+
+      // Calculate token cost
+      const tokenCost = calculateTokenCost(selectedModel, prompt.length)
+
+      // Check and deduct tokens
+      if (userId) {
+        const deductionResult = await deductTokens(userId, tokenCost, selectedModel, 'Content generation')
+        if (!deductionResult.success) {
+          return res.status(402).json({ 
+            error: 'Insufficient tokens', 
+            required: tokenCost,
+            available: deductionResult.remainingTokens || 0
+          })
+        }
+      }
+
+      // Generate the content
+      const completion = await aiClient.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: contentConfig.systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: contentType === 'blog-article' ? 4000 : appConfig.chat.maxTokens,
+        temperature: contentType === 'creative-writing' ? 0.9 : 0.8
+      })
+
+      const generatedContent = completion.choices[0]?.message?.content || 'Failed to generate content.'
+
+      // Determine content limits
+      const maxLengths = {
+        'social-media': platform === 'twitter' ? 280 : 3000,
+        'creative-writing': 10000,
+        'blog-article': 20000,
+        'script': 5000
+      }
+
+      const maxLength = maxLengths[contentType] || 3000
+      const characterCount = generatedContent.length
+      const withinLimit = characterCount <= maxLength
+
+      let response: WritingResponse = {
+        content: generatedContent,
+        contentType,
+        platform,
+        characterCount,
+        maxLength,
+        withinLimit,
+        provider,
+        model: selectedModel,
+        tokensUsed: tokenCost
+      }
+
+      // Generate variations if requested
+      if (generateVariations) {
+        const variations = generateContentVariations(generatedContent, contentType, variationCount)
+        response.variations = variations
+        response.variationCount = variations.length
+      }
+
+      res.json(response)
+
+    } catch (error: any) {
+      console.error('Content generation error:', error)
+      
+      if (error.message?.includes('rate limit') || error.message?.includes('quota')) {
+        res.status(429).json({ 
+          error: 'Rate limit exceeded. Please try again later.',
+          retryAfter: 60
+        })
+      } else {
+        res.status(500).json({ 
+          error: 'Failed to generate content. Please try again.',
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        })
+      }
+    }
+  })
+
+  // Get content suggestions
+  app.get('/api/writing-helper/suggestions', authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const { contentType, topic } = req.query
+      
+      const suggestions = {
+        'social-media': {
+          keyPoints: ['Engagement hook', 'Value proposition', 'Call to action', 'Personal story'],
+          tones: ['Professional', 'Casual', 'Inspiring', 'Humorous'],
+          objectives: ['Introduce product', 'Share insights', 'Build community', 'Drive traffic']
+        },
+        'creative-writing': {
+          keyPoints: ['Character development', 'Setting description', 'Conflict introduction', 'Emotional arc'],
+          tones: ['Dramatic', 'Romantic', 'Mysterious', 'Adventure'],
+          objectives: ['Tell a story', 'Explore emotion', 'Create atmosphere', 'Develop character']
+        },
+        'blog-article': {
+          keyPoints: ['Introduction hook', 'Main argument', 'Supporting evidence', 'Actionable conclusion'],
+          tones: ['Informative', 'Persuasive', 'Analytical', 'Personal'],
+          objectives: ['Educate readers', 'Share expertise', 'Solve problems', 'Inspire action']
+        },
+        'script': {
+          keyPoints: ['Character introduction', 'Dialogue flow', 'Scene setting', 'Emotional beats'],
+          tones: ['Romantic', 'Dramatic', 'Comedy', 'Slice-of-life'],
+          objectives: ['Introduce character', 'Develop relationship', 'Create tension', 'Resolve conflict']
+        }
+      }
+
+      const contentSuggestions = suggestions[contentType as keyof typeof suggestions] || suggestions['social-media']
+      
+      res.json({
+        suggestions: contentSuggestions,
+        topicIdeas: topic ? [
+          `How to ${topic}`,
+          `The future of ${topic}`,
+          `My experience with ${topic}`,
+          `5 things about ${topic}`
+        ] : []
+      })
+    } catch (error) {
+      console.error('Suggestions error:', error)
+      res.status(500).json({ error: 'Failed to get suggestions' })
+    }
+  })
+} 

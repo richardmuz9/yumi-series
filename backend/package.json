@@ -1,0 +1,51 @@
+{
+  "name": "website-builder-backend",
+  "version": "1.0.0",
+  "description": "Backend for Website Builder by Yumi",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc && npm run copy-config",
+    "copy-config": "mkdir -p dist/config && cp config/*.json dist/config/ || (mkdir dist\\config 2>nul & copy config\\*.json dist\\config\\)",
+    "start": "node dist/index.js",
+    "postinstall": "npm run build"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.9",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "alipay-sdk": "^4.14.0",
+    "axios": "^1.6.2",
+    "bcryptjs": "^3.0.2",
+    "cheerio": "^1.0.0-rc.12",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "https-proxy-agent": "^7.0.6",
+    "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.6.0",
+    "multer": "^1.4.5-lts.1",
+    "openai": "^4.0.0",
+    "pdf-parse": "^1.1.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sharp": "^0.33.1",
+    "sqlite3": "^5.1.7",
+    "stripe": "^18.2.1",
+    "tesseract.js": "^5.0.4"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.35",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/multer": "^1.4.13",
+    "@types/node": "^18.15.11",
+    "@types/pdf-parse": "^1.1.4",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.4"
+  }
+}

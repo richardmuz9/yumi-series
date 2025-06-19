@@ -1,0 +1,117 @@
+{
+  "platforms": {
+    "linkedin": {
+      "name": "LinkedIn",
+      "maxLength": 3000,
+      "templates": [
+        {
+          "id": "product_launch",
+          "name": "Product Launch",
+          "objective": "Introduce product",
+          "tone": "Professional",
+          "template": "Write a professional LinkedIn announcement post introducing {topic}. Focus on the key benefits: {keyPoints}. Keep it engaging for industry peers and potential customers.",
+          "example": "🚀 Excited to announce the launch of our new AI-powered website builder! After months of development, we're finally ready to help businesses create stunning websites in minutes, not days. Key features include: drag-and-drop simplicity, AI content generation, and mobile-first design. What do you think? Ready to revolutionize your web presence? #WebDevelopment #AI #ProductLaunch"
+        },
+        {
+          "id": "tutorial_share",
+          "name": "Share Tutorial",
+          "objective": "Share tutorial",
+          "tone": "Professional",
+          "template": "Write a helpful LinkedIn tutorial post about {topic}. Break it down into clear steps and explain why each {keyPoints} matters. Make it valuable for industry peers.",
+          "example": "💡 Quick Tutorial: How to optimize your website's loading speed in 5 steps:\n\n1️⃣ Compress images (use WebP format)\n2️⃣ Minify CSS/JS files\n3️⃣ Enable browser caching\n4️⃣ Use a CDN\n5️⃣ Optimize database queries\n\nResult? 40% faster load times = better user experience + higher SEO rankings.\n\nWhich step surprised you the most? 👇 #WebDev #Performance"
+        },
+        {
+          "id": "story_tell",
+          "name": "Tell a Story",
+          "objective": "Tell a story",
+          "tone": "Gentle",
+          "template": "Write an engaging LinkedIn story post about {topic}. Share personal insights and connect with {keyPoints}. Make it relatable and inspiring for your network.",
+          "example": "Last month, I watched a small business owner's face light up when their new website went live. 💫\n\nThey'd been struggling with a DIY site for years - slow, outdated, driving customers away. In just 2 hours with our AI builder, they had something beautiful.\n\n'I never thought I could have a site like this,' they said.\n\nThat's why we do what we do. Technology should empower, not intimidate.\n\nWhat's a moment when tech made your life easier? 👇"
+        }
+      ]
+    },
+    "xiaohongshu": {
+      "name": "小红书 / Rednote",
+      "maxLength": 1000,
+      "templates": [
+        {
+          "id": "lifestyle_sharing",
+          "name": "Lifestyle Sharing",
+          "objective": "Share lifestyle",
+          "tone": "Gentle",
+          "template": "Write a casual, personal 小红书 post about {topic}. Use a warm, friendly tone and include emojis. Focus on personal experience with {keyPoints}.",
+          "example": "今天想和大家分享一个超好用的网站制作工具！🌟\n\n作为一个技术小白，之前想做个人网站简直是噩梦😭 代码什么的完全不懂...\n\n但是用了这个AI网站生成器，真的太惊喜了！✨\n📝 只需要描述想要什么样的网站\n🎨 AI自动生成设计和内容\n📱 还自动适配手机端\n\n10分钟就做出了超漂亮的个人作品集！朋友们都问我是不是找了专业设计师😂\n\n有想做网站的姐妹吗？真的强烈推荐！\n\n#网站制作 #AI工具 #个人网站"
+        },
+        {
+          "id": "product_review",
+          "name": "Product Review",
+          "objective": "Review product",
+          "tone": "Humorous",
+          "template": "Write a fun and honest 小红书 product review about {topic}. Be authentic and include both pros and cons from {keyPoints}. Use emojis and casual language.",
+          "example": "AI网站生成器测评来啦！🔥\n\n用了一周，必须给大家一个真实反馈~\n\n✅ 优点：\n• 确实很智能，描述一下就能生成\n• 模板超多，不怕撞款\n• 速度快到怀疑人生\n• 小白友好，妈妈都会用\n\n❌ 缺点：\n• 有时候生成的内容需要微调\n• 高级功能需要付费\n• 对中文理解还能更好\n\n💰 价格：基础版免费，高级版￥99/月\n🌟 推荐指数：4.5/5\n\n总体来说还是很值得的！特别是对我们这种设计苦手😂\n\n你们有用过类似工具吗？\n\n#AI工具测评 #网站制作 #效率工具"
+        }
+      ]
+    },
+    "twitter": {
+      "name": "Twitter",
+      "maxLength": 280,
+      "templates": [
+        {
+          "id": "quick_tip",
+          "name": "Quick Tip",
+          "objective": "Share tip",
+          "tone": "Cool",
+          "template": "Write a concise Twitter tip about {topic}. Keep it under 280 characters and include {keyPoints}. Be direct and actionable.",
+          "example": "🚀 Website speed tip:\n\nCompress images before uploading. A 2MB photo becomes 200KB with no visible quality loss.\n\nResult: 10x faster loading = happier users.\n\nUse tools like TinyPNG or WebP format.\n\n#WebDev #Performance"
+        },
+        {
+          "id": "announcement",
+          "name": "Announcement",
+          "objective": "Make announcement",
+          "tone": "Energetic",
+          "template": "Write an exciting Twitter announcement about {topic}. Create buzz around {keyPoints}. Use emojis and hashtags effectively.",
+          "example": "🎉 LAUNCHING TODAY!\n\nAI Website Builder v2.0 is here!\n\n✨ 50% faster generation\n🎨 100+ new templates\n📱 Better mobile optimization\n🤖 Smarter AI understanding\n\nBuilding websites just got easier 🚀\n\nTry it free: [link]\n\n#AI #WebDev #Launch"
+        }
+      ]
+    }
+  },
+  "stylePacks": {
+    "tsundere": {
+      "name": "Tsundere",
+      "description": "Slightly rude but secretly affectionate",
+      "prompt": "Use a tsundere style: start with a lightly playful tease (like '哼' or 'hmph'), act slightly dismissive but gradually become more helpful and caring. End on a warmer note with phrases like '不过也不错啦' or 'but I guess it's not bad'."
+    },
+    "cool": {
+      "name": "Cool",
+      "description": "Short, concise, confident",
+      "prompt": "Use a cool, confident style: keep sentences short and punchy, use strong action verbs, avoid excessive emojis, be direct and authoritative. Maximum 2-3 sentences per paragraph."
+    },
+    "gentle": {
+      "name": "Gentle",
+      "description": "Warm, reassuring",
+      "prompt": "Use a gentle, warm style: use inclusive language like 'we' and 'let's', add friendly emojis sparingly, be encouraging and supportive, offer help and reassurance."
+    },
+    "professional": {
+      "name": "Professional",
+      "description": "Business-appropriate, formal",
+      "prompt": "Use a professional tone: maintain formal language, focus on business value and benefits, use industry terminology appropriately, be credible and authoritative."
+    },
+    "humorous": {
+      "name": "Humorous",
+      "description": "Light-hearted, entertaining",
+      "prompt": "Use a humorous style: include light jokes or witty observations, use funny analogies, add appropriate emojis for comedic effect, keep it entertaining but relevant."
+    },
+    "energetic": {
+      "name": "Energetic",
+      "description": "Enthusiastic, exciting",
+      "prompt": "Use an energetic style: show excitement with exclamation points and dynamic language, use action words, include energetic emojis, create a sense of momentum and enthusiasm."
+    }
+  },
+  "audiences": {
+    "industry_peers": "Industry professionals and colleagues",
+    "friends": "Personal friends and casual network",
+    "potential_customers": "Potential customers and prospects",
+    "general_public": "General public audience",
+    "followers": "Existing followers and fans"
+  }
+} 

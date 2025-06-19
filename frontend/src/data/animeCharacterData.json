@@ -1,0 +1,107 @@
+{
+  "colorPalettes": [
+    {
+      "id": "neon_cyberpunk",
+      "name": "Neon Cyberpunk",
+      "primary": "#ff00ff",
+      "secondary": "#00ffff",
+      "accent": "#ffff00",
+      "mood": "edgy futuristic",
+      "description": "Electric neon colors for a cyberpunk aesthetic"
+    },
+    {
+      "id": "pastel_kawaii",
+      "name": "Pastel Kawaii",
+      "primary": "#ffb3d9",
+      "secondary": "#b3d9ff",
+      "accent": "#ffffb3",
+      "mood": "cute soft",
+      "description": "Soft pastel colors for adorable characters"
+    },
+    {
+      "id": "warm_autumn",
+      "name": "Warm Autumn",
+      "primary": "#ff7f50",
+      "secondary": "#daa520",
+      "accent": "#8b4513",
+      "mood": "cozy nostalgic",
+      "description": "Warm earth tones for a cozy feeling"
+    },
+    {
+      "id": "ocean_depths",
+      "name": "Ocean Depths",
+      "primary": "#0077be",
+      "secondary": "#4682b4",
+      "accent": "#20b2aa",
+      "mood": "mysterious deep",
+      "description": "Deep blues and teals for mysterious characters"
+    }
+  ],
+  "characterPoses": [
+    {
+      "id": "confident_stand",
+      "name": "Confident Stand",
+      "description": "Standing with hands on hips, confident pose",
+      "preview": "🧍‍♀️",
+      "category": "standing"
+    },
+    {
+      "id": "energetic_jump",
+      "name": "Energetic Jump",
+      "description": "Mid-jump with arms raised, full of energy",
+      "preview": "🤸‍♀️",
+      "category": "action"
+    },
+    {
+      "id": "relaxed_sitting",
+      "name": "Relaxed Sitting",
+      "description": "Sitting casually with a relaxed posture",
+      "preview": "🪑",
+      "category": "sitting"
+    },
+    {
+      "id": "happy_smile",
+      "name": "Happy Smile",
+      "description": "Bright, genuine smile with sparkling eyes",
+      "preview": "😊",
+      "category": "expression"
+    },
+    {
+      "id": "surprised_gasp",
+      "name": "Surprised Gasp",
+      "description": "Wide eyes and open mouth, surprised expression",
+      "preview": "😲",
+      "category": "expression"
+    },
+    {
+      "id": "mischievous_smirk",
+      "name": "Mischievous Smirk",
+      "description": "Slight smirk with a playful glint in the eyes",
+      "preview": "😏",
+      "category": "expression"
+    }
+  ],
+  "progressSuggestions": {
+    "outline": [
+      "Start with basic shapes and proportions",
+      "Focus on the overall silhouette first",
+      "Use light strokes for initial sketching"
+    ],
+    "coloring": [
+      "Apply base colors from your selected palette",
+      "Consider the lighting source for shading",
+      "Use color harmony principles"
+    ],
+    "details": [
+      "Add facial features and expressions",
+      "Include clothing patterns and accessories",
+      "Refine hair texture and flow"
+    ],
+    "final": [
+      "Clean up line art and remove guides",
+      "Add final highlights and shadows",
+      "Consider background elements"
+    ]
+  },
+  "spriteFrames": ["idle1", "idle2", "walk1", "walk2"]
+} 
