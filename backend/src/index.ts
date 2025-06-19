@@ -14,10 +14,19 @@ db.initialize().catch(console.error)
 
 // Create Express app with shared configuration
 const app = createApp()
-const port = process.env.PORT || 3000
+const port = Number(process.env.PORT) || 3000
 
 // Add health check endpoint
 addHealthCheck(app)
+
+// Root health check for Railway
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'OK',
+    service: 'Yumi Series Backend',
+    timestamp: new Date().toISOString()
+  })
+})
 
 // Authentication endpoints
 app.post('/api/auth/signup', async (req, res) => {
@@ -395,7 +404,7 @@ app.use((req, res) => {
 })
 
 // Start server
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Yumi Series Backend running on port ${port}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
   console.log(`🌐 CORS Origins: ${process.env.CORS_ORIGINS || 'all origins'}`)
