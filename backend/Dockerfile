@@ -1,4 +1,4 @@
-# Use Node.js 18 alpine image
+# Use Node.js LTS
 FROM node:18-alpine
 
 # Set working directory
@@ -13,8 +13,8 @@ RUN npm ci --only=production
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Create dist directory and copy config
+RUN mkdir -p dist && cp -r config dist/
 
 # Expose port
 EXPOSE 3000

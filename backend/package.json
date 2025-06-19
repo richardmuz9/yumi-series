@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc && npm run copy-config",
-    "copy-config": "mkdir -p dist/config && cp config/*.json dist/config/ || (mkdir dist\\config 2>nul & copy config\\*.json dist\\config\\)",
-    "start": "node dist/index.js",
-    "postinstall": "npm run build"
+    "start": "ts-node src/index.ts",
+    "copy-config": "cp -r config dist/ || xcopy config dist\\config\\ /E /I || true"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.9",

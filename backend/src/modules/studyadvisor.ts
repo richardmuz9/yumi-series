@@ -545,7 +545,7 @@ export const chatWithAIAdvisor = async (req: AuthRequest, res: express.Response)
       return res.status(400).json({ error: 'Messages array is required' });
     }
 
-    const aiClient = getAIClient();
+    const aiClient = getAIClient('openai');
     
     const systemPrompt = `You are an expert AI study advisor specializing in Japanese university admissions and EJU preparation. 
 
