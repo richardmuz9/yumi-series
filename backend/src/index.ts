@@ -15,6 +15,13 @@ db.initialize().catch(err => {
   // Don't exit - let the server start anyway for basic health checks
 })
 
+// Log environment status
+console.log('🔑 Environment Variables Status:')
+console.log(`- OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? '✅ Set' : '❌ Missing'}`)
+console.log(`- CLAUDE_API_KEY: ${process.env.CLAUDE_API_KEY ? '✅ Set' : '❌ Missing'}`)
+console.log(`- OPENROUTER_API_KEY: ${process.env.OPENROUTER_API_KEY ? '✅ Set' : '❌ Missing'}`)
+console.log(`- QWEN_API_KEY: ${process.env.QWEN_API_KEY ? '✅ Set' : '❌ Missing'}`)
+
 // Create Express app with shared configuration
 const app = createApp()
 const port = Number(process.env.PORT) || 3000

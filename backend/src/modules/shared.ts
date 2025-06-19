@@ -47,41 +47,66 @@ export const proxyConfig = process.env.PROXY_HOST && process.env.PROXY_PORT ? {
   httpsAgent: new HttpsProxyAgent(`http://${process.env.PROXY_HOST}:${process.env.PROXY_PORT}`)
 } : {}
 
-// Initialize AI clients with proxy support
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  ...proxyConfig
-})
+// Initialize AI clients with proxy support (lazy initialization)
+let _openai: OpenAI | null = null
+let _claude: Anthropic | null = null  
+let _openrouter: OpenAI | null = null
+let _qwen: OpenAI | null = null
 
-export const claude = new Anthropic({
-  apiKey: process.env.CLAUDE_API_KEY,
-  // Note: Anthropic SDK doesn't support proxy configuration directly
-})
+function getOpenAIClient(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || 'dummy-key',
+      ...proxyConfig
+    })
+  }
+  return _openai
+}
 
-export const openrouter = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
-  ...proxyConfig
-})
+function getClaudeClient(): Anthropic {
+  if (!_claude) {
+    _claude = new Anthropic({
+      apiKey: process.env.CLAUDE_API_KEY || 'dummy-key',
+      // Note: Anthropic SDK doesn't support proxy configuration directly
+    })
+  }
+  return _claude
+}
 
-export const qwen = new OpenAI({
-  baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-  apiKey: process.env.QWEN_API_KEY,
-  ...proxyConfig
-})
+function getOpenRouterClient(): OpenAI {
+  if (!_openrouter) {
+    _openrouter = new OpenAI({
+      baseURL: "https://openrouter.ai/api/v1",
+      apiKey: process.env.OPENROUTER_API_KEY || 'dummy-key',
+      ...proxyConfig
+    })
+  }
+  return _openrouter
+}
+
+function getQwenClient(): OpenAI {
+  if (!_qwen) {
+    _qwen = new OpenAI({
+      baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      apiKey: process.env.QWEN_API_KEY || 'dummy-key',
+      ...proxyConfig
+    })
+  }
+  return _qwen
+}
 
 // Function to get the appropriate AI client based on provider
 export function getAIClient(provider: string): OpenAI | Anthropic {
   switch (provider) {
     case 'openai':
-      return openai
+      return getOpenAIClient()
     case 'claude':
-      return claude
+      return getClaudeClient()
     case 'openrouter':
-      return openrouter
+      return getOpenRouterClient()
     case 'qwen':
     default:
-      return qwen
+      return getQwenClient()
   }
 }
 
@@ -89,12 +114,12 @@ export function getAIClient(provider: string): OpenAI | Anthropic {
 export function getOpenAICompatibleClient(provider: string): OpenAI {
   switch (provider) {
     case 'openai':
-      return openai
+      return getOpenAIClient()
     case 'openrouter':
-      return openrouter
+      return getOpenRouterClient()
     case 'qwen':
     default:
-      return qwen
+      return getQwenClient()
   }
 }
 
@@ -199,19 +224,34 @@ const upload = multer({
 // Health check endpoint
 export function addHealthCheck(app: express.Application) {
   app.get('/api/health', (req, res) => {
-    res.json({ 
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      version: appConfig.version || '1.0.0',
-      enabledProviders: Object.entries(modelsConfig.providers)
-        .filter(([_, provider]: [string, any]) => provider.enabled)
-        .map(([name, _]: [string, any]) => name),
-      defaults: {
-        provider: appConfig.defaults?.provider || 'qwen',
-        model: appConfig.defaults?.model || 'qwen-turbo',
-        mode: appConfig.defaults?.mode || 'assistant'
-      }
-    })
+    try {
+      res.json({ 
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        version: appConfig.version || '1.0.0',
+        enabledProviders: Object.entries(modelsConfig.providers)
+          .filter(([_, provider]: [string, any]) => provider.enabled)
+          .map(([name, _]: [string, any]) => name),
+        defaults: {
+          provider: appConfig.defaults?.provider || 'qwen',
+          model: appConfig.defaults?.model || 'qwen-turbo',
+          mode: appConfig.defaults?.mode || 'assistant'
+        },
+        apiKeys: {
+          openai: !!process.env.OPENAI_API_KEY,
+          claude: !!process.env.CLAUDE_API_KEY,
+          openrouter: !!process.env.OPENROUTER_API_KEY,
+          qwen: !!process.env.QWEN_API_KEY
+        }
+      })
+    } catch (error) {
+      console.error('Health check error:', error)
+      res.status(500).json({ 
+        status: 'error',
+        timestamp: new Date().toISOString(),
+        error: 'Health check failed'
+      })
+    }
   })
 
   // Models endpoint
