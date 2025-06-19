@@ -72,10 +72,10 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
   const t = getTranslation(language);
   const canvasRef = useRef<CanvasAreaRef>(null);
 
-  // Set GPT-4o as default for Anime Character Designer
+  // Use free Qwen provider for Anime Character Designer
   useEffect(() => {
-    setProvider('openai')
-    setModel('gpt-4o')
+    setProvider('qwen')
+    setModel('qwen-turbo')
   }, [setProvider, setModel])
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);

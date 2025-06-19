@@ -399,10 +399,21 @@ export function addHealthCheck(app: express.Application) {
       const { 
         message, 
         messages, 
-        provider = 'qwen', 
-        model = 'qwen-turbo', 
+        provider: requestedProvider = 'qwen', 
+        model: requestedModel = 'qwen-turbo', 
         mode = 'assistant' 
       } = req.body
+
+      // Force free providers to avoid credit issues
+      let provider = requestedProvider
+      let model = requestedModel
+      
+      // Redirect expensive providers to free Qwen
+      if (requestedProvider === 'openrouter' || requestedProvider === 'openai' || requestedProvider === 'claude') {
+        console.log(`🔄 Redirecting ${requestedProvider}/${requestedModel} to qwen/qwen-turbo (free provider)`)
+        provider = 'qwen'
+        model = 'qwen-turbo'
+      }
 
       // Support both single message and messages array formats
       let userMessage: string

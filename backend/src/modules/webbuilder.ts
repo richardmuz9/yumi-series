@@ -512,11 +512,22 @@ document.addEventListener('DOMContentLoaded', function() {
       const { 
         message, 
         messages: inputMessages,  // Rename to avoid conflict
-        model = modelsConfig.providers.qwen.defaultModel,
-        provider = 'qwen',
+        model: requestedModel = modelsConfig.providers.qwen.defaultModel,
+        provider: requestedProvider = 'qwen',
         context = '',
         chatHistory = []
       } = req.body
+
+      // Force free providers to avoid credit issues
+      let provider = requestedProvider
+      let model = requestedModel
+      
+      // Redirect expensive providers to free Qwen
+      if (requestedProvider === 'openrouter' || requestedProvider === 'openai' || requestedProvider === 'claude') {
+        console.log(`🔄 WebBuilder: Redirecting ${requestedProvider}/${requestedModel} to qwen/qwen-turbo (free provider)`)
+        provider = 'qwen'
+        model = modelsConfig.providers.qwen.defaultModel
+      }
 
       const userId = req.user?.id
 
