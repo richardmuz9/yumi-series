@@ -392,10 +392,23 @@ export function addHealthCheck(app: express.Application) {
   // Chat endpoint for model recommendations
   app.post('/api/chat', authenticateUser, async (req: AuthRequest, res) => {
     try {
-      const { message, provider = 'qwen', model = 'qwen-turbo', mode = 'assistant' } = req.body
+      const { 
+        message, 
+        messages, 
+        provider = 'qwen', 
+        model = 'qwen-turbo', 
+        mode = 'assistant' 
+      } = req.body
 
-      if (!message) {
-        return res.status(400).json({ error: 'Message is required' })
+      // Support both single message and messages array formats
+      let userMessage: string
+      if (messages && Array.isArray(messages) && messages.length > 0) {
+        // Use the last message from the array (most recent user message)
+        userMessage = messages[messages.length - 1]?.content || ''
+      } else if (message) {
+        userMessage = message
+      } else {
+        return res.status(400).json({ error: 'Message or messages array is required' })
       }
 
       const client = getOpenAICompatibleClient(provider)
@@ -409,7 +422,7 @@ export function addHealthCheck(app: express.Application) {
           },
           {
             role: 'user',
-            content: message
+            content: userMessage
           }
         ],
         max_tokens: 300,
@@ -419,13 +432,14 @@ export function addHealthCheck(app: express.Application) {
       const assistantMessage = response.choices[0]?.message?.content || 'I apologize, but I cannot provide a recommendation at this time.'
 
       // Deduct tokens for chat
-      const tokenCost = calculateTokenCost(model, message.length)
+      const tokenCost = calculateTokenCost(model, userMessage.length)
       if (req.user) {
         await deductTokens(req.user.id, tokenCost, model, 'Model recommendation chat')
       }
 
       res.json({ 
-        message: assistantMessage,
+        response: assistantMessage,  // Frontend expects 'response' field
+        message: assistantMessage,   // Keep for backward compatibility
         model,
         provider,
         tokensUsed: tokenCost

@@ -511,6 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       const { 
         message, 
+        messages: inputMessages,  // Rename to avoid conflict
         model = modelsConfig.providers.qwen.defaultModel,
         provider = 'qwen',
         context = '',
@@ -519,8 +520,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const userId = req.user?.id
 
-      if (!message) {
-        return res.status(400).json({ error: 'Message is required' })
+      // Support both single message and messages array formats
+      let userMessage: string
+      if (inputMessages && Array.isArray(inputMessages) && inputMessages.length > 0) {
+        // Use the last message from the array (most recent user message)
+        userMessage = inputMessages[inputMessages.length - 1]?.content || ''
+      } else if (message) {
+        userMessage = message
+      } else {
+        return res.status(400).json({ error: 'Message or messages array is required' })
       }
 
       // Enhanced system prompt with research capability
@@ -529,15 +537,15 @@ document.addEventListener('DOMContentLoaded', function() {
         '\n\nIf the user asks about trends, research, or market insights, use the AI research function to provide comprehensive information.'
 
       // Check if this is a research query
-      const isResearchQuery = message.toLowerCase().includes('trend') || 
-                             message.toLowerCase().includes('research') ||
-                             message.toLowerCase().includes('market') ||
-                             message.toLowerCase().includes('insight')
+      const isResearchQuery = userMessage.toLowerCase().includes('trend') || 
+                             userMessage.toLowerCase().includes('research') ||
+                             userMessage.toLowerCase().includes('market') ||
+                             userMessage.toLowerCase().includes('insight')
 
-      let enhancedMessage = message
+      let enhancedMessage = userMessage
       if (isResearchQuery) {
-        const researchResults = await aiResearch(message)
-        enhancedMessage = `${message}\n\nResearch findings: ${researchResults}`
+        const researchResults = await aiResearch(userMessage)
+        enhancedMessage = `${userMessage}\n\nResearch findings: ${researchResults}`
       }
 
       // Calculate token cost
@@ -577,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const response = await claude.messages.create({
           model: model,
           max_tokens: appConfig.chat?.maxTokens || 1000,
-          messages: messages.filter(m => m.role !== 'system'),
+          messages: messages.filter((m: any) => m.role !== 'system'),
           system: systemPrompt
         })
         assistantMessage = response.content[0]?.text || 'I apologize, but I could not generate a response.'
@@ -600,7 +608,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       res.json({
-        message: assistantMessage,
+        response: assistantMessage,  // Frontend expects 'response' field
+        message: assistantMessage,   // Keep for backward compatibility
         model: model,
         provider: provider,
         tokensUsed: tokenCost,
