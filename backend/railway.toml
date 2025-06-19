@@ -1,7 +1,8 @@
 [build]
-builder = "DOCKER"
+builder = "NIXPACKS"
 
 [deploy]
+startCommand = "npm run build && npm start"
 healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
