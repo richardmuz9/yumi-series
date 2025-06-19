@@ -1012,4 +1012,181 @@
   .logout-text {
     display: none;
   }
+}
+
+/* Floating AI Assistant */
+.floating-ai-assistant {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 40;
+}
+
+.ai-assistant-btn {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.ai-assistant-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.4);
+}
+
+.ai-assistant-icon {
+  font-size: 2rem;
+  position: relative;
+  z-index: 2;
+  animation: aiFloat 3s ease-in-out infinite;
+}
+
+.ai-assistant-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  opacity: 0.6;
+  animation: aiPulse 2s infinite;
+}
+
+@keyframes aiFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes aiPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* AI Assistant Welcome Tooltip */
+.ai-welcome-tooltip {
+  position: absolute;
+  bottom: 80px;
+  right: -20px;
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+  animation: aiWelcomeSlide 0.5s ease-out;
+}
+
+.ai-welcome-content {
+  padding: 16px 20px;
+  position: relative;
+}
+
+.ai-welcome-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.ai-welcome-icon {
+  font-size: 16px;
+}
+
+.ai-welcome-content p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.ai-welcome-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.ai-welcome-close:hover {
+  color: #6b7280;
+}
+
+.ai-welcome-arrow {
+  position: absolute;
+  bottom: -8px;
+  right: 28px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  transform: rotate(45deg);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes aiWelcomeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile adjustments for AI Assistant */
+@media (max-width: 768px) {
+  .floating-ai-assistant {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .ai-assistant-btn {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .ai-assistant-icon {
+    font-size: 1.5rem;
+  }
+  
+  .ai-welcome-tooltip {
+    bottom: 70px;
+    right: -10px;
+    width: 260px;
+  }
+  
+  .ai-welcome-content {
+    padding: 14px 16px;
+  }
+  
+  .ai-welcome-arrow {
+    right: 24px;
+  }
 } 

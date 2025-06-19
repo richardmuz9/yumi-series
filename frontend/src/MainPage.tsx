@@ -3,6 +3,7 @@ import ChargePage from './components/ChargePage';
 import ModelIntroduction from './components/ModelIntroduction';
 import LayoutCustomizer from './components/LayoutCustomizer';
 import AppDownloadSection from './components/AppDownloadSection';
+import AIAssistant from './components/AIAssistant';
 import { AuthModal } from './components/AuthModal';
 import { billingApi } from './services/billingApi';
 import { getTranslation, type Translation } from './translations';
@@ -84,6 +85,8 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showDownloads, setShowDownloads] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showAIWelcome, setShowAIWelcome] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [userTokens, setUserTokens] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,6 +98,13 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
     checkAuthStatus();
     loadUserBilling();
     loadInstalledModes();
+    
+    // Hide AI welcome tooltip after 8 seconds
+    const timer = setTimeout(() => {
+      setShowAIWelcome(false);
+    }, 8000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const checkAuthStatus = async () => {
@@ -285,11 +295,11 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
               </button>
               <button 
                 className="model-guide-btn"
-                onClick={() => setShowModelGuide(true)}
-                title="AI Model Guide - Learn about available models"
+                onClick={() => setShowAIAssistant(true)}
+                title="AI Assistant - Get help with models, features, and billing"
               >
                 <span className="model-guide-icon">🤖</span>
-                <span className="model-guide-text">{t.modelGuide}</span>
+                <span className="model-guide-text">AI Help</span>
               </button>
               <button 
                 className="download-btn"
@@ -414,6 +424,48 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
         onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
       />
+
+      {/* AI Assistant Modal */}
+      {showAIAssistant && (
+        <AIAssistant 
+          onClose={() => setShowAIAssistant(false)} 
+        />
+      )}
+
+      {/* Floating AI Assistant Button */}
+      <div className="floating-ai-assistant">
+        <button 
+          className="ai-assistant-btn"
+          onClick={() => {
+            setShowAIAssistant(true);
+            setShowAIWelcome(false);
+          }}
+          title="Yumi AI Assistant - Get help with models, features, and billing"
+        >
+          <div className="ai-assistant-icon">🤖</div>
+          <div className="ai-assistant-pulse"></div>
+        </button>
+        
+        {/* Welcome Tooltip */}
+        {showAIWelcome && (
+          <div className="ai-welcome-tooltip">
+            <div className="ai-welcome-content">
+              <div className="ai-welcome-header">
+                <span className="ai-welcome-icon">🤖</span>
+                <strong>New: AI Assistant!</strong>
+              </div>
+              <p>Get help with models, features, billing & feedback!</p>
+              <button 
+                className="ai-welcome-close"
+                onClick={() => setShowAIWelcome(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="ai-welcome-arrow"></div>
+          </div>
+        )}
+      </div>
 
       {/* Layout Customizer Modal */}
       <LayoutCustomizer 
