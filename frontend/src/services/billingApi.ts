@@ -5,6 +5,7 @@ export interface UserBilling {
   creditsBalance: number // Credits in USD
   totalSpent: number
   qwenTokensUsedMonth: number
+  premiumTokensUsedMonth?: number
   openrouterRequestsUsedToday: number
   subscriptionStatus: 'active' | 'inactive' | 'canceled' | 'past_due'
   subscriptionPlan: string
@@ -13,6 +14,8 @@ export interface UserBilling {
   premiumTokens?: number
   credits: number
   qwenTokensUsed: number
+  qwenTokensLeft?: number
+  premiumTokensLeft?: number
   openrouterRequestsUsed: number
   nextReset: string
   nextBillingDate?: string
@@ -60,9 +63,11 @@ export interface ModelAvailability {
 export interface TokenPackage {
   id: string;
   name: string;
-  tokens: number;
+  tokens?: number;
+  credits?: number;
   price: number; // in cents
   description: string;
+  recommended?: boolean;
 }
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001'

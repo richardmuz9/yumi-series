@@ -7,8 +7,53 @@ interface EnhancedWebBuilderAppProps {
   onBackToMain?: () => void
 }
 
-type ViewMode = 'dashboard' | 'templates' | 'editor' | 'ai-chat' | 'preview' | 'deploy' | 'analytics'
-type EditorMode = 'visual' | 'code' | 'split'
+type ViewMode = 'dashboard' | 'templates' | 'editor' | 'ai-chat' | 'preview' | 'deploy' | 'analytics' | 'github' | 'domains'
+type EditorMode = 'visual' | 'code' | 'split' | 'live-preview'
+
+interface GitHubRepository {
+  id: string
+  name: string
+  full_name: string
+  private: boolean
+  html_url: string
+  clone_url: string
+  default_branch: string
+}
+
+interface GitHubUser {
+  login: string
+  id: number
+  avatar_url: string
+  name: string
+  email: string
+}
+
+interface DomainSearchResult {
+  domain: string
+  available: boolean
+  price: number
+  currency: string
+  premium: boolean
+  suggestions?: string[]
+}
+
+interface DomainRegistration {
+  domain: string
+  registrant: {
+    firstName: string
+    lastName: string
+    email: string
+    phone: string
+    address: string
+    city: string
+    state: string
+    postalCode: string
+    country: string
+  }
+  nameservers?: string[]
+  autoRenew: boolean
+  privacyProtection: boolean
+}
 
 const EnhancedWebBuilderApp: React.FC<EnhancedWebBuilderAppProps> = ({ onBackToMain }) => {
   // Core state
@@ -29,6 +74,7 @@ const EnhancedWebBuilderApp: React.FC<EnhancedWebBuilderAppProps> = ({ onBackToM
   const [htmlCode, setHtmlCode] = useState('')
   const [cssCode, setCssCode] = useState('')
   const [jsCode, setJsCode] = useState('')
+  const [livePreviewUrl, setLivePreviewUrl] = useState<string | null>(null)
   
   // AI Chat state
   const [chatMessages, setChatMessages] = useState<any[]>([])
@@ -38,6 +84,7 @@ const EnhancedWebBuilderApp: React.FC<EnhancedWebBuilderAppProps> = ({ onBackToM
   // Preview state
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
   const [showPreview, setShowPreview] = useState(false)
+  const [hotReloadEnabled, setHotReloadEnabled] = useState(true)
   
   // Deployment state
   const [deploymentConfig, setDeploymentConfig] = useState<DeploymentConfig>({
@@ -46,10 +93,53 @@ const EnhancedWebBuilderApp: React.FC<EnhancedWebBuilderAppProps> = ({ onBackToM
     environment: 'production'
   })
 
+  // GitHub integration state
+  const [githubUser, setGithubUser] = useState<GitHubUser | null>(null)
+  const [githubRepos, setGithubRepos] = useState<GitHubRepository[]>([])
+  const [selectedRepo, setSelectedRepo] = useState<GitHubRepository | null>(null)
+  const [githubToken, setGithubToken] = useState<string | null>(null)
+  const [commitMessage, setCommitMessage] = useState('Update website')
+  const [isDeployingToGitHub, setIsDeployingToGitHub] = useState(false)
+
+  // Domain management state
+  const [domainSearch, setDomainSearch] = useState('')
+  const [domainSearchResults, setDomainSearchResults] = useState<DomainSearchResult[]>([])
+  const [selectedDomain, setSelectedDomain] = useState<string | null>(null)
+  const [domainRegistration, setDomainRegistration] = useState<DomainRegistration>({
+    domain: '',
+    registrant: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: 'US'
+    },
+    autoRenew: true,
+    privacyProtection: true
+  })
+  const [isDomainSearching, setIsDomainSearching] = useState(false)
+  const [isRegisteringDomain, setIsRegisteringDomain] = useState(false)
+
   // Load initial data
   useEffect(() => {
     loadInitialData()
+    checkGitHubAuth()
   }, [])
+
+  // Auto-save
+  useEffect(() => {
+    if (currentProject && (htmlCode || cssCode || jsCode)) {
+      const timeoutId = setTimeout(() => {
+        saveProject()
+      }, 2000) // Debounce updates
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [htmlCode, cssCode, jsCode, currentProject])
 
   const loadInitialData = async () => {
     try {
@@ -70,6 +160,260 @@ const EnhancedWebBuilderApp: React.FC<EnhancedWebBuilderAppProps> = ({ onBackToM
       setIsLoading(false)
     }
   }
+
+  // GitHub OAuth Integration
+  const checkGitHubAuth = () => {
+    const token = localStorage.getItem('github_token')
+    if (token) {
+      setGithubToken(token)
+      fetchGitHubUser(token)
+    }
+  }
+
+  const initiateGitHubOAuth = () => {
+    const clientId = process.env.REACT_APP_GITHUB_CLIENT_ID
+    const redirectUri = `${window.location.origin}/auth/github/callback`
+    const scope = 'repo,user:email'
+    const state = Math.random().toString(36).substring(7)
+    
+    localStorage.setItem('github_oauth_state', state)
+    
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`
+    window.location.href = authUrl
+  }
+
+  const fetchGitHubUser = async (token: string) => {
+    try {
+      const response = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      })
+      
+      if (response.ok) {
+        const user = await response.json()
+        setGithubUser(user)
+        fetchGitHubRepos(token)
+      } else {
+        // Token might be expired
+        localStorage.removeItem('github_token')
+        setGithubToken(null)
+      }
+    } catch (error) {
+      console.error('Failed to fetch GitHub user:', error)
+    }
+  }
+
+  const fetchGitHubRepos = async (token: string) => {
+    try {
+      const response = await fetch('https://api.github.com/user/repos?sort=updated&per_page=50', {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      })
+      
+      if (response.ok) {
+        const repos = await response.json()
+        setGithubRepos(repos)
+      }
+    } catch (error) {
+      console.error('Failed to fetch GitHub repos:', error)
+    }
+  }
+
+  const createGitHubRepo = async (repoName: string, isPrivate: boolean = false) => {
+    if (!githubToken) return null
+
+    try {
+      const response = await fetch('https://api.github.com/user/repos', {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: repoName,
+          description: `Website created with Yumi Series Web Builder`,
+          private: isPrivate,
+          auto_init: true,
+          gitignore_template: 'Node'
+        })
+      })
+
+      if (response.ok) {
+        const repo = await response.json()
+        setGithubRepos(prev => [repo, ...prev])
+        return repo
+      } else {
+        throw new Error('Failed to create repository')
+      }
+    } catch (error) {
+      console.error('Failed to create GitHub repo:', error)
+      setError('Failed to create GitHub repository')
+      return null
+    }
+  }
+
+  const deployToGitHub = async () => {
+    if (!githubToken || !selectedRepo || !currentProject) return
+
+    setIsDeployingToGitHub(true)
+    try {
+      // Create or update files in the repository
+      const files = [
+        {
+          path: 'index.html',
+          content: htmlCode,
+          message: `Update index.html - ${commitMessage}`
+        },
+        {
+          path: 'styles.css',
+          content: cssCode,
+          message: `Update styles.css - ${commitMessage}`
+        },
+        {
+          path: 'script.js',
+          content: jsCode,
+          message: `Update script.js - ${commitMessage}`
+        },
+        {
+          path: 'README.md',
+          content: `# ${currentProject.name}\n\n${currentProject.description}\n\nBuilt with Yumi Series Web Builder`,
+          message: `Update README.md - ${commitMessage}`
+        }
+      ]
+
+      for (const file of files) {
+        await createOrUpdateGitHubFile(selectedRepo, file.path, file.content, file.message)
+      }
+
+      setError(null)
+      alert('Successfully deployed to GitHub! 🎉')
+    } catch (error) {
+      console.error('Failed to deploy to GitHub:', error)
+      setError('Failed to deploy to GitHub')
+    } finally {
+      setIsDeployingToGitHub(false)
+    }
+  }
+
+  const createOrUpdateGitHubFile = async (repo: GitHubRepository, path: string, content: string, message: string) => {
+    if (!githubToken) return
+
+    // First, try to get the existing file to get its SHA
+    let sha: string | undefined
+    try {
+      const getResponse = await fetch(`https://api.github.com/repos/${repo.full_name}/contents/${path}`, {
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      })
+      
+      if (getResponse.ok) {
+        const fileData = await getResponse.json()
+        sha = fileData.sha
+      }
+    } catch (error) {
+      // File doesn't exist, which is fine for creation
+    }
+
+    // Create or update the file
+    const response = await fetch(`https://api.github.com/repos/${repo.full_name}/contents/${path}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message,
+        content: btoa(unescape(encodeURIComponent(content))), // Base64 encode
+        sha
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to update ${path}`)
+    }
+  }
+
+  // Domain Management
+  const searchDomains = async () => {
+    if (!domainSearch.trim()) return
+
+    setIsDomainSearching(true)
+    try {
+      // This would integrate with a domain registrar API like Namecheap
+      const response = await fetch('/api/domains/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          domain: domainSearch,
+          tlds: ['.com', '.net', '.org', '.io', '.dev', '.app']
+        })
+      })
+
+      if (response.ok) {
+        const results = await response.json()
+        setDomainSearchResults(results)
+      } else {
+        throw new Error('Domain search failed')
+      }
+    } catch (error) {
+      console.error('Domain search error:', error)
+      // Mock results for demo
+      const mockResults: DomainSearchResult[] = [
+        { domain: `${domainSearch}.com`, available: Math.random() > 0.5, price: 12.99, currency: 'USD', premium: false },
+        { domain: `${domainSearch}.net`, available: Math.random() > 0.5, price: 14.99, currency: 'USD', premium: false },
+        { domain: `${domainSearch}.org`, available: Math.random() > 0.5, price: 13.99, currency: 'USD', premium: false },
+        { domain: `${domainSearch}.io`, available: Math.random() > 0.5, price: 49.99, currency: 'USD', premium: false },
+        { domain: `${domainSearch}.dev`, available: Math.random() > 0.5, price: 15.99, currency: 'USD', premium: false }
+      ]
+      setDomainSearchResults(mockResults)
+    } finally {
+      setIsDomainSearching(false)
+    }
+  }
+
+  const registerDomain = async () => {
+    if (!selectedDomain) return
+
+    setIsRegisteringDomain(true)
+    try {
+      const response = await fetch('/api/domains/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...domainRegistration,
+          domain: selectedDomain
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        alert(`Domain ${selectedDomain} registered successfully! 🎉`)
+        setSelectedDomain(null)
+        setDomainSearchResults([])
+      } else {
+        throw new Error('Domain registration failed')
+      }
+    } catch (error) {
+      console.error('Domain registration error:', error)
+      setError('Failed to register domain')
+    } finally {
+      setIsRegisteringDomain(false)
+    }
+  }
+
+  // Live Preview and Serverless Functions - Removed unused functions
 
   // Project management
   const createNewProject = async (templateId?: string) => {
@@ -201,9 +545,12 @@ const EnhancedWebBuilderApp: React.FC<EnhancedWebBuilderAppProps> = ({ onBackToM
       setIsLoading(true)
       const result = await WebBuilderService.deployWebsite(currentProject.id, deploymentConfig)
       
-      // Show success with deployment URL
-      setError(null)
-      
+              if (result.url) {
+          alert(`Website deployed successfully! URL: ${result.url}`)
+          setCurrentView('analytics')
+      } else {
+        setError('Deployment failed')
+      }
     } catch (err) {
       setError('Failed to deploy website')
     } finally {
@@ -244,7 +591,9 @@ const EnhancedWebBuilderApp: React.FC<EnhancedWebBuilderAppProps> = ({ onBackToM
           { id: 'ai-chat', icon: '🤖', label: 'AI Assistant' },
           { id: 'preview', icon: '👁️', label: 'Preview' },
           { id: 'deploy', icon: '🚀', label: 'Deploy' },
-          { id: 'analytics', icon: '📊', label: 'Analytics' }
+          { id: 'analytics', icon: '📊', label: 'Analytics' },
+          { id: 'github', icon: '🐙', label: 'GitHub' },
+          { id: 'domains', icon: '🌐', label: 'Domains' }
         ].map(tab => (
           <button
             key={tab.id}
@@ -913,6 +1262,103 @@ const EnhancedWebBuilderApp: React.FC<EnhancedWebBuilderAppProps> = ({ onBackToM
     </div>
   )
 
+  // Render GitHub integration
+  const renderGitHubIntegration = () => (
+    <div className="github-view">
+      <div className="github-header">
+        <h2>🐙 GitHub Integration</h2>
+        <p>Connect and deploy to GitHub</p>
+      </div>
+      
+      {!githubUser ? (
+        <div className="github-auth">
+          <button onClick={initiateGitHubOAuth} className="github-auth-btn">
+            Connect GitHub Account
+          </button>
+        </div>
+      ) : (
+        <div className="github-connected">
+          <div className="user-info">
+            <img src={githubUser.avatar_url} alt="GitHub Avatar" className="avatar" />
+            <div>
+              <h3>{githubUser.name || githubUser.login}</h3>
+              <p>@{githubUser.login}</p>
+            </div>
+          </div>
+          
+          <div className="repo-management">
+            <h3>Repositories</h3>
+            <div className="repo-list">
+              {githubRepos.map(repo => (
+                <div key={repo.id} className="repo-item">
+                  <div className="repo-info">
+                    <h4>{repo.name}</h4>
+                    <p>{repo.full_name}</p>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedRepo(repo)}
+                    className={selectedRepo?.id === repo.id ? 'selected' : ''}
+                  >
+                    Select
+                  </button>
+                </div>
+              ))}
+            </div>
+            
+            <button onClick={deployToGitHub} disabled={!selectedRepo || isLoading}>
+              Deploy to GitHub
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
+  // Render domain management
+  const renderDomainManagement = () => (
+    <div className="domain-view">
+      <div className="domain-header">
+        <h2>🌐 Domain Management</h2>
+        <p>Search and register domains</p>
+      </div>
+      
+      <div className="domain-search">
+        <div className="search-form">
+          <input
+            type="text"
+            value={domainSearch}
+            onChange={(e) => setDomainSearch(e.target.value)}
+            placeholder="Enter domain name..."
+          />
+          <button onClick={searchDomains} disabled={isLoading}>
+            Search
+          </button>
+        </div>
+        
+        {domainSearchResults.length > 0 && (
+          <div className="search-results">
+            {domainSearchResults.map((result, index) => (
+              <div key={index} className="domain-result">
+                <div className="domain-info">
+                  <h4>{result.domain}</h4>
+                  <p className={result.available ? 'available' : 'taken'}>
+                    {result.available ? 'Available' : 'Taken'}
+                  </p>
+                </div>
+                {result.available && (
+                  <div className="domain-price">
+                    <span>${result.price}/year</span>
+                    <button onClick={registerDomain}>Register</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   // Main render
   return (
     <div className="enhanced-web-builder">
@@ -940,6 +1386,8 @@ const EnhancedWebBuilderApp: React.FC<EnhancedWebBuilderAppProps> = ({ onBackToM
         {currentView === 'preview' && renderPreview()}
         {currentView === 'deploy' && renderDeploy()}
         {currentView === 'analytics' && renderAnalytics()}
+        {currentView === 'github' && renderGitHubIntegration()}
+        {currentView === 'domains' && renderDomainManagement()}
       </div>
       
       {showPreview && (

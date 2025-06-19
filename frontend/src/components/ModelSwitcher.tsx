@@ -15,7 +15,6 @@ export const ModelSwitcher: React.FC<ModelSwitcherProps> = ({
   const getProviderEmoji = (providerName: string) => {
     switch (providerName) {
       case 'qwen': return '🚀'
-      case 'openrouter': return '🌐'
       case 'openai': return '🤖'
       case 'claude': return '🧠'
       default: return '⚡'
@@ -25,14 +24,13 @@ export const ModelSwitcher: React.FC<ModelSwitcherProps> = ({
   const getProviderColor = (providerName: string) => {
     switch (providerName) {
       case 'qwen': return 'from-blue-400 to-cyan-400'
-      case 'openrouter': return 'from-green-400 to-emerald-400'
       case 'openai': return 'from-purple-400 to-pink-400'
       case 'claude': return 'from-orange-400 to-red-400'
       default: return 'from-gray-400 to-gray-500'
     }
   }
 
-  const handleProviderChange = (newProvider: 'openai' | 'openrouter' | 'qwen' | 'claude') => {
+  const handleProviderChange = (newProvider: 'openai' | 'qwen' | 'claude') => {
     setProvider(newProvider)
     const models = availableModels[newProvider]
     if (Array.isArray(models) && models.length > 0) {
@@ -56,7 +54,6 @@ export const ModelSwitcher: React.FC<ModelSwitcherProps> = ({
           className="px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
         >
           <option value="qwen">🚀 Qwen (Free)</option>
-          <option value="openrouter">🌐 OpenRouter (Free)</option>
           <option value="openai">🤖 OpenAI (Paid)</option>
           <option value="claude">🧠 Claude (Paid)</option>
         </select>
@@ -94,8 +91,8 @@ export const ModelSwitcher: React.FC<ModelSwitcherProps> = ({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Provider
         </label>
-        <div className="grid grid-cols-2 gap-2">
-          {(['qwen', 'openrouter', 'openai', 'claude'] as const).map((providerOption) => {
+        <div className="grid grid-cols-3 gap-2">
+          {(['qwen', 'openai', 'claude'] as const).map((providerOption) => {
             const isPaid = providerOption === 'openai' || providerOption === 'claude'
             return (
               <button
@@ -107,16 +104,15 @@ export const ModelSwitcher: React.FC<ModelSwitcherProps> = ({
                     : 'border-gray-200 bg-white hover:border-purple-200 hover:shadow-md'
                 } ${isPaid ? 'border-l-4 border-l-orange-400' : ''}`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col items-center gap-1">
                   <span className="text-lg">{getProviderEmoji(providerOption)}</span>
-                  <div className="text-left">
+                  <div className="text-center">
                     <div className="font-medium capitalize">
                       {providerOption}
                       {isPaid && <span className="text-xs ml-1">💳</span>}
                     </div>
                     <div className={`text-xs ${provider === providerOption ? 'text-white/80' : 'text-gray-500'}`}>
                       {providerOption === 'qwen' && 'Fast & Free'}
-                      {providerOption === 'openrouter' && 'Free Models'}
                       {providerOption === 'openai' && 'Premium GPT'}
                       {providerOption === 'claude' && 'Advanced Claude'}
                     </div>

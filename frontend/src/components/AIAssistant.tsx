@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { apiService } from '../services/api'
+import { getLocalAnswer } from '../utils/faqResponses'
 
 interface AIAssistantProps {
   onClose: () => void
@@ -30,7 +31,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: '👋 Hi! I\'m your Yumi AI Assistant! I can help you with:\n\n🤖 **Model Selection** - Find the perfect AI model\n📚 **How-to Guides** - Learn to use all Yumi features\n💰 **Billing Questions** - Understand our pricing\n📝 **Feedback** - Share your thoughts\n\nWhat would you like to know?',
+      content: '👋 Hi! I\'m your enhanced Yumi AI Assistant! I can help you with:\n\n⚡ **Instant Answers** - Common questions answered immediately\n🤖 **Model Selection** - Find the perfect AI model\n📚 **How-to Guides** - Learn to use all Yumi features\n💰 **Billing Questions** - Understand our pricing\n📝 **Feedback** - Share your thoughts\n\nTry asking about "pricing", "free models", "how to start", or any Yumi feature!',
       timestamp: new Date()
     }
   ])
@@ -83,22 +84,27 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose }) => {
     setIsLoading(true)
 
     try {
-      // Check knowledge base first
-      let response = handleKnowledgeQuery(currentMessage)
+      // First, try local FAQ responses for instant answers
+      let response = getLocalAnswer(currentMessage)
       
+      // If no local answer, check knowledge base
       if (!response) {
-        // Fallback to AI if not in knowledge base
+        response = handleKnowledgeQuery(currentMessage)
+      }
+      
+      // If still no answer, fallback to AI API
+      if (!response) {
         const aiResponse = await apiService.chat({
           messages: [
             {
-              role: 'system',
+              role: 'user',
               content: 'You are Yumi AI Assistant, helping users with Yumi-Series platform. Be helpful, friendly, and concise. Focus on Yumi features: Writing Helper, Web Builder, Study Advisor, Anime Character Helper, Report Writer. Explain billing clearly.'
             },
             ...chatMessages.slice(-5), // Last 5 messages for context
             userMessage
           ],
           mode: 'assistant',
-          provider: 'openrouter',
+          provider: 'qwen',
           model: 'google/gemini-2.5-pro'
         })
         response = aiResponse.response
@@ -128,7 +134,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose }) => {
     const lowerQuery = query.toLowerCase()
     
     // Check all knowledge categories
-    for (const [category, items] of Object.entries(knowledgeBase)) {
+    for (const [, items] of Object.entries(knowledgeBase)) {
       for (const [key, value] of Object.entries(items)) {
         if (lowerQuery.includes(key) || 
             key.split(' ').some(word => lowerQuery.includes(word))) {
@@ -173,6 +179,15 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose }) => {
     { label: '📚 How-to Guide', action: () => setMode('help') },
     { label: '💰 Billing Info', action: () => setMode('billing') },
     { label: '📝 Feedback', action: () => setMode('feedback') }
+  ]
+
+  const faqSuggestions = [
+    { label: '💰 Pricing', query: 'What is your pricing?' },
+    { label: '🆓 Free tier', query: 'Tell me about the free tier' },
+    { label: '📱 How to install', query: 'How do I install the app?' },
+    { label: '🚀 Getting started', query: 'How to start using Yumi?' },
+    { label: '🌍 Change language', query: 'How to change language?' },
+    { label: '🤖 Which model', query: 'Which AI model should I use?' }
   ]
 
   const renderContent = () => {
@@ -359,6 +374,52 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose }) => {
                 </div>
               )}
             </div>
+
+            {/* FAQ Quick Suggestions */}
+            {chatMessages.length === 1 && (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-600 font-medium">💡 Try these common questions:</p>
+                <div className="grid grid-cols-2 gap-1">
+                  {faqSuggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      onClick={async () => {
+                        setCurrentMessage(suggestion.query)
+                        // Trigger sending the message
+                        const userMessage: ChatMessage = {
+                          role: 'user',
+                          content: suggestion.query,
+                          timestamp: new Date()
+                        }
+                        setChatMessages(prev => [...prev, userMessage])
+                        setCurrentMessage('')
+                        setIsLoading(true)
+
+                        try {
+                          const response = getLocalAnswer(suggestion.query) || 
+                                         handleKnowledgeQuery(suggestion.query) ||
+                                         'Let me help you with that! Can you provide more details?'
+                          
+                          const assistantMessage: ChatMessage = {
+                            role: 'assistant',
+                            content: response,
+                            timestamp: new Date()
+                          }
+                          setChatMessages(prev => [...prev, assistantMessage])
+                        } catch (error) {
+                          console.error('FAQ error:', error)
+                        } finally {
+                          setIsLoading(false)
+                        }
+                      }}
+                      className="p-2 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-left"
+                    >
+                      {suggestion.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Chat Input */}
             <div className="flex gap-2">

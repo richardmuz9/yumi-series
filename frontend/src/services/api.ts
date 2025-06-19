@@ -112,7 +112,7 @@ export interface ChatRequest {
   message?: string // Keep for backward compatibility
   messages?: ChatMessage[] // New messages array support
   mode: 'agent' | 'assistant'
-  provider?: 'openai' | 'openrouter' | 'qwen' | 'claude'
+  provider?: 'openai' | 'qwen' | 'claude'
   model?: string
 }
 
@@ -122,9 +122,8 @@ export interface ChatResponse {
   model: string
 }
 
-export interface ModelsResponse extends Record<string, string[]> {
+export interface ModelsResponse {
   openai: string[]
-  openrouter: string[]
   qwen: string[]
   claude: string[]
 }
@@ -301,17 +300,14 @@ export const apiService = {
       // Handle the backend's complex model structure and extract just the IDs
       const validatedData: ModelsResponse = {
         openai: data.openai?.models && Array.isArray(data.openai.models) 
-          ? data.openai.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
-          : [],
-        openrouter: data.openrouter?.models && Array.isArray(data.openrouter.models) 
-          ? data.openrouter.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
-          : [],
-        qwen: data.qwen?.models && Array.isArray(data.qwen.models) 
-          ? data.qwen.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
-          : [],
-        claude: data.claude?.models && Array.isArray(data.claude.models) 
-          ? data.claude.models.map((m: any) => m.id || m.name || m).filter(Boolean) 
-          : []
+          ? data.openai.models.map((m: any) => m.id || m.name || m).filter(Boolean)
+          : ['gpt-4', 'gpt-3.5-turbo'],
+        qwen: data.qwen?.models && Array.isArray(data.qwen.models)
+          ? data.qwen.models.map((m: any) => m.id || m.name || m).filter(Boolean)
+          : ['qwen-turbo', 'qwen-plus'],
+        claude: data.claude?.models && Array.isArray(data.claude.models)
+          ? data.claude.models.map((m: any) => m.id || m.name || m).filter(Boolean)
+          : ['claude-3-opus-20240229', 'claude-3-sonnet-20240229']
       }
       
       console.log('Processed models data:', validatedData)

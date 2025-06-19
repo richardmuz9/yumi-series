@@ -20,24 +20,8 @@ const AppDownloadSection: React.FC<AppDownloadSectionProps> = ({ onClose }) => {
   const isWindows = /Windows/.test(userAgent)
   const isLinux = /Linux/.test(userAgent) && !isAndroid
 
-  const downloadLinks = {
-    // Desktop Apps (using Capacitor/Electron builds)
-    desktop: {
-      windows: '#', // Would link to actual .exe download
-      mac: '#',     // Would link to actual .dmg download  
-      linux: '#'   // Would link to actual .AppImage download
-    },
-    // Mobile Apps (using Capacitor builds)
-    mobile: {
-      android: {
-        playStore: '#', // Would link to Play Store
-        apk: '#'       // Would link to direct APK download
-      },
-      ios: {
-        appStore: '#'  // Would link to App Store
-      }
-    }
-  }
+  // Download links would be configured here for actual releases
+  // const downloadLinks = { desktop: {...}, mobile: {...} }
 
   return (
     <div className="app-download-overlay">
@@ -235,7 +219,7 @@ const AppDownloadSection: React.FC<AppDownloadSectionProps> = ({ onClose }) => {
               <h3>Progressive Web App</h3>
               <p>Install the web version for app-like experience with offline capabilities.</p>
               
-              <PWAInstaller className="embedded-pwa-installer" />
+              <PWAInstaller onClose={() => {}} />
               
               <div className="web-app-benefits">
                 <h4>Why Choose the Web App?</h4>

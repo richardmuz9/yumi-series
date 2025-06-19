@@ -1,7 +1,6 @@
 import express from 'express'
 import {
   openai as openaiClient,
-  openrouter,
   qwen,
   modelsConfig,
   promptsConfig,
@@ -314,10 +313,6 @@ export function setupWritingHelperRoutes(app: express.Application) {
         case 'openai':
           aiClient = openaiClient
           selectedModel = model || modelsConfig.providers.openai.defaultModel
-          break
-        case 'openrouter':
-          aiClient = openrouter
-          selectedModel = model || modelsConfig.providers.openrouter.defaultModel
           break
         case 'qwen':
           aiClient = qwen

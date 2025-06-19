@@ -28,6 +28,8 @@
   width: 90%;
   text-align: center;
   padding: 2rem;
+  margin-right: 100px; /* Space for the mode launcher */
+  transition: margin-right 0.3s ease;
 }
 
 .main-header {
@@ -661,6 +663,7 @@
   
   .main-content {
     padding: 1rem;
+    margin-right: 0; /* Remove right margin on mobile */
   }
   
   .charge-sidebar {
@@ -700,7 +703,7 @@
     font-size: 16px;
   }
   
-    .settings-btn {
+  .settings-btn {
     padding: 10px 16px;
     font-size: 13px;
   }
@@ -716,6 +719,38 @@
 
   .download-icon {
     font-size: 16px;
+  }
+
+  .main-welcome-section {
+    min-height: 300px;
+    margin: 1.5rem 0;
+    padding: 0 1rem;
+  }
+
+  .welcome-heading {
+    font-size: 2rem;
+  }
+
+  .welcome-description {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .quick-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-item {
+    padding: 1rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
   }
 }
 
@@ -1188,5 +1223,134 @@
   
   .ai-welcome-arrow {
     right: 24px;
+  }
+}
+
+/* Main Welcome Section - Simplified Layout */
+.main-welcome-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  margin: 2rem 0;
+  padding: 0 2rem;
+}
+
+.welcome-content {
+  text-align: center;
+  max-width: 600px;
+}
+
+.welcome-heading {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.welcome-description {
+  font-size: 1.2rem;
+  color: #e2e8f0;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4facfe;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+/* Mobile adjustments for welcome section */
+@media (max-width: 768px) {
+  .main-welcome-section {
+    min-height: 300px;
+    margin: 1.5rem 0;
+    padding: 0 1rem;
+  }
+
+  .welcome-heading {
+    font-size: 2rem;
+  }
+
+  .welcome-description {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .quick-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-item {
+    padding: 1rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-heading {
+    font-size: 1.8rem;
+  }
+
+  .welcome-description {
+    font-size: 0.9rem;
+  }
+
+  .quick-stats {
+    gap: 0.8rem;
+  }
+
+  .stat-item {
+    padding: 0.8rem;
+  }
+
+  .stat-number {
+    font-size: 1.3rem;
   }
 } 

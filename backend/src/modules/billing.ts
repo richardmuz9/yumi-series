@@ -86,53 +86,85 @@ const modelPricing = {
   }
 }
 
-// Updated credit packages reflecting higher costs but better value
+// Updated credit packages reflecting the new token structure
 const creditPackages = [
   { 
+    id: 'credits-1', 
+    name: 'Micro Pack', 
+    credits: 1, 
+    price: 100, // $1
+    tokens: 50000,
+    description: '$1 - 50K tokens for basic testing',
+    recommended: false
+  },
+  { 
+    id: 'credits-5', 
+    name: 'Starter Pack', 
+    credits: 5, 
+    price: 500, // $5
+    tokens: 300000,
+    description: '$5 - 300K tokens for light usage',
+    recommended: false
+  },
+  { 
+    id: 'credits-10', 
+    name: 'Popular Pack', 
+    credits: 10, 
+    price: 1000, // $10
+    tokens: 700000,
+    description: '$10 - 700K tokens for regular use',
+    recommended: true
+  },
+  { 
+    id: 'credits-15', 
+    name: 'Professional Pack', 
+    credits: 15, 
+    price: 1500, // $15
+    tokens: 1200000,
+    description: '$15 - 1.2M tokens for power users',
+    recommended: false
+  },
+  { 
     id: 'credits-20', 
-    name: 'Starter Credits', 
+    name: 'Power Pack', 
     credits: 20, 
     price: 2000, // $20
-    description: '$20 - Approximately 800K GPT-4o-mini tokens or 350K GPT-4o tokens',
+    tokens: 1800000,
+    description: '$20 - 1.8M tokens for heavy usage',
     recommended: false
   },
   { 
     id: 'credits-50', 
-    name: 'Popular Credits', 
+    name: 'Enterprise Pack', 
     credits: 50, 
-    price: 4500, // $45 (10% discount)
-    description: '$50 - Approximately 2M GPT-4o-mini tokens or 850K GPT-4o tokens',
-    recommended: true
-  },
-  { 
-    id: 'credits-100', 
-    name: 'Power User Credits', 
-    credits: 100, 
-    price: 8000, // $80 (20% discount)
-    description: '$100 - Approximately 4M GPT-4o-mini tokens or 1.7M GPT-4o tokens',
+    price: 5000, // $50
+    tokens: 4500000,
+    description: '$50 - 4.5M tokens for teams',
     recommended: false
   },
   { 
-    id: 'credits-200', 
-    name: 'Professional Credits', 
-    credits: 200, 
-    price: 14000, // $140 (30% discount)
-    description: '$200 - Approximately 8M GPT-4o-mini tokens or 3.4M GPT-4o tokens',
+    id: 'credits-100', 
+    name: 'Ultimate Pack', 
+    credits: 100, 
+    price: 10000, // $100
+    tokens: 10000000,
+    description: '$100 - 10M tokens for enterprise',
     recommended: false
   }
 ]
 
-// Monthly subscription plan
+// Monthly subscription plan with polish writing and study advisor access
 const subscriptionPlans = [
   {
     id: 'monthly-pro',
     name: 'Monthly Pro',
     price: 1000, // $10/month
-    tokensPerDay: 35000,
-    tokensPerMonth: 1050000, // 35K * 30 days
-    description: '35K tokens daily, never run out, premium support',
+    tokensPerDay: 33000, // ~1M tokens per month (33K * 30 days)
+    tokensPerMonth: 1000000,
+    description: '33K tokens daily + Polish Writing + Study Advisor access',
     benefits: [
-      '35,000 tokens every day',
+      '33,000 tokens every day',
+      'Polish Writing & Study Advisor',
       'Priority processing',
       'Premium model access',
       'Advanced features',
@@ -145,15 +177,16 @@ const subscriptionPlans = [
 // In-memory user data (replace with database)
 let userBillingData: any = {
   1: {
-    creditsBalance: 5.00, // $5 free credits (reduced but still generous)
+    creditsBalance: 5.00, // $5 free credits for paid models
     totalSpent: 0,
-    qwenTokensUsedMonth: 0,
-    openrouterRequestsUsedToday: 0,
+    qwenTokensUsedMonth: 0, // Track free Qwen usage (1M/month limit)
+    premiumTokensUsedMonth: 0, // Track paid model usage (10K/month free)
     subscriptionStatus: 'inactive',
     subscriptionPlan: 'free',
     monthlyTokensUsed: 0,
     dailyTokensUsed: 0,
-    lastDailyReset: new Date().toISOString().split('T')[0] // Today's date
+    lastDailyReset: new Date().toISOString().split('T')[0], // Today's date
+    lastMonthlyReset: new Date().toISOString().substring(0, 7) // Current month (YYYY-MM)
   }
 }
 
@@ -191,26 +224,47 @@ function resetDailyTokensIfNeeded(userId: number) {
   }
 }
 
+function resetMonthlyTokensIfNeeded(userId: number) {
+  const user = userBillingData[userId]
+  if (!user) return
+  
+  const currentMonth = new Date().toISOString().substring(0, 7) // YYYY-MM
+  if (user.lastMonthlyReset !== currentMonth) {
+    user.qwenTokensUsedMonth = 0
+    user.premiumTokensUsedMonth = 0
+    user.lastMonthlyReset = currentMonth
+  }
+}
+
 // Routes
 router.get('/user', async (req, res) => {
   try {
     const userId = 1 // Default user for demo
     resetDailyTokensIfNeeded(userId)
+    resetMonthlyTokensIfNeeded(userId)
     
     const billing = userBillingData[userId] || {
       creditsBalance: 5.00,
       totalSpent: 0,
       qwenTokensUsedMonth: 0,
-      openrouterRequestsUsedToday: 0,
+      premiumTokensUsedMonth: 0,
       subscriptionStatus: 'inactive',
       subscriptionPlan: 'free',
       monthlyTokensUsed: 0,
-      dailyTokensUsed: 0
+      dailyTokensUsed: 0,
+      lastDailyReset: new Date().toISOString().split('T')[0],
+      lastMonthlyReset: new Date().toISOString().substring(0, 7)
     }
+    
+    // Calculate remaining tokens for free tiers
+    const qwenTokensLeft = Math.max(0, 1000000 - billing.qwenTokensUsedMonth)
+    const premiumTokensLeft = Math.max(0, 10000 - billing.premiumTokensUsedMonth)
     
     res.json({
       id: userId,
       email: 'demo@yumi.ai',
+      qwenTokensLeft,
+      premiumTokensLeft,
       ...billing
     })
   } catch (error) {
@@ -268,7 +322,7 @@ router.post('/model-check', async (req, res) => {
     } else {
       // Check subscription tokens first
       if (billing.subscriptionStatus === 'active') {
-        const remainingDaily = 35000 - billing.dailyTokensUsed
+        const remainingDaily = 33000 - billing.dailyTokensUsed
         if (remainingDaily > 0) {
           res.json({
             available: true,
@@ -307,6 +361,7 @@ router.post('/usage', async (req, res) => {
     const userId = 1
     
     resetDailyTokensIfNeeded(userId)
+    resetMonthlyTokensIfNeeded(userId)
     const cost = calculateTokenCost(provider, modelId, inputTokens || 0, outputTokens || 0)
     const totalTokens = (inputTokens || 0) + (outputTokens || 0)
     
@@ -315,26 +370,45 @@ router.post('/usage', async (req, res) => {
         creditsBalance: 5.00,
         totalSpent: 0,
         qwenTokensUsedMonth: 0,
-        openrouterRequestsUsedToday: 0,
+        premiumTokensUsedMonth: 0,
         subscriptionStatus: 'inactive',
         subscriptionPlan: 'free',
         monthlyTokensUsed: 0,
         dailyTokensUsed: 0,
-        lastDailyReset: new Date().toISOString().split('T')[0]
+        lastDailyReset: new Date().toISOString().split('T')[0],
+        lastMonthlyReset: new Date().toISOString().substring(0, 7)
       }
     }
     
     if (isModelFree(provider, modelId)) {
       // Update free tier usage counters
       if (provider === 'qwen') {
+        // Check monthly limit for Qwen (1M tokens)
+        if (userBillingData[userId].qwenTokensUsedMonth + totalTokens > 1000000) {
+          return res.status(429).json({ 
+            error: 'Monthly limit exceeded for Qwen models',
+            limit: 1000000,
+            used: userBillingData[userId].qwenTokensUsedMonth,
+            remaining: Math.max(0, 1000000 - userBillingData[userId].qwenTokensUsedMonth)
+          })
+        }
         userBillingData[userId].qwenTokensUsedMonth += totalTokens
-      } else if (provider === 'openrouter') {
-        userBillingData[userId].openrouterRequestsUsedToday += 1
+      } else {
+        // For other paid models, check the 10K monthly free limit
+        if (userBillingData[userId].premiumTokensUsedMonth + totalTokens > 10000) {
+          return res.status(429).json({ 
+            error: 'Monthly free limit exceeded for premium models',
+            limit: 10000,
+            used: userBillingData[userId].premiumTokensUsedMonth,
+            remaining: Math.max(0, 10000 - userBillingData[userId].premiumTokensUsedMonth)
+          })
+        }
+        userBillingData[userId].premiumTokensUsedMonth += totalTokens
       }
     } else {
       // For paid models, use subscription tokens first, then credits
       if (userBillingData[userId].subscriptionStatus === 'active') {
-        const remainingDaily = 35000 - userBillingData[userId].dailyTokensUsed
+        const remainingDaily = 33000 - userBillingData[userId].dailyTokensUsed
         if (remainingDaily >= totalTokens) {
           // Use subscription tokens
           userBillingData[userId].dailyTokensUsed += totalTokens

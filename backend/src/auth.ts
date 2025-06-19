@@ -40,35 +40,6 @@ export const MODEL_COSTS = {
   'deepseek-chat': 2,
   'deepseek-coder': 3,
   'deepseek-math': 3,
-  
-  // OpenRouter models - Anthropic Claude
-  'anthropic/claude-3-opus': 10,
-  'anthropic/claude-3-sonnet': 6,
-  'anthropic/claude-3-haiku': 3,
-  
-  // OpenRouter models - OpenAI
-  'openai/gpt-4': 8,
-  'openai/gpt-4-turbo': 6,
-  'openai/gpt-3.5-turbo': 2,
-  
-  // OpenRouter models - Google
-  'google/gemini-pro': 4,
-  'google/gemini-pro-vision': 5,
-  
-  // OpenRouter models - Meta
-  'meta-llama/llama-3-70b-instruct': 4,
-  'meta-llama/llama-3-8b-instruct': 2,
-  
-  // OpenRouter models - Mistral
-  'mistralai/mixtral-8x7b-instruct': 3,
-  'mistralai/mistral-7b-instruct': 2,
-  
-  // OpenRouter models - DeepSeek
-  'deepseek/deepseek-chat': 2,
-  'deepseek/deepseek-coder': 3,
-  
-  // OpenRouter models - Microsoft
-  'microsoft/wizardlm-2-8x22b': 5,
 } as const
 
 // Free tier constants

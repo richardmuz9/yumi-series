@@ -13,25 +13,29 @@ interface AppState {
   mode: 'agent' | 'assistant'
   messages: Message[]
   previewCode: string
-  provider: 'openai' | 'openrouter' | 'qwen' | 'claude'
+  provider: 'openai' | 'qwen' | 'claude'
   model: string
-  availableModels: Record<string, string[]>
+  availableModels: {
+    openai: string[]
+    qwen: string[]
+    claude: string[]
+  }
   isLoading: boolean
   currentView: 'chat' | 'archive' | 'writing-helper'
-  language: 'en' | 'cn' | 'jp' | 'kr'
+  language: 'en' | 'zh' | 'ja' | 'ko'
   showLayoutCustomizer: boolean
   installedModes: string[]
   setMode: (mode: 'agent' | 'assistant') => void
-  setProvider: (provider: 'openai' | 'openrouter' | 'qwen' | 'claude') => void
+  setProvider: (provider: 'openai' | 'qwen' | 'claude') => void
   setModel: (model: string) => void
-  setAvailableModels: (models: Record<string, string[]>) => void
+  setAvailableModels: (models: { openai: string[], qwen: string[], claude: string[] }) => void
   addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void
   clearMessages: () => void
   archiveMessages: () => void
   setCurrentView: (view: 'chat' | 'archive' | 'writing-helper') => void
   setPreviewCode: (code: string) => void
   setLoading: (loading: boolean) => void
-  setLanguage: (language: 'en' | 'cn' | 'jp' | 'kr') => void
+  setLanguage: (lang: 'en' | 'zh' | 'ja' | 'ko') => void
   setShowLayoutCustomizer: (show: boolean) => void
   setInstalledModes: (modes: string[]) => void
 }
@@ -44,41 +48,22 @@ export const useStore = create<AppState>((set, get) => ({
   model: 'qwen-turbo',
   availableModels: {
     openai: [
+      'gpt-4',
+      'gpt-4-turbo', 
       'gpt-4o',
       'gpt-4o-mini',
-      'gpt-4-turbo',
-      'gpt-4',
       'gpt-3.5-turbo'
-    ],
-    anthropic: [
-      'claude-3-5-sonnet-20241022',
-      'claude-3-5-haiku-20241022', 
-      'claude-3-opus-20240229',
-      'claude-3-sonnet-20240229',
-      'claude-3-haiku-20240307'
-    ],
-    openrouter: [
-      'google/gemini-2.5-pro',
-      'google/gemini-2.5-pro-vision', 
-      'google/gemini-2.5-pro-preview',
-      'meta-llama/llama-3-70b-instruct',
-      'meta-llama/llama-3-8b-instruct',
-      'mistralai/mistral-7b-instruct',
-      'mistralai/mixtral-8x7b-instruct',
-      'microsoft/wizardlm-2-8x22b'
     ],
     qwen: [
       'qwen-turbo',
       'qwen-plus',
       'qwen-max',
       'qwen-vl-plus',
-      'qwen-vl-max',
-      'deepseek/deepseek-chat',
-      'deepseek/deepseek-coder'
+      'qwen-vl-max'
     ],
     claude: [
       'claude-opus-4-20250514',
-      'claude-sonnet-4-20250514',
+      'claude-sonnet-4-20250514', 
       'claude-3-opus-20240229',
       'claude-3-5-sonnet-20240620',
       'claude-3-sonnet-20240229',
@@ -87,7 +72,7 @@ export const useStore = create<AppState>((set, get) => ({
   },
   isLoading: false,
   currentView: 'chat',
-  language: (localStorage.getItem('yumiLanguage') as 'en' | 'cn' | 'jp' | 'kr') || 'en',
+  language: (localStorage.getItem('yumiLanguage') as 'en' | 'zh' | 'ja' | 'ko') || 'en',
   showLayoutCustomizer: false,
   installedModes: ['web-builder'], // Default to core mode only
   setMode: (mode) => set({ mode }),
@@ -134,10 +119,10 @@ export const useStore = create<AppState>((set, get) => ({
   setCurrentView: (view) => set({ currentView: view }),
   setPreviewCode: (code) => set({ previewCode: code }),
   setLoading: (loading) => set({ isLoading: loading }),
-  setLanguage: (language) => {
-    set({ language })
+  setLanguage: (lang) => {
+    set({ language: lang })
     // Persist language choice to localStorage
-    localStorage.setItem('yumiLanguage', language)
+    localStorage.setItem('yumiLanguage', lang)
   },
   setShowLayoutCustomizer: (show) => set({ showLayoutCustomizer: show }),
   setInstalledModes: (modes) => set({ installedModes: modes }),

@@ -5,72 +5,17 @@ import LayoutCustomizer from './components/LayoutCustomizer';
 import AppDownloadSection from './components/AppDownloadSection';
 import AIAssistant from './components/AIAssistant';
 import { AuthModal } from './components/AuthModal';
+import ModeLauncher from './components/ModeLauncher';
 import { billingApi } from './services/billingApi';
 import { getTranslation, type Translation } from './translations';
 import { useStore } from './store';
+import useGlobalLanguage from './hooks/useGlobalLanguage';
 import { modeManager } from './utils/modeManager';
 import { authService, User } from './services/api';
 import './main.css';
+import './components/ModeLauncher.css';
 
-interface ModeCardProps {
-  icon: string;
-  title: string;
-  description: string;
-  modeKey: string;
-  installed: boolean;
-  installing: boolean;
-  onClick: () => void;
-  onInstallToggle: (modeKey: string, install: boolean) => void;
-}
-
-const ModeCard: React.FC<ModeCardProps & { comingSoonText: string }> = ({ 
-  icon, 
-  title, 
-  description, 
-  modeKey, 
-  installed, 
-  installing,
-  onClick, 
-  onInstallToggle,
-  comingSoonText 
-}) => (
-  <div className={`mode-card ${installed ? 'available' : 'unavailable'}`}>
-    <div className="mode-icon">{icon}</div>
-    <h3 className="mode-title">{title}</h3>
-    <p className="mode-description">{description}</p>
-    
-    <div className="mode-actions">
-      {installing ? (
-        <div className="mode-installing">
-          <div className="installing-spinner"></div>
-          <span>Installing...</span>
-        </div>
-      ) : installed ? (
-        <>
-          <button 
-            className="mode-enter-btn"
-            onClick={onClick}
-          >
-            Enter Mode
-          </button>
-          <button 
-            className="mode-uninstall-btn"
-            onClick={() => onInstallToggle(modeKey, false)}
-          >
-            Uninstall
-          </button>
-        </>
-      ) : (
-        <button 
-          className="mode-install-btn"
-          onClick={() => onInstallToggle(modeKey, true)}
-        >
-          📦 Install Mode
-        </button>
-      )}
-    </div>
-  </div>
-);
+// Mode card component removed - using ModeLauncher instead
 
 interface MainPageProps {
   onModeSelect: (mode: string) => void;
@@ -79,7 +24,8 @@ interface MainPageProps {
 type Language = 'en' | 'cn' | 'jp' | 'kr';
 
 const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
-  const { language, setLanguage, showLayoutCustomizer, setShowLayoutCustomizer, installedModes, setInstalledModes } = useStore();
+  const { showLayoutCustomizer, setShowLayoutCustomizer, installedModes, setInstalledModes } = useStore();
+  const { language, translations: t, switchLanguage, availableLanguages } = useGlobalLanguage();
   const [showChargePage, setShowChargePage] = useState(false);
   const [showModelGuide, setShowModelGuide] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -91,8 +37,6 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
   const [userTokens, setUserTokens] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [installingModes, setInstallingModes] = useState<Set<string>>(new Set());
-
-  const t = getTranslation(language);
 
   useEffect(() => {
     checkAuthStatus();
@@ -293,14 +237,7 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
                 <span className="settings-icon">⚙️</span>
                 <span className="settings-text">{t.settings}</span>
               </button>
-              <button 
-                className="model-guide-btn"
-                onClick={() => setShowAIAssistant(true)}
-                title="AI Assistant - Get help with models, features, and billing"
-              >
-                <span className="model-guide-icon">🤖</span>
-                <span className="model-guide-text">AI Help</span>
-              </button>
+
               <button 
                 className="download-btn"
                 onClick={() => setShowDownloads(true)}
@@ -321,21 +258,29 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
           </p>
         </header>
         
-        <div className="modes-grid">
-          {allModes.map((mode) => (
-            <ModeCard
-              key={mode.key}
-              icon={mode.icon}
-              title={mode.title}
-              description={mode.description}
-              modeKey={mode.key}
-              installed={installedModes.includes(mode.key)}
-              installing={installingModes.has(mode.key)}
-              onClick={() => handleModeSelect(mode.key)}
-              onInstallToggle={handleInstallToggle}
-              comingSoonText={t.comingSoon}
-            />
-          ))}
+        {/* Simplified main content area - ModeLauncher will handle mode selection */}
+        <div className="main-welcome-section">
+          <div className="welcome-content">
+            <h2 className="welcome-heading">🚀 Ready to Create?</h2>
+            <p className="welcome-description">
+              Use the mode launcher on the right to access your AI tools.
+              Customize which modes appear in your favorites for quick access.
+            </p>
+            <div className="quick-stats">
+              <div className="stat-item">
+                <span className="stat-number">{installedModes.length}</span>
+                <span className="stat-label">Installed Modes</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">{formatTokens(userTokens)}</span>
+                <span className="stat-label">Available Credits</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">{Object.keys(getTranslation('en')).length}+</span>
+                <span className="stat-label">Features</span>
+              </div>
+            </div>
+          </div>
         </div>
         
         <footer className="main-footer">
@@ -390,7 +335,7 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
                 <select 
                   className="language-selector"
                   value={language}
-                  onChange={(e) => setLanguage(e.target.value as Language)}
+                  onChange={(e) => switchLanguage(e.target.value as 'en' | 'zh' | 'ja' | 'ko')}
                 >
                   <option value="en">English</option>
                   <option value="zh">中文</option>
@@ -472,6 +417,14 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
         isOpen={showLayoutCustomizer}
         onClose={() => setShowLayoutCustomizer(false)}
         t={t}
+      />
+
+      {/* Control Center-style Mode Launcher */}
+      <ModeLauncher
+        onModeSelect={handleModeSelect}
+        installedModes={installedModes}
+        installingModes={installingModes}
+        onInstallToggle={handleInstallToggle}
       />
     </div>
   );

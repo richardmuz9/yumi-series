@@ -3,7 +3,6 @@ import axios from 'axios'
 import multer from 'multer'
 import {
   openai as openaiClient,
-  openrouter,
   qwen,
   modelsConfig,
   promptsConfig,

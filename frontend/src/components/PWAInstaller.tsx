@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import useGlobalLanguage from '../hooks/useGlobalLanguage'
 import './PWAInstaller.css'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -11,75 +12,61 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 interface PWAInstallerProps {
-  className?: string
+  onClose: () => void
 }
 
-const PWAInstaller: React.FC<PWAInstallerProps> = ({ className = '' }) => {
+const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
+  const { translations: t } = useGlobalLanguage()
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstallable, setIsInstallable] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
-  const [showPrompt, setShowPrompt] = useState(false)
-  const [platform, setPlatform] = useState<'ios' | 'android' | 'desktop' | 'unknown'>('unknown')
-  const [isStandalone, setIsStandalone] = useState(false)
+  const [platform, setPlatform] = useState<string>('')
+  const [showInstructions, setShowInstructions] = useState(false)
 
   useEffect(() => {
-    // Check if already installed/running as PWA
-    const checkStandalone = () => {
-      const isStandaloneMode = 
-        window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone ||
-        document.referrer.includes('android-app://')
-      
-      setIsStandalone(isStandaloneMode)
-      setIsInstalled(isStandaloneMode)
+    // Check if app is already installed
+    if ((window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true)
     }
 
     // Detect platform
-    const detectPlatform = () => {
-      const userAgent = navigator.userAgent.toLowerCase()
-      const isIOS = /iphone|ipad|ipod/.test(userAgent)
-      const isAndroid = /android/.test(userAgent)
-      const isDesktop = !isIOS && !isAndroid
-
-      if (isIOS) setPlatform('ios')
-      else if (isAndroid) setPlatform('android')
-      else if (isDesktop) setPlatform('desktop')
-      else setPlatform('unknown')
+    const userAgent = navigator.userAgent.toLowerCase()
+    if (userAgent.includes('android')) {
+      setPlatform('android')
+    } else if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+      setPlatform('ios')
+    } else if (userAgent.includes('windows')) {
+      setPlatform('windows')
+    } else if (userAgent.includes('mac')) {
+      setPlatform('macos')
+    } else {
+      setPlatform('desktop')
     }
 
-    // Handle beforeinstallprompt event
+    // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
-      const event = e as BeforeInstallPromptEvent
-      setDeferredPrompt(event)
+      setDeferredPrompt(e as BeforeInstallPromptEvent)
       setIsInstallable(true)
-      
-      // Show prompt after a delay for better UX
-      setTimeout(() => setShowPrompt(true), 3000)
     }
 
-    // Handle app installed event
+    // Listen for app installed event
     const handleAppInstalled = () => {
       setIsInstalled(true)
-      setShowPrompt(false)
-      setIsInstallable(false)
       setDeferredPrompt(null)
+      setIsInstallable(false)
       
-      // Show success message
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-          type: 'SHOW_NOTIFICATION',
-          data: {
-            title: 'Yumi Series Installed!',
-            body: 'The app is now available on your home screen',
-            icon: '/pwa-192.svg'
-          }
+      // Show success notification
+      if ('serviceWorker' in navigator && 'Notification' in window) {
+        navigator.serviceWorker.ready.then(registration => {
+          registration.showNotification('Yumi Series Installed! 🎉', {
+            body: 'App installed successfully. You can now access it from your home screen.',
+            icon: '/pwa-192.svg',
+            badge: '/pwa-192.svg'
+          })
         })
       }
     }
-
-    checkStandalone()
-    detectPlatform()
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
@@ -91,250 +78,269 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ className = '' }) => {
   }, [])
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return
+    if (!deferredPrompt) {
+      setShowInstructions(true)
+      return
+    }
 
     try {
       await deferredPrompt.prompt()
-      const choiceResult = await deferredPrompt.userChoice
+      const { outcome } = await deferredPrompt.userChoice
       
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt')
+      if (outcome === 'accepted') {
+        console.log('✅ User accepted the install prompt')
       } else {
-        console.log('User dismissed the install prompt')
+        console.log('❌ User dismissed the install prompt')
       }
       
       setDeferredPrompt(null)
-      setShowPrompt(false)
+      setIsInstallable(false)
     } catch (error) {
-      console.error('Error during installation:', error)
+      console.error('❌ Install prompt failed:', error)
+      setShowInstructions(true)
     }
   }
 
-  const handleDismiss = () => {
-    setShowPrompt(false)
-    
-    // Don't show again for this session
-    sessionStorage.setItem('pwa-install-dismissed', 'true')
+  const getPlatformIcon = () => {
+    switch (platform) {
+      case 'android': return '🤖'
+      case 'ios': return '🍎'
+      case 'windows': return '🪟'
+      case 'macos': return '🍎'
+      default: return '💻'
+    }
+  }
+
+  const getPlatformName = () => {
+    switch (platform) {
+      case 'android': return 'Android'
+      case 'ios': return 'iOS'
+      case 'windows': return 'Windows'
+      case 'macos': return 'macOS'
+      default: return 'Desktop'
+    }
   }
 
   const getInstallInstructions = () => {
     switch (platform) {
       case 'ios':
         return {
-          title: 'Install Yumi Series',
+          title: 'Install on iPhone/iPad',
           steps: [
-            'Tap the Share button in Safari',
-            'Scroll down and tap "Add to Home Screen"',
-            'Tap "Add" to install the app'
-          ],
-          icon: '📱'
+            '1. Tap the Share button in Safari',
+            '2. Scroll down and tap "Add to Home Screen"',
+            '3. Tap "Add" to confirm installation',
+            '4. Find Yumi Series on your home screen'
+          ]
         }
       case 'android':
         return {
-          title: 'Install Yumi Series',
+          title: 'Install on Android',
           steps: [
-            'Tap the menu (⋮) in Chrome',
-            'Select "Add to Home screen"',
-            'Tap "Add" to install'
-          ],
-          icon: '🤖'
-        }
-      case 'desktop':
-        return {
-          title: 'Install Yumi Series',
-          steps: [
-            'Click the install button in the address bar',
-            'Or use the button below to install',
-            'Access the app from your desktop'
-          ],
-          icon: '💻'
+            '1. Tap the menu (⋮) in Chrome',
+            '2. Select "Add to Home screen"',
+            '3. Tap "Add" to confirm',
+            '4. Launch from your home screen'
+          ]
         }
       default:
         return {
-          title: 'Install Yumi Series',
-          steps: ['Use your browser\'s install option'],
-          icon: '📦'
+          title: 'Install on Desktop',
+          steps: [
+            '1. Look for the install icon in your browser address bar',
+            '2. Click the install button when prompted',
+            '3. Or use browser menu > "Install Yumi Series"',
+            '4. Access from your desktop or start menu'
+          ]
         }
     }
   }
 
   if (isInstalled) {
     return (
-      <div className={`pwa-installer installed ${className}`}>
-        <div className="install-status">
-          <div className="install-icon">✅</div>
-          <div className="install-content">
-            <h3>App Installed!</h3>
-            <p>Yumi Series is now available on your home screen</p>
+      <div className="pwa-installer">
+        <div className="pwa-overlay" onClick={onClose} />
+        <div className="pwa-content installed">
+          <div className="pwa-header">
+            <h2>✅ App Installed!</h2>
+            <button className="close-btn" onClick={onClose}>×</button>
+          </div>
+          <div className="pwa-body">
+            <div className="install-success">
+              <div className="success-icon">🎉</div>
+              <h3>Yumi Series is now installed!</h3>
+              <p>You can access the app directly from your {getPlatformName()} home screen or desktop.</p>
+              
+              <div className="installed-features">
+                <div className="feature-item">
+                  <span className="feature-icon">⚡</span>
+                  <span>Faster loading</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-icon">📱</span>
+                  <span>Native app experience</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-icon">🔔</span>
+                  <span>Push notifications</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-icon">🌐</span>
+                  <span>Offline capabilities</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     )
   }
 
-  const instructions = getInstallInstructions()
-
   return (
-    <div className={`pwa-installer ${className}`}>
-      {/* Installation Card */}
-      <div className="install-card">
-        <div className="install-header">
-          <div className="install-icon">{instructions.icon}</div>
-          <div className="install-info">
-            <h3>{instructions.title}</h3>
-            <p>Get the app for the best experience</p>
-          </div>
-          {isInstallable && platform === 'desktop' && (
-            <button 
-              className="install-btn-primary"
-              onClick={handleInstallClick}
-            >
-              Install
-            </button>
+    <div className="pwa-installer">
+      <div className="pwa-overlay" onClick={onClose} />
+      <div className="pwa-content">
+        <div className="pwa-header">
+          <h2>
+            {getPlatformIcon()} Install Yumi Series
+          </h2>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+
+        <div className="pwa-body">
+          {!showInstructions ? (
+            <>
+              <div className="install-hero">
+                <div className="app-preview">
+                  <img src="/yumi-tusr.png" alt="Yumi Series" className="app-icon" />
+                  <div className="app-info">
+                    <h3>Yumi Series</h3>
+                    <p>AI-Powered Creative Suite</p>
+                    <div className="app-rating">
+                      <span className="stars">⭐⭐⭐⭐⭐</span>
+                      <span className="rating-text">Excellent</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="install-benefits">
+                  <h4>Get the app for the best experience</h4>
+                  <div className="benefits-grid">
+                    <div className="benefit-item">
+                      <span className="benefit-icon">🚀</span>
+                      <div>
+                        <strong>Faster loading and performance</strong>
+                        <p>Optimized for speed with advanced caching</p>
+                      </div>
+                    </div>
+                    <div className="benefit-item">
+                      <span className="benefit-icon">📱</span>
+                      <div>
+                        <strong>Works offline with cached content</strong>
+                        <p>Continue working even without internet</p>
+                      </div>
+                    </div>
+                    <div className="benefit-item">
+                      <span className="benefit-icon">🔔</span>
+                      <div>
+                        <strong>Get notifications for updates</strong>
+                        <p>Stay informed about new features</p>
+                      </div>
+                    </div>
+                    <div className="benefit-item">
+                      <span className="benefit-icon">🎯</span>
+                      <div>
+                        <strong>Quick access from home screen</strong>
+                        <p>Launch instantly like a native app</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="install-actions">
+                <button 
+                  className="install-btn primary"
+                  onClick={handleInstallClick}
+                  disabled={!isInstallable && platform !== 'ios'}
+                >
+                  <span className="btn-icon">💻</span>
+                  Install App
+                </button>
+                
+                {platform === 'ios' && (
+                  <button 
+                    className="install-btn secondary"
+                    onClick={() => setShowInstructions(true)}
+                  >
+                    <span className="btn-icon">📖</span>
+                    Show Instructions
+                  </button>
+                )}
+              </div>
+
+              <div className="install-note">
+                <p>
+                  <strong>Native Apps Coming Soon!</strong> 📱
+                  <br />
+                  We're working on dedicated iOS and Android apps with enhanced features.
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="install-instructions">
+              <button 
+                className="back-btn"
+                onClick={() => setShowInstructions(false)}
+              >
+                ← Back
+              </button>
+              
+              <h3>{getInstallInstructions().title}</h3>
+              <div className="instructions-list">
+                {getInstallInstructions().steps.map((step, index) => (
+                  <div key={index} className="instruction-step">
+                    <span className="step-number">{index + 1}</span>
+                    <span className="step-text">{step}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="visual-guide">
+                <p>Having trouble? Here's a visual guide:</p>
+                <div className="guide-images">
+                  {platform === 'ios' && (
+                    <div className="guide-image">
+                      <div className="mock-safari">
+                        <div className="safari-bar">
+                          <span>📱 Safari</span>
+                          <span>📤</span>
+                        </div>
+                        <div className="safari-content">
+                          <p>Tap the share button (📤) then "Add to Home Screen"</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {platform === 'android' && (
+                    <div className="guide-image">
+                      <div className="mock-chrome">
+                        <div className="chrome-bar">
+                          <span>🤖 Chrome</span>
+                          <span>⋮</span>
+                        </div>
+                        <div className="chrome-content">
+                          <p>Tap menu (⋮) then "Add to Home screen"</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </div>
-
-        <div className="install-benefits">
-          <h4>Benefits of Installing:</h4>
-          <ul>
-            <li>🚀 Faster loading and performance</li>
-            <li>📱 Works offline with cached content</li>
-            <li>🔔 Get notifications for updates</li>
-            <li>🎯 Quick access from home screen</li>
-            <li>💾 Auto-save your work locally</li>
-          </ul>
-        </div>
-
-        {!isInstallable && (
-          <div className="install-instructions">
-            <h4>Installation Steps:</h4>
-            <ol>
-              {instructions.steps.map((step, index) => (
-                <li key={index}>{step}</li>
-              ))}
-            </ol>
-            
-            {platform === 'ios' && (
-              <div className="ios-note">
-                <p><strong>Note:</strong> Make sure you're using Safari browser for installation.</p>
-              </div>
-            )}
-            
-            {platform === 'android' && (
-              <div className="android-note">
-                <p><strong>Note:</strong> Chrome browser is recommended for the best experience.</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="install-features">
-          <h4>App Features:</h4>
-          <div className="feature-grid">
-            <div className="feature-item">
-              <span className="feature-icon">✍️</span>
-              <span className="feature-name">Writing Helper</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">🌐</span>
-              <span className="feature-name">Web Builder</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">📊</span>
-              <span className="feature-name">Report Writer</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">🎓</span>
-              <span className="feature-name">Study Advisor</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">🎨</span>
-              <span className="feature-name">Anime Designer</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating Install Prompt */}
-      {showPrompt && isInstallable && !sessionStorage.getItem('pwa-install-dismissed') && (
-        <div className="pwa-install-prompt show">
-          <div className="pwa-install-icon">📱</div>
-          <div className="pwa-install-content">
-            <div className="pwa-install-title">Install Yumi Series</div>
-            <div className="pwa-install-description">
-              Get the app for faster access and offline features
-            </div>
-          </div>
-          <div className="pwa-install-actions">
-            <button 
-              className="pwa-install-btn"
-              onClick={handleDismiss}
-            >
-              Later
-            </button>
-            <button 
-              className="pwa-install-btn pwa-install-btn-primary"
-              onClick={handleInstallClick}
-            >
-              Install
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Browser Support Info */}
-      <div className="browser-support">
-        <h4>Browser Compatibility:</h4>
-        <div className="browser-list">
-          <div className="browser-item">
-            <span className="browser-icon">🌐</span>
-            <span>Chrome (Desktop & Mobile)</span>
-            <span className="support-status supported">✅</span>
-          </div>
-          <div className="browser-item">
-            <span className="browser-icon">🦊</span>
-            <span>Firefox (Desktop)</span>
-            <span className="support-status partial">⚠️</span>
-          </div>
-          <div className="browser-item">
-            <span className="browser-icon">🌍</span>
-            <span>Edge (Desktop)</span>
-            <span className="support-status supported">✅</span>
-          </div>
-          <div className="browser-item">
-            <span className="browser-icon">🧭</span>
-            <span>Safari (iOS)</span>
-            <span className="support-status manual">📱</span>
-          </div>
-        </div>
-        <p className="support-note">
-          ✅ Full support | ⚠️ Limited support | 📱 Manual installation
-        </p>
-      </div>
-
-      {/* Troubleshooting */}
-      <div className="troubleshooting">
-        <details>
-          <summary>Installation Issues?</summary>
-          <div className="troubleshooting-content">
-            <h5>Common Solutions:</h5>
-            <ul>
-              <li><strong>Can't see install option:</strong> Make sure you're using a supported browser and the site is served over HTTPS</li>
-              <li><strong>Install button not working:</strong> Refresh the page and try again</li>
-              <li><strong>iOS Safari:</strong> The install option is in the Share menu, not the address bar</li>
-              <li><strong>Desktop:</strong> Look for the install icon in your browser's address bar</li>
-            </ul>
-            
-            <h5>Still having issues?</h5>
-            <p>Try these steps:</p>
-            <ol>
-              <li>Clear your browser cache and cookies</li>
-              <li>Make sure you're on the latest browser version</li>
-              <li>Try using an incognito/private window</li>
-              <li>Contact support if the problem persists</li>
-            </ol>
-          </div>
-        </details>
       </div>
     </div>
   )

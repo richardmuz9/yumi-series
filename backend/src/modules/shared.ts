@@ -54,7 +54,6 @@ export const proxyConfig = (
 // Initialize AI clients with proxy support (lazy initialization)
 let _openai: OpenAI | null = null
 let _claude: Anthropic | null = null  
-let _openrouter: OpenAI | null = null
 let _qwen: OpenAI | null = null
 
 function getOpenAIClient(): OpenAI {
@@ -71,21 +70,10 @@ function getClaudeClient(): Anthropic {
   if (!_claude) {
     _claude = new Anthropic({
       apiKey: process.env.CLAUDE_API_KEY || 'dummy-key',
-      // Note: Anthropic SDK doesn't support proxy configuration directly
-    })
-  }
-  return _claude
-}
-
-function getOpenRouterClient(): OpenAI {
-  if (!_openrouter) {
-    _openrouter = new OpenAI({
-      baseURL: "https://openrouter.ai/api/v1",
-      apiKey: process.env.OPENROUTER_API_KEY || 'dummy-key',
       ...proxyConfig
     })
   }
-  return _openrouter
+  return _claude
 }
 
 function getQwenClient(): OpenAI {
@@ -99,7 +87,7 @@ function getQwenClient(): OpenAI {
   return _qwen
 }
 
-// Export lazy-initialized clients for backward compatibility
+// Proxy objects for lazy initialization
 export const openai = new Proxy({} as OpenAI, {
   get(target, prop) {
     return getOpenAIClient()[prop as keyof OpenAI]
@@ -112,17 +100,22 @@ export const claude = new Proxy({} as Anthropic, {
   }
 })
 
-export const openrouter = new Proxy({} as OpenAI, {
-  get(target, prop) {
-    return getOpenRouterClient()[prop as keyof OpenAI]
-  }
-})
-
 export const qwen = new Proxy({} as OpenAI, {
   get(target, prop) {
     return getQwenClient()[prop as keyof OpenAI]
   }
 })
+
+// Function to get OpenAI-compatible client (excludes Claude)
+export function getOpenAICompatibleClient(provider: string): OpenAI {
+  switch (provider) {
+    case 'openai':
+      return getOpenAIClient()
+    case 'qwen':
+    default:
+      return getQwenClient()
+  }
+}
 
 // Function to get the appropriate AI client based on provider
 export function getAIClient(provider: string): OpenAI | Anthropic {
@@ -131,21 +124,6 @@ export function getAIClient(provider: string): OpenAI | Anthropic {
       return getOpenAIClient()
     case 'claude':
       return getClaudeClient()
-    case 'openrouter':
-      return getOpenRouterClient()
-    case 'qwen':
-    default:
-      return getQwenClient()
-  }
-}
-
-// Function to get OpenAI-compatible client (excludes Claude)
-export function getOpenAICompatibleClient(provider: string): OpenAI {
-  switch (provider) {
-    case 'openai':
-      return getOpenAIClient()
-    case 'openrouter':
-      return getOpenRouterClient()
     case 'qwen':
     default:
       return getQwenClient()
@@ -269,7 +247,6 @@ export function addHealthCheck(app: express.Application) {
         apiKeys: {
           openai: !!process.env.OPENAI_API_KEY,
           claude: !!process.env.CLAUDE_API_KEY,
-          openrouter: !!process.env.OPENROUTER_API_KEY,
           qwen: !!process.env.QWEN_API_KEY
         }
       })
@@ -409,7 +386,7 @@ export function addHealthCheck(app: express.Application) {
       let model = requestedModel
       
       // Redirect expensive providers to free Qwen
-      if (requestedProvider === 'openrouter' || requestedProvider === 'openai' || requestedProvider === 'claude') {
+      if (requestedProvider === 'openai' || requestedProvider === 'claude') {
         console.log(`🔄 Redirecting ${requestedProvider}/${requestedModel} to qwen/qwen-turbo (free provider)`)
         provider = 'qwen'
         model = 'qwen-turbo'

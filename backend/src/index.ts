@@ -19,7 +19,6 @@ db.initialize().catch(err => {
 console.log('🔑 Environment Variables Status:')
 console.log(`- OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? '✅ Set' : '❌ Missing'}`)
 console.log(`- CLAUDE_API_KEY: ${process.env.CLAUDE_API_KEY ? '✅ Set' : '❌ Missing'}`)
-console.log(`- OPENROUTER_API_KEY: ${process.env.OPENROUTER_API_KEY ? '✅ Set' : '❌ Missing'}`)
 console.log(`- QWEN_API_KEY: ${process.env.QWEN_API_KEY ? '✅ Set' : '❌ Missing'}`)
 
 // Create Express app with shared configuration

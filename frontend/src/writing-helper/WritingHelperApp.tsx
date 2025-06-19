@@ -10,7 +10,7 @@ interface WritingHelperAppProps {
 
 const WritingHelperApp: React.FC<WritingHelperAppProps> = ({ onBackToMain }) => {
   const { language } = useStore();
-  const t = getTranslation(language);
+  // const t = getTranslation(language); // Translations available if needed
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
