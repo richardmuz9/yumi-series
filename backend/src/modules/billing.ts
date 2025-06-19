@@ -221,6 +221,7 @@ router.get('/user', async (req, res) => {
 
 router.get('/packages', async (req, res) => {
   try {
+    console.log('📦 Fetching credit packages, count:', creditPackages.length)
     res.json(creditPackages)
   } catch (error) {
     console.error('Error fetching credit packages:', error)
@@ -386,11 +387,16 @@ router.post('/subscription', async (req, res) => {
   try {
     const { planId, successUrl, cancelUrl } = req.body
     
+    console.log('🔄 Creating subscription session:', { planId, successUrl, cancelUrl })
+    
     // Mock subscription session for demo
-    res.json({
+    const response = {
       sessionId: 'demo_subscription',
       url: `${successUrl}?demo=true&plan=${planId}`
-    })
+    }
+    
+    console.log('✅ Subscription session created:', response)
+    res.json(response)
   } catch (error) {
     console.error('Error creating subscription session:', error)
     res.status(500).json({ error: 'Failed to create subscription session' })

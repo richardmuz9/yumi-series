@@ -121,10 +121,13 @@ class BillingApi {
 
   async getCreditPackages(): Promise<CreditPackage[]> {
     try {
-      return await this.request<CreditPackage[]>('/packages')
+      console.log('📦 Fetching credit packages from API...')
+      const packages = await this.request<CreditPackage[]>('/packages')
+      console.log('✅ Credit packages fetched:', packages.length, 'packages')
+      return packages
     } catch (error) {
-      console.warn('Failed to get credit packages, using fallback:', error)
-      return [
+      console.warn('❌ Failed to get credit packages from API, using fallback:', error)
+      const fallbackPackages = [
         { 
           id: 'credits-20', 
           name: 'Starter Credits', 
@@ -138,7 +141,7 @@ class BillingApi {
           name: 'Popular Credits', 
           credits: 50, 
           price: 4500,
-          description: '$50 - Approximately 2M GPT-4o-mini tokens or 850K GPT-4o tokens',
+          description: '$45 - Approximately 2M GPT-4o-mini tokens or 850K GPT-4o tokens',
           recommended: true
         },
         { 
@@ -146,7 +149,7 @@ class BillingApi {
           name: 'Power User Credits', 
           credits: 100, 
           price: 8000,
-          description: '$100 - Approximately 4M GPT-4o-mini tokens or 1.7M GPT-4o tokens',
+          description: '$80 - Approximately 4M GPT-4o-mini tokens or 1.7M GPT-4o tokens',
           recommended: false
         },
         { 
@@ -154,10 +157,12 @@ class BillingApi {
           name: 'Professional Credits', 
           credits: 200, 
           price: 14000,
-          description: '$200 - Approximately 8M GPT-4o-mini tokens or 3.4M GPT-4o tokens',
+          description: '$140 - Approximately 8M GPT-4o-mini tokens or 3.4M GPT-4o tokens',
           recommended: false
         }
       ]
+      console.log('📦 Using fallback packages:', fallbackPackages.length, 'packages')
+      return fallbackPackages
     }
   }
 

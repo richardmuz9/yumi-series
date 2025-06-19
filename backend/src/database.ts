@@ -229,12 +229,37 @@ class Database {
     model?: string,
     stripePaymentId?: string
   ): Promise<TokenTransaction> {
-    const result = await this.runAsync(
-      'INSERT INTO token_transactions (userId, type, amount, model, description, stripePaymentId) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, type, amount, model, description, stripePaymentId]
-    )
-    
-    return await this.getAsync('SELECT * FROM token_transactions WHERE id = ?', [result.lastID])
+    try {
+      console.log('🔍 Adding token transaction:', { userId, type, amount, description, model })
+      
+      const result = await this.runAsync(
+        'INSERT INTO token_transactions (userId, type, amount, model, description, stripePaymentId) VALUES (?, ?, ?, ?, ?, ?)',
+        [userId, type, amount, model, description, stripePaymentId]
+      )
+      
+      console.log('📊 Token transaction INSERT result:', {
+        hasResult: !!result,
+        lastID: result?.lastID,
+        changes: result?.changes
+      })
+      
+      if (!result || !result.lastID) {
+        console.error('❌ Token transaction INSERT failed - no lastID returned')
+        throw new Error('Failed to insert token transaction')
+      }
+      
+      const transaction = await this.getAsync('SELECT * FROM token_transactions WHERE id = ?', [result.lastID])
+      if (!transaction) {
+        console.error('❌ Failed to retrieve token transaction after creation, ID:', result.lastID)
+        throw new Error('Failed to retrieve created token transaction')
+      }
+      
+      console.log('✅ Token transaction created successfully:', { id: transaction.id, type, amount })
+      return transaction
+    } catch (error) {
+      console.error('💥 Database addTokenTransaction error:', error)
+      throw error
+    }
   }
 
   async getUserTokenTransactions(userId: number, limit: number = 50): Promise<TokenTransaction[]> {
