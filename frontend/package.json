@@ -1,9 +1,9 @@
 {
-  "name": "yumi-series",
+  "name": "yumi-website-builder",
   "productName": "Yumi Series - AI Platform",
   "description": "Advanced AI platform for content creation, web building, and character design",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.3.1",
   "author": {
     "name": "Yumi AI",
     "email": "support@yumi.ai",
