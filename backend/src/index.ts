@@ -38,6 +38,18 @@ app.get('/', (req, res) => {
   })
 })
 
+// Debug endpoint to check JWT configuration
+app.get('/debug/auth', (req, res) => {
+  res.json({
+    jwtSecretSet: !!process.env.JWT_SECRET,
+    jwtSecretPreview: process.env.JWT_SECRET ? 
+      `${process.env.JWT_SECRET.substring(0, 10)}...` : 
+      'Using default fallback',
+    nodeEnv: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  })
+})
+
 // Authentication endpoints
 app.post('/api/auth/signup', async (req, res) => {
   try {

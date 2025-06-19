@@ -41,8 +41,12 @@ export const animePersonasConfig = JSON.parse(readFileSync(join(__dirname, '../.
 export const contentBlocksConfig = JSON.parse(readFileSync(join(__dirname, '../../config/content-blocks.json'), 'utf8'))
 export const userPreferencesConfig = JSON.parse(readFileSync(join(__dirname, '../../config/user-preferences.json'), 'utf8'))
 
-// Proxy configuration for mainland China users
-export const proxyConfig = process.env.PROXY_HOST && process.env.PROXY_PORT ? {
+// Proxy configuration for mainland China users (only in development)
+export const proxyConfig = (
+  process.env.NODE_ENV !== 'production' && 
+  process.env.PROXY_HOST && 
+  process.env.PROXY_PORT
+) ? {
   httpAgent: new HttpsProxyAgent(`http://${process.env.PROXY_HOST}:${process.env.PROXY_PORT}`),
   httpsAgent: new HttpsProxyAgent(`http://${process.env.PROXY_HOST}:${process.env.PROXY_PORT}`)
 } : {}

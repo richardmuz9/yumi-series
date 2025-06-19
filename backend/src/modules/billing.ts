@@ -16,13 +16,21 @@ import {
 // Initialize Alipay SDK if available
 let alipaySdk: any = null
 try {
-  if (process.env.ALIPAY_APP_ID && process.env.ALIPAY_PRIVATE_KEY && process.env.ALIPAY_PUBLIC_KEY) {
+  // Only initialize Alipay in production with proper credentials
+  if (process.env.NODE_ENV === 'production' && 
+      process.env.ALIPAY_APP_ID && 
+      process.env.ALIPAY_PRIVATE_KEY && 
+      process.env.ALIPAY_PUBLIC_KEY &&
+      AlipaySdk) {
     alipaySdk = new AlipaySdk({
       appId: process.env.ALIPAY_APP_ID,
       privateKey: process.env.ALIPAY_PRIVATE_KEY,
       alipayPublicKey: process.env.ALIPAY_PUBLIC_KEY,
       gateway: 'https://openapi.alipaydev.com/gateway.do', // sandbox endpoint
     })
+    console.log('✅ Alipay SDK initialized successfully')
+  } else {
+    console.log('ℹ️  Alipay SDK not initialized (missing credentials or development mode)')
   }
 } catch (error) {
   console.warn('Alipay SDK initialization failed - payments will be limited:', error)

@@ -127,8 +127,12 @@ class Database {
       [email, username, passwordHash]
     )
     
-    const user = await this.getUserById(result.lastID!)
-    if (!user) throw new Error('Failed to create user')
+    if (!result || !result.lastID) {
+      throw new Error('Failed to insert user into database')
+    }
+    
+    const user = await this.getUserById(result.lastID)
+    if (!user) throw new Error('Failed to retrieve created user')
     return user
   }
 

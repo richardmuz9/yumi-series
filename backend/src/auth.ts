@@ -113,20 +113,31 @@ export async function authenticateUser(req: AuthRequest, res: Response, next: Ne
       token = req.cookies.authToken
     }
 
+    console.log('🔍 Auth Debug:', {
+      hasAuthHeader: !!req.headers.authorization,
+      hasCookie: !!req.cookies?.authToken,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : 'NO TOKEN',
+      userAgent: req.headers['user-agent']?.substring(0, 50)
+    })
+
     if (!token) {
+      console.log('❌ No token provided')
       return res.status(401).json({ error: 'Authentication required' })
     }
 
     const decoded = verifyToken(token)
     if (!decoded) {
+      console.log('❌ Invalid token:', token.substring(0, 20))
       return res.status(401).json({ error: 'Invalid token' })
     }
 
     const user = await db.getUserById(decoded.userId)
     if (!user) {
+      console.log('❌ User not found for ID:', decoded.userId)
       return res.status(401).json({ error: 'User not found' })
     }
 
+    console.log('✅ Authentication successful for user:', user.email)
     req.user = user
     next()
   } catch (error) {
