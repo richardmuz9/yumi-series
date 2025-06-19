@@ -12,7 +12,6 @@ async function fetchWithRetry(
       ...init,
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
         ...init?.headers,
       },
     })
@@ -57,8 +56,20 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`
     
+    // Automatically include auth headers if available
+    const token = localStorage.getItem('authToken')
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers,
+    }
+    
     try {
-      const response = await fetchWithRetry(url, options)
+      const response = await fetchWithRetry(url, {
+        ...options,
+        headers,
+        credentials: 'include'
+      })
       return await response.json()
     } catch (error) {
       console.error(`API ${options.method || 'GET'} ${endpoint} failed:`, error)
@@ -143,11 +154,11 @@ export interface User {
 }
 
 class AuthService {
-  private baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+  private baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
   async signup(email: string, username: string, password: string): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/auth/signup`, {
+      const response = await fetch(`${this.baseUrl}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -175,7 +186,7 @@ class AuthService {
 
   async login(email: string, password: string): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/auth/login`, {
+      const response = await fetch(`${this.baseUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -203,7 +214,7 @@ class AuthService {
 
   async logout(): Promise<{ success: boolean }> {
     try {
-      await fetch(`${this.baseUrl}/auth/logout`, {
+      await fetch(`${this.baseUrl}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       })
@@ -227,7 +238,7 @@ class AuthService {
         return { success: false, error: 'No authentication token' }
       }
 
-      const response = await fetch(`${this.baseUrl}/auth/profile`, {
+      const response = await fetch(`${this.baseUrl}/api/auth/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`
         },
