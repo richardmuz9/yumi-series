@@ -1,6 +1,6 @@
 import express from 'express'
 // @ts-ignore - alipay-sdk doesn't have official types
-const AlipaySdk = require('alipay-sdk')
+const AlipaySdk = require('alipay-sdk').default || require('alipay-sdk')
 import {
   authenticateUser,
   AuthRequest,
