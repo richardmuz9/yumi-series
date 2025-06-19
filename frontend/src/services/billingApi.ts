@@ -71,11 +71,17 @@ class BillingApi {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_BASE}/api/billing${endpoint}`
     
+    // Include authentication token if available
+    const token = localStorage.getItem('authToken')
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers,
+    }
+    
     const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
+      credentials: 'include',
       ...options,
     })
 
@@ -226,7 +232,7 @@ class BillingApi {
 
   async getTokenPackages(): Promise<TokenPackage[]> {
     try {
-      const response = await this.request('/billing/packages') as { packages?: TokenPackage[] };
+      const response = await this.request('/packages') as { packages?: TokenPackage[] };
       return response.packages || [];
     } catch (error) {
       console.warn('Failed to fetch token packages, using fallback');
@@ -257,7 +263,7 @@ class BillingApi {
   }
 
   async createAlipayPayment(packageId: string, successUrl: string): Promise<{ paymentUrl: string }> {
-    const response = await this.request('/billing/alipay', {
+    const response = await this.request('/alipay', {
       method: 'POST',
       body: JSON.stringify({
         packageId,
@@ -274,7 +280,7 @@ class BillingApi {
     successUrl: string;
     cancelUrl: string;
   }): Promise<{ url: string }> {
-    const response = await this.request('/billing/checkout', {
+    const response = await this.request('/checkout', {
       method: 'POST',
       body: JSON.stringify(params)
     });
@@ -282,7 +288,7 @@ class BillingApi {
   }
 
   async createPortalSession(returnUrl: string): Promise<{ url: string }> {
-    const response = await this.request('/billing/portal', {
+    const response = await this.request('/portal', {
       method: 'POST',
       body: JSON.stringify({ returnUrl })
     });
@@ -290,7 +296,7 @@ class BillingApi {
   }
 
   async createSubscriptionSession(planId: string, successUrl?: string, cancelUrl?: string): Promise<{ url: string }> {
-    const response = await this.request('/billing/subscription', {
+    const response = await this.request('/subscription', {
       method: 'POST',
       body: JSON.stringify({ 
         planId, 

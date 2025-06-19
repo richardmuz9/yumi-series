@@ -367,7 +367,7 @@ router.post('/checkout', async (req, res) => {
   }
 })
 
-router.post('/subscribe', async (req, res) => {
+router.post('/subscription', async (req, res) => {
   try {
     const { planId, successUrl, cancelUrl } = req.body
     
