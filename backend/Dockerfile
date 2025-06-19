@@ -7,21 +7,23 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including dev dependencies for build)
+RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Create dist directory and copy config
-RUN mkdir -p dist && cp -r config dist/
+# Build the TypeScript code
+RUN npm run build
 
-# Expose port
+# Remove dev dependencies after build to reduce image size
+RUN npm prune --production
+
+# Expose port (Railway will override this)
 EXPOSE 3000
 
 # Set environment variable
 ENV NODE_ENV=production
-ENV PORT=3000
 
 # Start the application
 CMD ["npm", "start"] 

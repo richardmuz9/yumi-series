@@ -10,7 +10,10 @@ import YumiPersonalityManager from './modules/yumiPersonality'
 import { authenticateUser, hashPassword, comparePassword, generateToken, AuthRequest } from './auth'
 
 // Initialize database
-db.initialize().catch(console.error)
+db.initialize().catch(err => {
+  console.error('Failed to initialize database:', err)
+  // Don't exit - let the server start anyway for basic health checks
+})
 
 // Create Express app with shared configuration
 const app = createApp()
@@ -403,8 +406,8 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' })
 })
 
-// Start server
-app.listen(port, '0.0.0.0', () => {
+// Start server with error handling
+const server = app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Yumi Series Backend running on port ${port}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
   console.log(`🌐 CORS Origins: ${process.env.CORS_ORIGINS || 'all origins'}`)
@@ -419,8 +422,34 @@ app.listen(port, '0.0.0.0', () => {
     
     console.log(`🤖 AI Providers: ${enabledProviders.join(', ')}`)
   } catch (error) {
-    console.log(`⚠️  Could not load AI provider information`)
+    console.log(`⚠️  Could not load AI provider information:`, error)
   }
   
-  console.log(`🔗 Health check: http://localhost:${port}/api/health`)
+  console.log(`🔗 Health check: http://0.0.0.0:${port}/`)
+  console.log(`🔗 Detailed health: http://0.0.0.0:${port}/api/health`)
+})
+
+// Handle server errors
+server.on('error', (error: any) => {
+  console.error('Server error:', error)
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${port} is already in use`)
+  }
+})
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('Received SIGINT, shutting down gracefully...')
+  server.close(() => {
+    console.log('Server closed')
+    process.exit(0)
+  })
+})
+
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully...')
+  server.close(() => {
+    console.log('Server closed')
+    process.exit(0)
+  })
 }) 
