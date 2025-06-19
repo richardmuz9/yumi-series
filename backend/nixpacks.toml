@@ -1,0 +1,17 @@
+[phases.setup]
+dependsOn = []
+
+[phases.install]
+dependsOn = ["setup"]
+cmds = ["npm ci"]
+
+[phases.build]
+dependsOn = ["install"]
+cmds = ["npm run build"]
+
+[phases.start]
+dependsOn = ["build"]
+cmd = "npm start"
+
+[variables]
+NODE_ENV = "production" 
