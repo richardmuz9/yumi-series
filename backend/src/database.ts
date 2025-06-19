@@ -51,14 +51,24 @@ class Database {
   private allAsync: (sql: string, params?: any[]) => Promise<any[]>
 
   constructor() {
-    const dbPath = path.join(__dirname, '../database.sqlite')
+    // Use /tmp/ for Railway production, local path for development
+    const dbPath = process.env.NODE_ENV === 'production' 
+      ? '/tmp/database.sqlite' 
+      : path.join(__dirname, '../database.sqlite')
+      
     console.log('📂 Database path:', dbPath)
     console.log('📁 Current working directory:', process.cwd())
     console.log('📁 __dirname:', __dirname)
+    console.log('🌍 Environment:', process.env.NODE_ENV)
     
     this.db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
         console.error('❌ SQLite connection error:', err)
+        // Try creating database in memory as fallback for Railway
+        if (process.env.NODE_ENV === 'production') {
+          console.warn('🔄 Falling back to in-memory SQLite database')
+          this.db = new sqlite3.Database(':memory:')
+        }
       } else {
         console.log('✅ SQLite database connected successfully')
       }
@@ -73,6 +83,7 @@ class Database {
   async initialize() {
     await this.createTables()
     await this.testDatabaseAccess()
+    await this.ensureUserConsistency()
   }
   
   private async testDatabaseAccess() {
@@ -100,6 +111,20 @@ class Database {
       }
     } catch (error) {
       console.error('❌ Database write test failed:', error)
+    }
+  }
+
+  private async ensureUserConsistency() {
+    try {
+      console.log('🔍 Checking user database consistency...')
+      const users = await this.getAllUsers()
+      console.log('👥 Current users in database:', users.map(u => ({ id: u.id, email: u.email })))
+      
+      if (users.length === 0) {
+        console.log('ℹ️  No users found - this is expected for a fresh database')
+      }
+    } catch (error) {
+      console.error('❌ User consistency check failed:', error)
     }
   }
 
