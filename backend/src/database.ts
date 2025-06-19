@@ -52,7 +52,17 @@ class Database {
 
   constructor() {
     const dbPath = path.join(__dirname, '../database.sqlite')
-    this.db = new sqlite3.Database(dbPath)
+    console.log('📂 Database path:', dbPath)
+    console.log('📁 Current working directory:', process.cwd())
+    console.log('📁 __dirname:', __dirname)
+    
+    this.db = new sqlite3.Database(dbPath, (err) => {
+      if (err) {
+        console.error('❌ SQLite connection error:', err)
+      } else {
+        console.log('✅ SQLite database connected successfully')
+      }
+    })
     
     // Promisify methods
     this.runAsync = promisify(this.db.run.bind(this.db))
@@ -62,6 +72,35 @@ class Database {
 
   async initialize() {
     await this.createTables()
+    await this.testDatabaseAccess()
+  }
+  
+  private async testDatabaseAccess() {
+    try {
+      console.log('🧪 Testing database write access...')
+      
+      // Test if we can write to the database
+      const testResult = await this.runAsync(
+        'INSERT OR IGNORE INTO users (email, username, passwordHash) VALUES (?, ?, ?)',
+        ['test@system.local', 'system_test', 'test_hash']
+      )
+      
+      console.log('📊 Database write test result:', {
+        hasResult: !!testResult,
+        lastID: testResult?.lastID,
+        changes: testResult?.changes
+      })
+      
+      // Clean up test user
+      if (testResult?.lastID) {
+        await this.runAsync('DELETE FROM users WHERE id = ?', [testResult.lastID])
+        console.log('✅ Database write test successful - cleaned up test user')
+      } else {
+        console.warn('⚠️  Database write test did not return expected result')
+      }
+    } catch (error) {
+      console.error('❌ Database write test failed:', error)
+    }
   }
 
   private async createTables() {
@@ -122,18 +161,37 @@ class Database {
 
   // User methods
   async createUser(email: string, username: string, passwordHash: string): Promise<User> {
-    const result = await this.runAsync(
-      'INSERT INTO users (email, username, passwordHash) VALUES (?, ?, ?)',
-      [email, username, passwordHash]
-    )
-    
-    if (!result || !result.lastID) {
-      throw new Error('Failed to insert user into database')
+    try {
+      console.log('🔍 Attempting to create user:', { email, username })
+      
+      const result = await this.runAsync(
+        'INSERT INTO users (email, username, passwordHash) VALUES (?, ?, ?)',
+        [email, username, passwordHash]
+      )
+      
+      console.log('📊 Database INSERT result:', { 
+        hasResult: !!result, 
+        lastID: result?.lastID, 
+        changes: result?.changes 
+      })
+      
+      if (!result || !result.lastID) {
+        console.error('❌ Database INSERT failed - no lastID returned')
+        throw new Error('Failed to insert user into database')
+      }
+      
+      const user = await this.getUserById(result.lastID)
+      if (!user) {
+        console.error('❌ Failed to retrieve user after creation, ID:', result.lastID)
+        throw new Error('Failed to retrieve created user')
+      }
+      
+      console.log('✅ User created successfully:', { id: user.id, email: user.email })
+      return user
+    } catch (error) {
+      console.error('💥 Database createUser error:', error)
+      throw error
     }
-    
-    const user = await this.getUserById(result.lastID)
-    if (!user) throw new Error('Failed to retrieve created user')
-    return user
   }
 
   async getUserById(id: number): Promise<User | null> {
