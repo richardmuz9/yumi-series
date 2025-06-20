@@ -1,7 +1,7 @@
 import React from 'react'
 import { WizardLayoutProps } from './types'
 
-const WizardLayout: React.FC<WizardLayoutProps> = ({
+export const WizardLayout: React.FC<WizardLayoutProps> = ({
   currentStep,
   totalSteps,
   stepTitle,
@@ -111,7 +111,8 @@ const WizardLayout: React.FC<WizardLayoutProps> = ({
         </button>
       </div>
 
-      <style jsx>{`
+      <style>
+        {`
         .wizard-layout {
           min-height: 100vh;
           background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -162,9 +163,8 @@ const WizardLayout: React.FC<WizardLayoutProps> = ({
             gap: 8px;
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   )
-}
-
-export default WizardLayout 
+} 

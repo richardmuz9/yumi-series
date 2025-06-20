@@ -219,20 +219,13 @@ export type WizardState = SocialMediaState | BlogArticleState | CreativeWritingS
 
 // Component Props
 export interface WizardLayoutProps {
-  title: string
-  subtitle: string
-  steps: Array<{
-    id: number
-    title: string
-    description: string
-  }>
   currentStep: number
-  onStepClick: (step: number) => void
-  onBack: () => void
+  totalSteps: number
+  stepTitle: string
   onNext: () => void
-  canGoNext: boolean
-  canGoBack: boolean
-  isLastStep: boolean
+  onPrev: () => void
+  onBack: () => void
+  canProceed: boolean
   children: React.ReactNode
 }
 
