@@ -230,7 +230,8 @@ app.get('/api/auth/profile', authenticateUser, async (req: AuthRequest, res) => 
     console.log('[API][Profile] Request received')
     console.log('[API][Profile] Auth headers:', {
       'authorization': req.headers.authorization,
-      'cookie': req.headers.cookie
+      'cookie': req.headers.cookie,
+      'x-demo-mode': req.headers['x-demo-mode']
     })
     console.log('[API][Profile] Authenticated user:', req.user ? { id: req.user.id, email: req.user.email } : 'null')
     

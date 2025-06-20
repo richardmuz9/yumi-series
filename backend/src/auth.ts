@@ -77,6 +77,25 @@ export async function comparePassword(password: string, hash: string): Promise<b
 // Authentication middleware
 export async function authenticateUser(req: AuthRequest, res: Response, next: NextFunction) {
   try {
+    // Check for demo mode first
+    const isDemoMode = req.headers['x-demo-mode'] === 'true' || req.query.demo === 'true'
+    
+    if (isDemoMode) {
+      console.log('✅ Demo mode activated - skipping authentication')
+      // Create a fake demo user
+      req.user = {
+        id: -1,
+        email: 'demo@example.com',
+        username: 'Demo User',
+        tokensRemaining: 1000,
+        totalTokensUsed: 0,
+        freeTokensUsedThisMonth: 0,
+        subscriptionStatus: 'free',
+        createdAt: new Date().toISOString()
+      } as any
+      return next()
+    }
+
     // Try to get token from Authorization header or cookie
     let token = req.headers.authorization?.replace('Bearer ', '')
     
@@ -88,7 +107,8 @@ export async function authenticateUser(req: AuthRequest, res: Response, next: Ne
       hasAuthHeader: !!req.headers.authorization,
       hasCookie: !!req.cookies?.authToken,
       tokenPreview: token ? `${token.substring(0, 20)}...` : 'NO TOKEN',
-      userAgent: req.headers['user-agent']?.substring(0, 50)
+      userAgent: req.headers['user-agent']?.substring(0, 50),
+      isDemoMode
     })
 
     if (!token) {

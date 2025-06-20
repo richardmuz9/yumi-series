@@ -10,6 +10,7 @@ import { PostPreview } from './PostPreview'
 import { AnimePersonaSelector } from './AnimePersonaSelector'
 import { PostVariations } from './PostVariations'
 import { postGeneratorService } from '../../services/postGeneratorApi'
+import { authService, User } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
 import SpeechToText from '../../components/SpeechToText'
 import writingHelperData from '../../data/writingHelperData.json'
@@ -58,6 +59,12 @@ const WritingHelper: React.FC = () => {
   // Additional UI state for futuristic interface
   const [quickActionMode, setQuickActionMode] = useState(false)
   
+  // Authentication state
+  const [user, setUser] = useState<User | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [isDemoMode, setIsDemoMode] = useState(false)
+  
   const [state, setState] = useState<WritingHelperState>({
     step: 1,
     contentType: 'social-media',
@@ -88,6 +95,60 @@ const WritingHelper: React.FC = () => {
     selectedVariation: null
   })
 
+  // Authentication and demo mode handling
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      try {
+        // Check for demo mode
+        const urlParams = new URLSearchParams(window.location.search)
+        const isDemo = urlParams.get('demo') === 'true'
+        
+        if (isDemo) {
+          console.log('[WritingHelper] Demo mode activated')
+          setIsDemoMode(true)
+          setIsAuthenticated(true)
+          setUser({
+            id: -1,
+            email: 'demo@example.com',
+            username: 'Demo User',
+            tokensRemaining: 1000,
+            totalTokensUsed: 0,
+            freeTokensUsedThisMonth: 0,
+            subscriptionStatus: 'free',
+            createdAt: new Date().toISOString()
+          })
+          setAuthLoading(false)
+          return
+        }
+
+        // Check if user is already authenticated
+        if (authService.isAuthenticated()) {
+          console.log('[WritingHelper] User already authenticated, fetching profile')
+          const profileResponse = await authService.getProfile()
+          
+          if (profileResponse.success && profileResponse.user) {
+            setUser(profileResponse.user)
+            setIsAuthenticated(true)
+            console.log('[WritingHelper] Profile loaded successfully')
+          } else {
+            console.warn('[WritingHelper] Failed to load profile:', profileResponse.error)
+            setIsAuthenticated(false)
+          }
+        } else {
+          console.log('[WritingHelper] User not authenticated')
+          setIsAuthenticated(false)
+        }
+      } catch (error) {
+        console.error('[WritingHelper] Authentication check failed:', error)
+        setIsAuthenticated(false)
+      } finally {
+        setAuthLoading(false)
+      }
+    }
+
+    checkAuthentication()
+  }, [])
+
   const updateState = (updates: Partial<WritingHelperState>) => {
     setState(prev => ({ ...prev, ...updates }))
   }
@@ -104,7 +165,7 @@ const WritingHelper: React.FC = () => {
   const startQuickCreate = () => {
     setQuickActionMode(true)
     setState(prev => ({ ...prev, step: 5 })) // Jump to topic input
-    setCurrentView('create')
+    // setCurrentView('create')
   }
 
   // 3D micro-interaction for buttons
@@ -195,7 +256,7 @@ const WritingHelper: React.FC = () => {
       }
       
       // Auto-switch to preview mode after generation
-      setCurrentView('preview')
+      // setCurrentView('preview')
     } catch (error) {
       console.error('Content generation error:', error)
       updateState({
@@ -530,13 +591,84 @@ const WritingHelper: React.FC = () => {
           </div>
         )
       case 6:
-        return state.contentType === 'social-media' ? (
-          <TrendingHooks
-            platform={state.platform}
-            trendingHashtags={state.trendingHashtags}
-            onTrendingHashtagsChange={(hashtags) => updateState({ trendingHashtags: hashtags })}
-          />
-        ) : null
+        return (
+          <div className="space-y-6">
+            {/* Authentication Status */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+              <h3 className="text-lg font-semibold mb-3 text-blue-800">🔐 Account Status</h3>
+              {authLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                  <span className="text-blue-700">Checking authentication...</span>
+                </div>
+              ) : isDemoMode ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🎭</span>
+                  <div>
+                    <div className="font-medium text-blue-800">Demo Mode Active</div>
+                    <div className="text-sm text-blue-600">Using demo features with limited functionality</div>
+                  </div>
+                </div>
+              ) : isAuthenticated && user ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">✅</span>
+                  <div>
+                    <div className="font-medium text-blue-800">Authenticated as {user.username}</div>
+                    <div className="text-sm text-blue-600">
+                      {user.tokensRemaining} tokens remaining | {user.subscriptionStatus} plan
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <div className="font-medium text-red-800">Not Authenticated</div>
+                    <div className="text-sm text-red-600">Please login to access full features</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Anime Persona Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold text-purple-800">🎭 Enhancement & Persona</h3>
+                <button
+                  onClick={() => updateState({ showAnimePersona: !state.showAnimePersona })}
+                  className={`px-3 py-1 rounded-lg text-sm transition-all duration-300 ${
+                    state.showAnimePersona
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  {state.showAnimePersona ? 'Hide Personas' : 'Choose Persona'}
+                </button>
+              </div>
+              
+              <p className="text-sm text-purple-600 mb-4">
+                Add personality from your favorite anime characters to make your content more engaging
+              </p>
+
+              {state.showAnimePersona && (
+                <AnimePersonaSelector
+                  selectedPersona={state.animePersona}
+                  onPersonaChange={(persona) => updateState({ animePersona: persona })}
+                  platform={state.contentType === 'social-media' ? state.platform : state.contentType}
+                />
+              )}
+            </div>
+
+            {/* Trending Hooks for Social Media */}
+            {state.contentType === 'social-media' && (
+              <TrendingHooks
+                platform={state.platform}
+                trendingHashtags={state.trendingHashtags}
+                onTrendingHashtagsChange={(hashtags) => updateState({ trendingHashtags: hashtags })}
+              />
+            )}
+          </div>
+        )
       case 7:
         return (
           <div className="space-y-6">
