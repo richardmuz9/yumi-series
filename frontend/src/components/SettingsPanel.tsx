@@ -52,16 +52,6 @@ export const SettingsPanel = () => {
             'deepseek/deepseek-chat',
             'deepseek/deepseek-coder'
           ],
-          openrouter: [
-            'google/gemini-2.5-pro',
-            'google/gemini-2.5-pro-vision', 
-            'google/gemini-2.5-pro-preview',
-            'meta-llama/llama-3-70b-instruct',
-            'meta-llama/llama-3-8b-instruct',
-            'mistralai/mistral-7b-instruct',
-            'mistralai/mixtral-8x7b-instruct',
-            'microsoft/wizardlm-2-8x22b'
-          ],
           openai: [
             'gpt-4',
             'gpt-4-turbo',
@@ -100,7 +90,7 @@ export const SettingsPanel = () => {
     })
   }, [setAvailableModels])
 
-  const handleProviderChange = (newProvider: 'openai' | 'openrouter' | 'qwen' | 'claude') => {
+  const handleProviderChange = (newProvider: 'openai' | 'qwen' | 'claude') => {
     setProvider(newProvider)
     // Set default model for the new provider with defensive check
     const models = availableModels[newProvider]
@@ -112,7 +102,7 @@ export const SettingsPanel = () => {
   const getProviderEmoji = (providerName: string) => {
     switch (providerName) {
       case 'qwen': return '🚀'
-      case 'openrouter': return '🌐'
+
       case 'openai': return '🤖'
       case 'anthropic': return '🧠'
       default: return '⚡'
@@ -122,7 +112,7 @@ export const SettingsPanel = () => {
   const getProviderColor = (providerName: string) => {
     switch (providerName) {
       case 'qwen': return 'from-blue-400 to-cyan-400'
-      case 'openrouter': return 'from-green-400 to-emerald-400'
+
       case 'openai': return 'from-purple-400 to-pink-400'
       case 'anthropic': return 'from-orange-400 to-red-400'
       default: return 'from-gray-400 to-gray-500'
@@ -183,7 +173,7 @@ export const SettingsPanel = () => {
           AI Provider
         </label>
         <div className="space-y-2">
-          {(['qwen', 'openrouter', 'openai', 'claude'] as const).map((providerOption) => {
+          {(['qwen', 'openai', 'claude'] as const).map((providerOption) => {
             const isPaidProvider = providerOption === 'openai' || providerOption === 'claude'
             return (
                               <button
@@ -207,7 +197,7 @@ export const SettingsPanel = () => {
                   </div>
                   <div className={`text-xs ${provider === providerOption ? 'text-white/80' : 'text-gray-500'}`}>
                     {providerOption === 'qwen' && 'Fast and cost-effective'}
-                    {providerOption === 'openrouter' && 'Free models from multiple providers'}
+
                     {providerOption === 'openai' && 'Premium GPT models (requires API credits)'}
                     {providerOption === 'claude' && 'Advanced Claude models (requires API credits)'}
                   </div>
@@ -256,12 +246,7 @@ export const SettingsPanel = () => {
                 <p>Fast, reliable, and cost-effective AI models perfect for website building tasks! 🚀</p>
               </div>
             )}
-            {provider === 'openrouter' && (
-              <div>
-                <div className="font-medium text-green-700 mb-1">OpenRouter</div>
-                <p>Access to multiple free AI models including Llama, Mistral, and more! Choose the best model for your needs. 🌐</p>
-              </div>
-            )}
+
             {provider === 'openai' && (
               <div>
                 <div className="font-medium text-purple-700 mb-1">OpenAI</div>

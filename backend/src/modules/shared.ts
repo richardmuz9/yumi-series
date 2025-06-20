@@ -168,7 +168,7 @@ export interface ChatRequest {
   message?: string
   messages?: ChatMessage[]
   mode: 'agent' | 'assistant'
-  provider?: 'openai' | 'openrouter' | 'qwen' | 'claude'
+  provider?: 'openai' | 'qwen' | 'claude'
   model?: string
 }
 

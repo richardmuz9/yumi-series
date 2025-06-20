@@ -66,12 +66,12 @@ export const ChatPanel = () => {
         
         // Fallback to direct API calls
         if (provider === 'openai') {
-          throw new Error('OpenAI direct API not available. Please use Qwen or OpenRouter.')
+          throw new Error('OpenAI direct API not available. Please use Qwen.')
         }
         
         response = await directApiService.chat({
           message: conversationMessages[conversationMessages.length - 1].content,
-          provider: provider as 'openrouter' | 'qwen',
+          provider: provider as 'qwen',
           model
         })
       }

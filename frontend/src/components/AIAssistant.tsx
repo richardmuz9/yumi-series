@@ -63,7 +63,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose }) => {
       'report writer': '📄 **Report Writer** for academic & professional reports!\n\n**Features:**\n• LaTeX support\n• Research integration\n• Citation management\n• Collaboration tools\n• Professional formatting\n\n**Great for:**\n• Academic papers\n• Business reports\n• Research documents\n• Technical writing'
     },
     billing: {
-      'pricing': '💰 **Yumi Pricing** - Transparent & Fair\n\n🆓 **Free Tier:**\n• 1M Qwen tokens/month\n• 50 OpenRouter requests/day\n• All features included\n\n💎 **Monthly Pro ($10/month):**\n• 35K tokens daily\n• Unlimited access\n• Premium models\n• Priority support\n\n💳 **Pay-as-you-go:**\n• $5+ credit top-ups\n• Only pay for what you use\n• No monthly commitment',
+      'pricing': '💰 **Yumi Pricing** - Transparent & Fair\n\n🆓 **Free Tier:**\n• 1M Qwen tokens/month\n• Reliable Qwen models\n• All features included\n\n💎 **Monthly Pro ($10/month):**\n• 35K tokens daily\n• Unlimited access\n• Premium models\n• Priority support\n\n💳 **Pay-as-you-go:**\n• $5+ credit top-ups\n• Only pay for what you use\n• No monthly commitment',
       'subscription': '📅 **Monthly Pro Subscription** gives you:\n\n✅ 35,000 tokens daily (1M+ monthly)\n✅ Access to all premium models\n✅ No rate limits\n✅ Priority support\n✅ Early access to new features\n\n**Value:** $40+ worth of tokens for just $10!\n\nPerfect for regular users, content creators, and professionals.',
       'tokens': '🎯 **Understanding Tokens**\n\n**What are tokens?**\nTokens are how AI models process text. ~4 characters = 1 token.\n\n**Examples:**\n• "Hello world" = ~3 tokens\n• Average email = ~200 tokens\n• Blog post = ~1,000 tokens\n\n**Your allowances:**\n• Free: 1M Qwen tokens/month\n• Pro: 35K mixed tokens/day\n• Credits: Pay per use',
       'credits': '💳 **Credits System**\n\nCredits = Direct payment for premium models\n\n**When used:**\n• When free limits are reached\n• For premium models (GPT-4, Claude)\n• For high-usage scenarios\n\n**Pricing:**\n• Minimum $5 top-up\n• Transparent per-token pricing\n• No expiration'
@@ -254,7 +254,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose }) => {
             <div className="space-y-3">
               <div className="p-3 bg-green-50 rounded-lg">
                 <h4 className="font-semibold text-green-800">🆓 Free Tier</h4>
-                <p className="text-sm text-green-700">1M Qwen tokens/month + 50 OpenRouter requests/day</p>
+                <p className="text-sm text-green-700">1M Qwen tokens/month + reliable service</p>
               </div>
               <div className="p-3 bg-blue-50 rounded-lg">
                 <h4 className="font-semibold text-blue-800">💎 Monthly Pro - $10</h4>

@@ -2,7 +2,6 @@ import express from 'express'
 import {
   openai as openaiClient,
   claude,
-  openrouter,
   qwen,
   getAIClient,
   getAvailableModels,
@@ -523,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
       let model = requestedModel
       
       // Redirect expensive providers to free Qwen
-      if (requestedProvider === 'openrouter' || requestedProvider === 'openai' || requestedProvider === 'claude') {
+      if (requestedProvider === 'openai' || requestedProvider === 'claude') {
         console.log(`🔄 WebBuilder: Redirecting ${requestedProvider}/${requestedModel} to qwen/qwen-turbo (free provider)`)
         provider = 'qwen'
         model = modelsConfig.providers.qwen.defaultModel
@@ -605,8 +604,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let aiClient = qwen
         if (provider === 'openai') {
           aiClient = openaiClient
-        } else if (provider === 'openrouter') {
-          aiClient = openrouter
         }
 
         const completion = await aiClient.chat.completions.create({

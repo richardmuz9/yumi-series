@@ -6,7 +6,7 @@ export interface UserBilling {
   totalSpent: number
   qwenTokensUsedMonth: number
   premiumTokensUsedMonth?: number
-  openrouterRequestsUsedToday: number
+
   subscriptionStatus: 'active' | 'inactive' | 'canceled' | 'past_due'
   subscriptionPlan: string
   monthlyTokensUsed?: number
@@ -16,7 +16,7 @@ export interface UserBilling {
   qwenTokensUsed: number
   qwenTokensLeft?: number
   premiumTokensLeft?: number
-  openrouterRequestsUsed: number
+
   nextReset: string
   nextBillingDate?: string
 }
@@ -109,7 +109,7 @@ class BillingApi {
         creditsBalance: 5.00, // $5 free credits
         totalSpent: 0,
         qwenTokensUsedMonth: 0,
-        openrouterRequestsUsedToday: 0,
+
         subscriptionStatus: 'inactive',
         subscriptionPlan: 'free',
         monthlyTokensUsed: 0,
@@ -117,7 +117,7 @@ class BillingApi {
         premiumTokens: 0,
         credits: 0,
         qwenTokensUsed: 0,
-        openrouterRequestsUsed: 0,
+
         nextReset: '',
         nextBillingDate: ''
       }

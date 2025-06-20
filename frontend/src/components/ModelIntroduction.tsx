@@ -248,7 +248,7 @@ const ModelIntroduction: React.FC<ModelIntroductionProps> = ({ onClose }) => {
           'qwen2-72b-instruct',
           'qwen2.5-72b-instruct'
         ],
-        openrouter: [
+                  // openrouter: [ // REMOVED
           'meta-llama/llama-3.1-8b-instruct:free',
           'microsoft/wizardlm-2-8x22b:free',
           'google/gemma-2-9b-it:free',
