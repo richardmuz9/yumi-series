@@ -74,8 +74,18 @@ class Database {
       }
     })
     
-    // Promisify methods
-    this.runAsync = promisify(this.db.run.bind(this.db))
+    // Promisify methods with proper context preservation
+    this.runAsync = (sql: string, params?: any[]) => {
+      return new Promise<sqlite3.RunResult>((resolve, reject) => {
+        this.db.run(sql, params || [], function(this: sqlite3.RunResult, err: Error | null) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(this) // Preserve the 'this' context containing lastID
+          }
+        })
+      })
+    }
     this.getAsync = promisify(this.db.get.bind(this.db))
     this.allAsync = promisify(this.db.all.bind(this.db))
   }

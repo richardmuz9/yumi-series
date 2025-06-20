@@ -84,19 +84,29 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
     }
 
     try {
+      console.log('🔄 Starting PWA installation...')
       await deferredPrompt.prompt()
       const { outcome } = await deferredPrompt.userChoice
       
+      console.log('📱 Install prompt result:', outcome)
+      
       if (outcome === 'accepted') {
         console.log('✅ User accepted the install prompt')
+        // Close the installer on successful installation
+        setTimeout(() => {
+          onClose()
+        }, 1000)
       } else {
         console.log('❌ User dismissed the install prompt')
+        // Show feedback that installation was cancelled
+        alert('Installation cancelled. You can install later from your browser menu.')
       }
       
       setDeferredPrompt(null)
       setIsInstallable(false)
     } catch (error) {
       console.error('❌ Install prompt failed:', error)
+      alert('Installation failed. Please try installing manually from your browser menu.')
       setShowInstructions(true)
     }
   }

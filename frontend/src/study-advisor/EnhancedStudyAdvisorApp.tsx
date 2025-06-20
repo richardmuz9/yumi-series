@@ -185,6 +185,30 @@ const EnhancedStudyAdvisorApp: React.FC<EnhancedStudyAdvisorAppProps> = ({ onCom
     initializeControlCenter()
     loadLiveAdmissionsData()
     initializeAdaptiveLearning()
+    
+    // Listen for global language changes
+    const handleLanguageChange = (event: CustomEvent) => {
+      console.log('🌍 Study Advisor received language change:', event.detail.language)
+      setCurrentLanguage(event.detail.language)
+      // Reinitialize control center with new language
+      setTimeout(() => {
+        initializeControlCenter()
+      }, 100)
+    }
+    
+    const handleForceRerender = () => {
+      console.log('🔄 Study Advisor force re-render triggered')
+      // Force component update
+      setCurrentLanguage(prev => prev) // Trigger re-render
+    }
+    
+    window.addEventListener('languageChanged', handleLanguageChange as EventListener)
+    window.addEventListener('forceRerender', handleForceRerender)
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange as EventListener)
+      window.removeEventListener('forceRerender', handleForceRerender)
+    }
   }, [])
 
   // Initialize control center modules

@@ -46,7 +46,11 @@ export const useGlobalLanguage = () => {
   }
 
   const switchLanguage = (newLanguage: 'en' | 'zh' | 'ja' | 'ko') => {
+    console.log('🌍 Switching language to:', newLanguage)
     setLanguage(newLanguage)
+    
+    // Force document update
+    document.documentElement.lang = getLanguageCode(newLanguage)
     
     // Trigger a custom event for components that need to react to language changes
     window.dispatchEvent(new CustomEvent('languageChanged', {
@@ -55,6 +59,12 @@ export const useGlobalLanguage = () => {
 
     // Store language preference
     localStorage.setItem('yumiLanguage', newLanguage)
+    
+    // Force a small delay to ensure state updates propagate
+    setTimeout(() => {
+      // Trigger a page refresh for components that don't listen to the event
+      window.dispatchEvent(new CustomEvent('forceRerender'))
+    }, 100)
     
     // Analytics tracking for language changes
     if (typeof (window as any).gtag !== 'undefined') {

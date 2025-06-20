@@ -48,7 +48,21 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
       setShowAIWelcome(false);
     }, 8000);
     
-    return () => clearTimeout(timer);
+    // Listen for language change events to update the interface
+    const handleLanguageChange = () => {
+      console.log('🌍 Main page received language change event')
+      // Force component re-render by updating state
+      setUser(prev => prev) // Trigger state update
+    }
+    
+    window.addEventListener('languageChanged', handleLanguageChange)
+    window.addEventListener('forceRerender', handleLanguageChange)
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('languageChanged', handleLanguageChange)
+      window.removeEventListener('forceRerender', handleLanguageChange)
+    }
   }, []);
 
   const checkAuthStatus = async () => {
