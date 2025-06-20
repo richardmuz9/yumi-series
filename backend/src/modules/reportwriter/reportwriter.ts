@@ -12,7 +12,9 @@ import {
   calculateTokenCost,
   deductTokens,
   AuthRequest
-} from './shared'
+} from '../shared'
+import { academicSearch, reportGenerator } from './services'
+import { ReportGenerationRequest, ResearchRequest } from './types'
 
 // Enhanced interfaces for data integration
 interface DataConnection {
@@ -196,42 +198,165 @@ export function setupReportWriterRoutes(app: express.Application) {
   // Research endpoint
   app.post('/api/report-writer/research', authenticateUser, async (req: AuthRequest, res) => {
     try {
-      const { query, source = 'all', maxResults = 20 } = req.body
+      const { query, source = 'all', maxResults = 20 }: ResearchRequest = req.body
       
       if (!query) {
-        return res.status(400).json({ error: 'Query is required' })
+        return res.status(400).json({ error: 'Search query is required' })
       }
 
-      let results: any[] = []
+      let results = []
 
-      if (source === 'all' || source === 'crossref') {
-        const crossrefResults = await academicSearch.searchCrossref(query, maxResults)
-        results.push(...crossrefResults.map(r => ({ ...r, source: 'crossref' })))
+      if (source === 'all') {
+        results = await academicSearch.searchAll(query, maxResults)
+      } else if (source === 'crossref') {
+        results = await academicSearch.searchCrossref(query, maxResults)
+      } else if (source === 'arxiv') {
+        results = await academicSearch.searchArxiv(query, maxResults)
+      } else {
+        return res.status(400).json({ error: 'Invalid source specified' })
       }
+
+      res.json({
+        query,
+        source,
+        results,
+        totalResults: results.length
+      })
+    } catch (error: any) {
+      console.error('Research error:', error)
+      res.status(500).json({ 
+        error: 'Failed to search academic sources',
+        details: error.message 
+      })
+    }
+  })
+
+  // Generate report endpoint
+  app.post('/api/report-writer/generate', authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const request: ReportGenerationRequest = req.body
+      const userId = req.user?.id
+
+      const response = await reportGenerator.generateReport(request, userId)
       
-      if (source === 'all' || source === 'arxiv') {
-        const arxivResults = await academicSearch.searchArxiv(query, maxResults)
-        results.push(...arxivResults.map(r => ({ ...r, source: 'arxiv' })))
-      }
-      
-      if (source === 'all' || source === 'pubmed') {
-        const pubmedResults = await academicSearch.searchPubmed(query, maxResults)
-        results.push(...pubmedResults.map(r => ({ ...r, source: 'pubmed' })))
+      res.json(response)
+    } catch (error: any) {
+      console.error('Report generation error:', error)
+      res.status(500).json({ 
+        error: 'Failed to generate report',
+        details: error.message 
+      })
+    }
+  })
+
+  // Upload files endpoint
+  app.post('/api/report-writer/upload', authenticateUser, upload.single('file'), async (req: AuthRequest, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' })
       }
 
-      // Sort by relevance and limit results
-      results = results.slice(0, maxResults)
+      // Process uploaded file (placeholder implementation)
+      const fileInfo = {
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        uploadedAt: new Date().toISOString()
+      }
 
       res.json({
         success: true,
-        results,
-        totalFound: results.length,
-        source,
-        query
+        file: fileInfo,
+        message: 'File uploaded successfully'
       })
+    } catch (error: any) {
+      console.error('File upload error:', error)
+      res.status(500).json({ 
+        error: 'Failed to upload file',
+        details: error.message 
+      })
+    }
+  })
+
+  // Get templates endpoint
+  app.get('/api/report-writer/templates', optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const templates = [
+        {
+          id: 'academic-paper',
+          name: 'Academic Paper',
+          description: 'Standard academic paper format with abstract, introduction, methodology, results, and conclusion',
+          sections: ['abstract', 'introduction', 'methodology', 'results', 'discussion', 'conclusion', 'references']
+        },
+        {
+          id: 'business-report',
+          name: 'Business Report',
+          description: 'Professional business report with executive summary and recommendations',
+          sections: ['executive-summary', 'introduction', 'analysis', 'findings', 'recommendations', 'conclusion']
+        },
+        {
+          id: 'technical-documentation',
+          name: 'Technical Documentation',
+          description: 'Technical documentation format with detailed specifications',
+          sections: ['overview', 'requirements', 'architecture', 'implementation', 'testing', 'deployment']
+        }
+      ]
+
+      res.json({ templates })
     } catch (error) {
-      console.error('Research endpoint error:', error)
-      res.status(500).json({ error: 'Failed to search papers' })
+      console.error('Error fetching templates:', error)
+      res.status(500).json({ error: 'Failed to fetch templates' })
+    }
+  })
+
+  // Save draft endpoint
+  app.post('/api/report-writer/drafts', authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const { title, content, sections } = req.body
+      const userId = req.user?.id
+
+      // In a real implementation, save to database
+      const draft = {
+        id: Date.now().toString(),
+        title,
+        content,
+        sections,
+        userId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+
+      res.json({ success: true, draft })
+    } catch (error) {
+      console.error('Error saving draft:', error)
+      res.status(500).json({ error: 'Failed to save draft' })
+    }
+  })
+
+  // Get user drafts
+  app.get('/api/report-writer/drafts', authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      // In a real implementation, fetch from database
+      const drafts = [
+        {
+          id: '1',
+          title: 'AI in Healthcare Research',
+          lastModified: '2024-01-15T10:30:00Z',
+          wordCount: 1250
+        },
+        {
+          id: '2',
+          title: 'Climate Change Analysis',
+          lastModified: '2024-01-14T15:45:00Z',
+          wordCount: 2100
+        }
+      ]
+
+      res.json({ drafts })
+    } catch (error) {
+      console.error('Error fetching drafts:', error)
+      res.status(500).json({ error: 'Failed to fetch drafts' })
     }
   })
 

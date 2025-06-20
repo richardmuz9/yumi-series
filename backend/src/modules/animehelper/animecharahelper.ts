@@ -1,5 +1,5 @@
 import express from 'express'
-import { authenticateUser, AuthRequest, db } from './shared'
+import { authenticateUser, AuthRequest, db } from '../shared'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({

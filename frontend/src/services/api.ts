@@ -64,15 +64,33 @@ class ApiClient {
       ...options.headers,
     }
     
+    console.log(`[API][Request] ${options.method || 'GET'} ${endpoint}`)
+    console.log(`[API][Request] URL:`, url)
+    console.log(`[API][Request] Headers:`, {
+      'Content-Type': headers['Content-Type'],
+      'Authorization': headers['Authorization'] ? `Bearer ${headers['Authorization'].substring(7, 20)}...` : 'none',
+      'Has-Cookie-Credentials': 'include'
+    })
+    
     try {
       const response = await fetchWithRetry(url, {
         ...options,
         headers,
         credentials: 'include'
       })
-      return await response.json()
+      
+      console.log(`[API][Response] ${options.method || 'GET'} ${endpoint} - Status:`, response.status)
+      
+      const result = await response.json()
+      console.log(`[API][Response] ${options.method || 'GET'} ${endpoint} - Data:`, {
+        success: result.success,
+        hasUser: !!result.user,
+        error: result.error
+      })
+      
+      return result
     } catch (error) {
-      console.error(`API ${options.method || 'GET'} ${endpoint} failed:`, error)
+      console.error(`[API][Error] ${options.method || 'GET'} ${endpoint} failed:`, error)
       throw error
     }
   }
@@ -157,25 +175,62 @@ class AuthService {
 
   async signup(email: string, username: string, password: string): Promise<AuthResponse> {
     try {
+      console.log('[Auth][Frontend] Starting signup process for:', { email, username })
+      console.log('[Auth][Frontend] API URL:', `${this.baseUrl}/api/auth/signup`)
+      
+      const requestBody = { email, username, password }
+      console.log('[Auth][Frontend] Request body (password hidden):', { 
+        email, 
+        username, 
+        passwordLength: password.length 
+      })
+
       const response = await fetch(`${this.baseUrl}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
-        body: JSON.stringify({ email, username, password })
+        body: JSON.stringify(requestBody)
+      })
+
+      console.log('[Auth][Frontend] Response status:', response.status)
+      console.log('[Auth][Frontend] Response headers:', {
+        'content-type': response.headers.get('content-type'),
+        'set-cookie': response.headers.get('set-cookie')
       })
 
       const data = await response.json()
+      console.log('[Auth][Frontend] Response data:', {
+        success: data.success,
+        hasUser: !!data.user,
+        hasToken: !!data.token,
+        tokenLength: data.token?.length,
+        error: data.error
+      })
       
       if (data.success && data.token) {
+        console.log('[Auth][Frontend] Storing auth token and user data')
         localStorage.setItem('authToken', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
+        
+        // Verify storage
+        const storedToken = localStorage.getItem('authToken')
+        const storedUser = localStorage.getItem('user')
+        console.log('[Auth][Frontend] Verification - Token stored:', !!storedToken)
+        console.log('[Auth][Frontend] Verification - User stored:', !!storedUser)
+      } else {
+        console.log('[Auth][Frontend] Signup failed:', data.error)
       }
 
       return data
     } catch (error) {
-      console.error('Signup error:', error)
+      console.error('[Auth][Frontend] Signup error:', error)
+      console.error('[Auth][Frontend] Error details:', {
+        name: (error as Error).name,
+        message: (error as Error).message,
+        stack: (error as Error).stack
+      })
       return {
         success: false,
         error: 'Network error during signup'

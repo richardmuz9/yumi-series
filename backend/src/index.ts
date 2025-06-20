@@ -1,11 +1,11 @@
 import { createApp, addHealthCheck, db } from './modules/shared'
-import { setupWebBuilderRoutes } from './modules/webbuilder'
-import { setupReportWriterRoutes } from './modules/reportwriter'
-import { setupPostGeneratorRoutes } from './modules/postgenerator'
-import { setupWritingHelperRoutes } from './modules/writinghelper'
-import { getAIUniversityRecommendations, chatWithAIAdvisor, getInterviewQuestions, submitInterviewFeedback, getEnhancedStudyProgress, logStudySession, saveStudyProfile, setupStudyAdvisorTables } from './modules/studyadvisor'
+import { setupWebBuilderRoutes } from './modules/webbuilder/webbuilder'
+import { setupReportWriterRoutes } from './modules/reportwriter/reportwriter'
+import { setupWritingHelperRoutes } from './modules/writinghelper/writinghelper'
+import { setupPostGeneratorRoutes } from './modules/writinghelper/postgenerator'
+import { getAIUniversityRecommendations, chatWithAIAdvisor, getInterviewQuestions, submitInterviewFeedback, getEnhancedStudyProgress, logStudySession, saveStudyProfile, setupStudyAdvisorTables } from './modules/studyadvisor/studyadvisor'
 import billingRoutes from './modules/billing'
-import { setupAnimeCharaHelperRoutes } from './modules/animecharahelper'
+import { setupAnimeCharaHelperRoutes } from './modules/animehelper/animecharahelper'
 import YumiPersonalityManager from './modules/yumiPersonality'
 import { authenticateUser, hashPassword, comparePassword, generateToken, AuthRequest } from './auth'
 
@@ -52,9 +52,18 @@ app.get('/debug/auth', (req, res) => {
 // Authentication endpoints
 app.post('/api/auth/signup', async (req, res) => {
   try {
+    console.log('[API][Signup] Request received')
+    console.log('[API][Signup] Request body:', req.body)
+    console.log('[API][Signup] Request headers:', {
+      'content-type': req.headers['content-type'],
+      'user-agent': req.headers['user-agent'],
+      'origin': req.headers.origin
+    })
+    
     const { email, username, password } = req.body
 
     if (!email || !username || !password) {
+      console.log('[API][Signup] Missing required fields:', { email: !!email, username: !!username, password: !!password })
       return res.status(400).json({
         success: false,
         error: 'Email, username, and password are required'
@@ -64,6 +73,7 @@ app.post('/api/auth/signup', async (req, res) => {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
+      console.log('[API][Signup] Invalid email format:', email)
       return res.status(400).json({
         success: false,
         error: 'Invalid email format'
@@ -72,27 +82,41 @@ app.post('/api/auth/signup', async (req, res) => {
 
     // Validate password strength
     if (password.length < 6) {
+      console.log('[API][Signup] Password too short:', password.length)
       return res.status(400).json({
         success: false,
         error: 'Password must be at least 6 characters long'
       })
     }
 
+    console.log('[API][Signup] Checking for existing user with email:', email)
+    
     // Check if user already exists
     const existingUserByEmail = await db.getUserByEmail(email)
     if (existingUserByEmail) {
+      console.log('[API][Signup] User already exists:', existingUserByEmail.id)
       return res.status(409).json({
         success: false,
         error: 'User with this email already exists'
       })
     }
 
+    console.log('[API][Signup] Creating new user for:', { email, username })
+    
     // Hash password and create user
     const passwordHash = await hashPassword(password)
+    console.log('[API][Signup] Password hashed successfully')
+    
     const user = await db.createUser(email, username, passwordHash)
+    console.log('[API][Signup] User created successfully:', {
+      id: user.id,
+      email: user.email,
+      username: user.username
+    })
 
     // Generate token
     const token = generateToken(user.id)
+    console.log('[API][Signup] JWT token generated for user ID:', user.id)
 
     // Set cookie and return response
     res.cookie('authToken', token, {
@@ -102,7 +126,7 @@ app.post('/api/auth/signup', async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     })
 
-    res.json({
+    const responseData = {
       success: true,
       user: {
         id: user.id,
@@ -112,9 +136,20 @@ app.post('/api/auth/signup', async (req, res) => {
         subscriptionStatus: user.subscriptionStatus
       },
       token
+    }
+    
+    console.log('[API][Signup] Sending success response:', {
+      userId: user.id,
+      hasToken: !!token,
+      tokenLength: token.length
     })
+
+    res.status(201)
+       .header('Location', `/api/auth/profile/${user.id}`)
+       .json(responseData)
   } catch (error) {
-    console.error('Signup error:', error)
+    console.error('[API][Signup] Error occurred:', error)
+    console.error('[API][Signup] Error stack:', (error as Error).stack)
     res.status(500).json({
       success: false,
       error: 'Failed to create account'
@@ -192,8 +227,16 @@ app.post('/api/auth/logout', (req, res) => {
 
 app.get('/api/auth/profile', authenticateUser, async (req: AuthRequest, res) => {
   try {
+    console.log('[API][Profile] Request received')
+    console.log('[API][Profile] Auth headers:', {
+      'authorization': req.headers.authorization,
+      'cookie': req.headers.cookie
+    })
+    console.log('[API][Profile] Authenticated user:', req.user ? { id: req.user.id, email: req.user.email } : 'null')
+    
     const user = req.user!
-    res.json({
+    
+    const responseData = {
       success: true,
       user: {
         id: user.id,
@@ -205,9 +248,12 @@ app.get('/api/auth/profile', authenticateUser, async (req: AuthRequest, res) => 
         subscriptionStatus: user.subscriptionStatus,
         createdAt: user.createdAt
       }
-    })
+    }
+    
+    console.log('[API][Profile] Sending profile response for user:', user.id)
+    res.json(responseData)
   } catch (error) {
-    console.error('Profile error:', error)
+    console.error('[API][Profile] Error occurred:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to get profile'

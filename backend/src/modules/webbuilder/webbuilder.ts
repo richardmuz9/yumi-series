@@ -1,10 +1,9 @@
+// WebBuilder Module - Main Routes File
 import express from 'express'
 import {
   openai as openaiClient,
   claude,
   qwen,
-  getAIClient,
-  getAvailableModels,
   modelsConfig,
   promptsConfig,
   appConfig,
@@ -13,175 +12,30 @@ import {
   calculateTokenCost,
   deductTokens,
   AuthRequest
-} from './shared'
+} from '../shared'
 
-// AI Research function (for webbuilder chat)
-async function aiResearch(query: string): Promise<string> {
-  try {
-    // Simulate AI research without external APIs
-    const researchPrompt = `Research and provide comprehensive insights about: ${query}
-
-Please provide:
-1. Current trends and developments
-2. Key statistics and data points
-3. Market insights and analysis
-4. Best practices and recommendations
-5. Relevant hashtags and keywords
-6. Strategic considerations
-
-Make this informative and actionable for content creation.`
-
-    const completion = await qwen.chat.completions.create({
-      model: modelsConfig.providers.qwen.defaultModel,
-      messages: [
-        { role: 'system', content: 'You are a research assistant providing comprehensive market insights and content strategy advice.' },
-        { role: 'user', content: researchPrompt }
-      ],
-      max_tokens: 1000,
-      temperature: 0.7
-    })
-
-    return completion.choices[0]?.message?.content || 'Unable to generate research insights.'
-  } catch (error) {
-    console.error('AI Research error:', error)
-    return 'Research functionality temporarily unavailable. Please try again later.'
-  }
-}
-
-// Enhanced Web Builder data
-const mockTemplates = [
-  {
-    id: 'template-1',
-    name: 'Modern Portfolio',
-    description: 'Clean, professional portfolio website',
-    category: 'portfolio',
-    thumbnail: '/templates/portfolio-modern.jpg',
-    htmlContent: `<!DOCTYPE html><html><head><title>Portfolio</title></head><body><header><h1>John Doe</h1><p>Web Developer</p></header><main><section><h2>About</h2><p>Passionate developer...</p></section></main></body></html>`,
-    cssContent: `* { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: Arial, sans-serif; line-height: 1.6; } header { background: #333; color: white; text-align: center; padding: 2rem; }`,
-    tags: ['modern', 'clean', 'responsive'],
-    isPremium: false,
-    author: 'Yumi AI',
-    rating: 4.8,
-    downloads: 1234
-  },
-  {
-    id: 'template-2',
-    name: 'Business Landing',
-    description: 'Professional business landing page',
-    category: 'business',
-    thumbnail: '/templates/business-landing.jpg',
-    htmlContent: `<!DOCTYPE html><html><head><title>Business</title></head><body><header><nav><h1>Company</h1></nav></header><main><section class="hero"><h1>Welcome to Our Business</h1><p>We provide excellent services</p><button>Get Started</button></section></main></body></html>`,
-    cssContent: `* { margin: 0; padding: 0; box-sizing: border-box; } .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 4rem 2rem; }`,
-    tags: ['business', 'professional', 'landing'],
-    isPremium: true,
-    author: 'Yumi AI',
-    rating: 4.9,
-    downloads: 856
-  }
-];
-
-const mockComponents = [
-  {
-    id: 'comp-1',
-    name: 'Hero Section',
-    description: 'Eye-catching hero section with call-to-action',
-    category: 'layout',
-    icon: '🎯',
-    html: `<section class="hero"><div class="container"><h1>Welcome to Our Website</h1><p>Discover amazing possibilities</p><button class="cta-btn">Get Started</button></div></section>`,
-    css: `.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 4rem 2rem; } .cta-btn { background: white; color: #667eea; padding: 1rem 2rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }`,
-    preview: '/components/hero-preview.jpg',
-    tags: ['hero', 'banner', 'cta']
-  },
-  {
-    id: 'comp-2',
-    name: 'Contact Form',
-    description: 'Professional contact form with validation',
-    category: 'forms',
-    icon: '📝',
-    html: `<form class="contact-form"><div class="form-group"><label>Name</label><input type="text" required></div><div class="form-group"><label>Email</label><input type="email" required></div><div class="form-group"><label>Message</label><textarea required></textarea></div><button type="submit">Send Message</button></form>`,
-    css: `.contact-form { max-width: 500px; margin: 0 auto; padding: 2rem; } .form-group { margin-bottom: 1rem; } label { display: block; margin-bottom: 0.5rem; font-weight: bold; } input, textarea { width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 4px; }`,
-    js: `document.querySelector('.contact-form').addEventListener('submit', function(e) { e.preventDefault(); alert('Form submitted!'); });`,
-    preview: '/components/form-preview.jpg',
-    tags: ['form', 'contact', 'validation']
-  }
-];
+// Import split components
+import { mockTemplates, mockComponents } from './data'
+import { aiResearch, generateChatResponse } from './services'
+import { 
+  WebBuilderChatRequest, 
+  WebBuilderGenerateRequest,
+  WebsiteGenerationOptions
+} from './types'
 
 export function setupWebBuilderRoutes(app: express.Application) {
   // Enhanced AI Chat for Web Building
   app.post('/api/web-builder/ai/chat', authenticateUser, async (req: AuthRequest, res) => {
     try {
-      const { messages, context = {} } = req.body
+      const { messages, context = {} }: WebBuilderChatRequest = req.body
       const userId = req.user?.id
 
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: 'Messages array is required' })
       }
 
-      const systemPrompt = `You are an expert web developer and designer. Help users build amazing websites by:
-
-1. Generating HTML, CSS, and JavaScript code
-2. Providing design suggestions and best practices
-3. Explaining web development concepts
-4. Helping with responsive design and accessibility
-5. Suggesting improvements and optimizations
-
-Current project context: ${JSON.stringify(context)}
-
-Always provide practical, working code examples and clear explanations.`
-
-      const lastMessage = messages[messages.length - 1]
-      
-      // Check if this is a code generation request
-      const isCodeRequest = lastMessage.content.toLowerCase().includes('create') || 
-                           lastMessage.content.toLowerCase().includes('generate') ||
-                           lastMessage.content.toLowerCase().includes('build') ||
-                           lastMessage.content.toLowerCase().includes('add')
-
-      let aiClient = qwen
-      
-      const completion = await aiClient.chat.completions.create({
-        model: modelsConfig.providers.qwen.defaultModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages.slice(-5) // Last 5 messages for context
-        ],
-        max_tokens: 1500,
-        temperature: 0.7
-      })
-
-      const response = completion.choices[0]?.message?.content || 'I apologize, but I could not generate a response.'
-      
-      // Generate suggestions based on the context
-      const suggestions = [
-        'Add a responsive navigation menu',
-        'Create a footer section',
-        'Improve the color scheme',
-        'Add animations and transitions',
-        'Optimize for mobile devices'
-      ]
-
-      // If it's a code request, try to extract code from the response
-      let codeChanges = null
-      if (isCodeRequest && response.includes('```')) {
-        // Simple code extraction (would be more sophisticated in real implementation)
-        const htmlMatch = response.match(/```html\n([\s\S]*?)\n```/)
-        const cssMatch = response.match(/```css\n([\s\S]*?)\n```/)
-        const jsMatch = response.match(/```javascript\n([\s\S]*?)\n```/)
-        
-        if (htmlMatch || cssMatch || jsMatch) {
-          codeChanges = {
-            html: htmlMatch ? htmlMatch[1] : undefined,
-            css: cssMatch ? cssMatch[1] : undefined,
-            js: jsMatch ? jsMatch[1] : undefined
-          }
-        }
-      }
-
-      res.json({
-        message: response,
-        suggestions: suggestions.slice(0, 3),
-        codeChanges
-      })
+      const result = await generateChatResponse(messages, context)
+      res.json(result)
 
     } catch (error) {
       console.error('Web Builder Chat error:', error)
@@ -192,13 +46,14 @@ Always provide practical, working code examples and clear explanations.`
   // Generate complete website
   app.post('/api/web-builder/ai/generate', authenticateUser, async (req: AuthRequest, res) => {
     try {
-      const { prompt, options = {} } = req.body
+      const { prompt, options = {} }: WebBuilderGenerateRequest = req.body
 
       const generationPrompt = `Generate a complete website based on this description: "${prompt}"
 
 Website type: ${options.type || 'general'}
 Style: ${options.style || 'modern'}
 Pages needed: ${options.pages || ['home']}
+Color scheme: ${options.colorScheme || 'modern blue and white'}
 
 Please provide:
 1. Complete HTML structure
@@ -207,9 +62,7 @@ Please provide:
 
 Make it responsive, accessible, and visually appealing.`
 
-      let aiClient = qwen
-      
-      const completion = await aiClient.chat.completions.create({
+      const completion = await qwen.chat.completions.create({
         model: modelsConfig.providers.qwen.defaultModel,
         messages: [{ role: 'user', content: generationPrompt }],
         max_tokens: 2000,
@@ -218,75 +71,14 @@ Make it responsive, accessible, and visually appealing.`
 
       const response = completion.choices[0]?.message?.content || ''
       
-      // Extract code sections (simplified implementation)
+      // Extract code sections
       const htmlMatch = response.match(/```html\n([\s\S]*?)\n```/)
       const cssMatch = response.match(/```css\n([\s\S]*?)\n```/)
       const jsMatch = response.match(/```javascript\n([\s\S]*?)\n```/)
 
-      const html = htmlMatch ? htmlMatch[1] : `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generated Website</title>
-</head>
-<body>
-    <header>
-        <h1>Welcome to Your Website</h1>
-        <p>Generated by AI based on: ${prompt}</p>
-    </header>
-    <main>
-        <section>
-            <h2>About</h2>
-            <p>This website was generated based on your requirements.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2024 Generated Website</p>
-    </footer>
-</body>
-</html>`
-
-      const css = cssMatch ? cssMatch[1] : `* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    line-height: 1.6;
-    color: #333;
-}
-
-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    text-align: center;
-    padding: 4rem 2rem;
-}
-
-main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-section {
-    margin-bottom: 3rem;
-}
-
-footer {
-    background: #333;
-    color: white;
-    text-align: center;
-    padding: 2rem;
-}`
-
-      const js = jsMatch ? jsMatch[1] : `// Basic interactivity
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Website loaded successfully!');
-});`
+      const html = htmlMatch ? htmlMatch[1] : generateFallbackHTML(prompt)
+      const css = cssMatch ? cssMatch[1] : generateFallbackCSS()
+      const js = jsMatch ? jsMatch[1] : generateFallbackJS()
 
       res.json({
         html,
@@ -510,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       const { 
         message, 
-        messages: inputMessages,  // Rename to avoid conflict
+        messages: inputMessages,
         model: requestedModel = modelsConfig.providers.qwen.defaultModel,
         provider: requestedProvider = 'qwen',
         context = '',
@@ -533,7 +325,6 @@ document.addEventListener('DOMContentLoaded', function() {
       // Support both single message and messages array formats
       let userMessage: string
       if (inputMessages && Array.isArray(inputMessages) && inputMessages.length > 0) {
-        // Use the last message from the array (most recent user message)
         userMessage = inputMessages[inputMessages.length - 1]?.content || ''
       } else if (message) {
         userMessage = message
@@ -591,7 +382,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Handle different providers
       if (provider === 'claude') {
-        // Claude API has different structure
         const response = await claude.messages.create({
           model: model,
           max_tokens: appConfig.chat?.maxTokens || 1000,
@@ -600,7 +390,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         assistantMessage = response.content[0]?.text || 'I apologize, but I could not generate a response.'
       } else {
-        // OpenAI-compatible APIs
         let aiClient = qwen
         if (provider === 'openai') {
           aiClient = openaiClient
@@ -616,8 +405,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       res.json({
-        response: assistantMessage,  // Frontend expects 'response' field
-        message: assistantMessage,   // Keep for backward compatibility
+        response: assistantMessage,
+        message: assistantMessage,
         model: model,
         provider: provider,
         tokensUsed: tokenCost,
@@ -664,4 +453,76 @@ document.addEventListener('DOMContentLoaded', function() {
       res.status(500).json({ error: 'Failed to save settings' })
     }
   })
+}
+
+// Helper functions
+function generateFallbackHTML(prompt: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Website</title>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Your Website</h1>
+        <p>Generated by AI based on: ${prompt}</p>
+    </header>
+    <main>
+        <section>
+            <h2>About</h2>
+            <p>This website was generated based on your requirements.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Generated Website</p>
+    </footer>
+</body>
+</html>`
+}
+
+function generateFallbackCSS(): string {
+  return `* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+section {
+    margin-bottom: 3rem;
+}
+
+footer {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+}`
+}
+
+function generateFallbackJS(): string {
+  return `// Basic interactivity
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Website loaded successfully!');
+});`
 } 

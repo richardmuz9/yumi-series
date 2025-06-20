@@ -39,6 +39,24 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
   const [installingModes, setInstallingModes] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    // PWA debugging at app startup
+    console.log('[PWA][MainPage] App initialization - PWA checks:')
+    console.log('  - Service Worker support:', 'serviceWorker' in navigator)
+    console.log('  - Current protocol:', window.location.protocol)
+    console.log('  - Is HTTPS:', window.location.protocol === 'https:')
+    console.log('  - Is standalone mode:', window.matchMedia('(display-mode: standalone)').matches)
+    console.log('  - Has navigator.standalone:', !!(navigator as any).standalone)
+    console.log('  - Window.deferredPrompt exists:', !!(window as any).deferredPrompt)
+    
+    // Listen for beforeinstallprompt globally 
+    const globalInstallHandler = (e: Event) => {
+      console.log('[PWA][MainPage] Global beforeinstallprompt captured!')
+      e.preventDefault()
+      ;(window as any).deferredPrompt = e
+    }
+    
+    window.addEventListener('beforeinstallprompt', globalInstallHandler)
+    
     checkAuthStatus();
     loadUserBilling();
     loadInstalledModes();
@@ -49,19 +67,33 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
     }, 8000);
     
     // Listen for language change events to update the interface
-    const handleLanguageChange = () => {
-      console.log('🌍 Main page received language change event')
+    const handleLanguageChange = (event: Event) => {
+      const customEvent = event as CustomEvent
+      console.log('[UI][MainPage] Received language change event:', customEvent.detail)
+      console.log('[UI][MainPage] Current language state:', language)
+      console.log('[UI][MainPage] Current translations sample:', {
+        title: t.title,
+        subtitle: t.subtitle,
+        charge: t.charge
+      })
       // Force component re-render by updating state
       setUser(prev => prev) // Trigger state update
     }
     
+    const handleForceRerender = (event: Event) => {
+      const customEvent = event as CustomEvent
+      console.log('[UI][MainPage] Received force rerender event:', customEvent.detail)
+      setUser(prev => prev) // Trigger state update
+    }
+    
     window.addEventListener('languageChanged', handleLanguageChange)
-    window.addEventListener('forceRerender', handleLanguageChange)
+    window.addEventListener('forceRerender', handleForceRerender)
     
     return () => {
       clearTimeout(timer);
       window.removeEventListener('languageChanged', handleLanguageChange)
-      window.removeEventListener('forceRerender', handleLanguageChange)
+      window.removeEventListener('forceRerender', handleForceRerender)
+      window.removeEventListener('beforeinstallprompt', globalInstallHandler)
     }
   }, []);
 

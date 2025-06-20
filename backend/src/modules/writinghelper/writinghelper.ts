@@ -10,7 +10,10 @@ import {
   calculateTokenCost,
   deductTokens,
   AuthRequest
-} from './shared'
+} from '../shared'
+import { generateWritingContent, optimizeForPlatform } from './services'
+import { WritingRequest } from './types'
+import { contentTypePrompts, platformLimits } from './data'
 
 interface WritingRequest {
   contentType: 'social-media' | 'creative-writing' | 'blog-article' | 'script'
@@ -443,6 +446,221 @@ export function setupWritingHelperRoutes(app: express.Application) {
     } catch (error) {
       console.error('Suggestions error:', error)
       res.status(500).json({ error: 'Failed to get suggestions' })
+    }
+  })
+
+  // Generate content endpoint
+  app.post('/api/writing-helper/generate', authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const writingRequest: WritingRequest = req.body
+      const userId = req.user?.id
+
+      const response = await generateWritingContent(writingRequest, userId)
+      
+      res.json(response)
+    } catch (error: any) {
+      console.error('Writing generation error:', error)
+      res.status(500).json({ 
+        error: 'Failed to generate content',
+        details: error.message 
+      })
+    }
+  })
+
+  // Get content type configurations
+  app.get('/api/writing-helper/content-types', (req, res) => {
+    try {
+      const contentTypes = Object.keys(contentTypePrompts).map(type => ({
+        id: type,
+        name: type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        description: contentTypePrompts[type].description || `Generate ${type} content`,
+        fields: contentTypePrompts[type].fields || []
+      }))
+
+      res.json({ contentTypes })
+    } catch (error) {
+      console.error('Error fetching content types:', error)
+      res.status(500).json({ error: 'Failed to fetch content types' })
+    }
+  })
+
+  // Get platform limitations
+  app.get('/api/writing-helper/platforms', (req, res) => {
+    try {
+      const platforms = Object.keys(platformLimits).map(platform => ({
+        id: platform,
+        name: platform.charAt(0).toUpperCase() + platform.slice(1),
+        ...platformLimits[platform]
+      }))
+
+      res.json({ platforms })
+    } catch (error) {
+      console.error('Error fetching platforms:', error)
+      res.status(500).json({ error: 'Failed to fetch platforms' })
+    }
+  })
+
+  // Optimize content for platform
+  app.post('/api/writing-helper/optimize', authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const { content, platform } = req.body
+
+      if (!content || !platform) {
+        return res.status(400).json({ error: 'Content and platform are required' })
+      }
+
+      const optimizedContent = optimizeForPlatform(content, platform)
+      
+      res.json({ 
+        optimizedContent,
+        platform,
+        originalLength: content.length,
+        optimizedLength: optimizedContent.length
+      })
+    } catch (error: any) {
+      console.error('Content optimization error:', error)
+      res.status(500).json({ 
+        error: 'Failed to optimize content',
+        details: error.message 
+      })
+    }
+  })
+
+  // Get writing suggestions
+  app.post('/api/writing-helper/suggestions', optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const { contentType, topic, audience } = req.body
+
+      const suggestions = {
+        tones: ['professional', 'casual', 'enthusiastic', 'informative', 'persuasive'],
+        objectives: ['inform', 'persuade', 'entertain', 'educate', 'inspire'],
+        keyPoints: [
+          `Key aspects of ${topic}`,
+          `Benefits and advantages`,
+          `Challenges and solutions`,
+          `Future implications`,
+          `Practical applications`
+        ],
+        hashtags: topic ? [
+          `#${topic.replace(/\s+/g, '')}`,
+          '#content',
+          '#insights',
+          '#knowledge'
+        ] : []
+      }
+
+      res.json(suggestions)
+    } catch (error) {
+      console.error('Error generating suggestions:', error)
+      res.status(500).json({ error: 'Failed to generate suggestions' })
+    }
+  })
+
+  // Get analytics for content
+  app.post('/api/writing-helper/analytics', optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const { content, contentType } = req.body
+
+      if (!content) {
+        return res.status(400).json({ error: 'Content is required' })
+      }
+
+      const analytics = {
+        characterCount: content.length,
+        wordCount: content.split(/\s+/).filter((word: string) => word.length > 0).length,
+        sentenceCount: content.split(/[.!?]+/).filter((s: string) => s.trim().length > 0).length,
+        readingTime: Math.ceil(content.split(/\s+/).length / 200), // 200 words per minute
+        hashtags: (content.match(/#\w+/g) || []).length,
+        mentions: (content.match(/@\w+/g) || []).length,
+        emojis: (content.match(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu) || []).length
+      }
+
+      res.json(analytics)
+    } catch (error) {
+      console.error('Error analyzing content:', error)
+      res.status(500).json({ error: 'Failed to analyze content' })
+    }
+  })
+
+  // Save template endpoint
+  app.post('/api/writing-helper/templates', authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const { name, content, contentType, description } = req.body
+      const userId = req.user?.id
+
+      // In a real implementation, you would save to database
+      const template = {
+        id: Date.now().toString(),
+        name,
+        content,
+        contentType,
+        description,
+        userId,
+        createdAt: new Date().toISOString()
+      }
+
+      res.json({ success: true, template })
+    } catch (error) {
+      console.error('Error saving template:', error)
+      res.status(500).json({ error: 'Failed to save template' })
+    }
+  })
+
+  // Get user templates
+  app.get('/api/writing-helper/templates', authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      // In a real implementation, you would fetch from database
+      const templates = [
+        {
+          id: '1',
+          name: 'Product Launch Post',
+          contentType: 'social-media',
+          description: 'Template for announcing new products',
+          createdAt: '2024-01-01T00:00:00Z'
+        },
+        {
+          id: '2',
+          name: 'Blog Introduction',
+          contentType: 'blog-article',
+          description: 'Standard blog post introduction template',
+          createdAt: '2024-01-02T00:00:00Z'
+        }
+      ]
+
+      res.json({ templates })
+    } catch (error) {
+      console.error('Error fetching templates:', error)
+      res.status(500).json({ error: 'Failed to fetch templates' })
+    }
+  })
+
+  // Get trending topics/hashtags
+  app.get('/api/writing-helper/trending', optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const trending = {
+        topics: [
+          'AI and Technology',
+          'Remote Work',
+          'Sustainability',
+          'Digital Marketing',
+          'Personal Development'
+        ],
+        hashtags: [
+          '#AI',
+          '#TechTrends',
+          '#RemoteWork',
+          '#Sustainability',
+          '#DigitalMarketing',
+          '#PersonalGrowth',
+          '#Innovation',
+          '#FutureOfWork'
+        ]
+      }
+
+      res.json(trending)
+    } catch (error) {
+      console.error('Error fetching trending data:', error)
+      res.status(500).json({ error: 'Failed to fetch trending data' })
     }
   })
 } 

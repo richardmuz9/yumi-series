@@ -24,13 +24,24 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
   const [showInstructions, setShowInstructions] = useState(false)
 
   useEffect(() => {
+    console.log('[PWA] PWAInstaller component mounted')
+    
     // Check if app is already installed
-    if ((window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches) {
+    const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches
+    console.log('[PWA] App installation status:', {
+      standalone: (window.navigator as any).standalone,
+      displayMode: window.matchMedia('(display-mode: standalone)').matches,
+      isInstalled: isStandalone
+    })
+    
+    if (isStandalone) {
       setIsInstalled(true)
     }
 
     // Detect platform
     const userAgent = navigator.userAgent.toLowerCase()
+    console.log('[PWA] User agent:', userAgent)
+    
     if (userAgent.includes('android')) {
       setPlatform('android')
     } else if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
@@ -45,13 +56,25 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
 
     // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
+      console.log('[PWA] beforeinstallprompt fired!', e)
+      console.log('[PWA] Event details:', {
+        type: e.type,
+        platforms: (e as BeforeInstallPromptEvent).platforms,
+        defaultPrevented: e.defaultPrevented
+      })
+      
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setIsInstallable(true)
+      
+      // Store globally for debugging
+      ;(window as any).deferredPrompt = e
+      console.log('[PWA] Deferred prompt stored, isInstallable set to true')
     }
 
     // Listen for app installed event
     const handleAppInstalled = () => {
+      console.log('[PWA] App installed event fired!')
       setIsInstalled(true)
       setDeferredPrompt(null)
       setIsInstallable(false)
@@ -68,8 +91,20 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
       }
     }
 
+    // Global PWA debugging
+    console.log('[PWA] Service Worker support:', 'serviceWorker' in navigator)
+    console.log('[PWA] Current protocol:', window.location.protocol)
+    console.log('[PWA] Is HTTPS:', window.location.protocol === 'https:')
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
+
+    // Check if we already have a deferred prompt stored
+    if ((window as any).deferredPrompt) {
+      console.log('[PWA] Found existing deferred prompt on window')
+      setDeferredPrompt((window as any).deferredPrompt)
+      setIsInstallable(true)
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -78,37 +113,76 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
   }, [])
 
   const handleInstallClick = async () => {
+    console.log('[PWA] Install button clicked!')
+    console.log('[PWA] Current state:', {
+      deferredPrompt: !!deferredPrompt,
+      isInstallable,
+      platform,
+      isInstalled
+    })
+    
     if (!deferredPrompt) {
+      console.log('[PWA] No deferred prompt available, showing instructions')
+      console.log('[PWA] Checking global window.deferredPrompt:', !!(window as any).deferredPrompt)
+      
+      // Try to use global deferred prompt as fallback
+      if ((window as any).deferredPrompt) {
+        console.log('[PWA] Using global deferred prompt as fallback')
+        setDeferredPrompt((window as any).deferredPrompt)
+        setIsInstallable(true)
+        // Retry with the global prompt
+        return handleInstallClick()
+      }
+      
       setShowInstructions(true)
       return
     }
 
     try {
-      console.log('🔄 Starting PWA installation...')
+      console.log('[PWA] Starting PWA installation...')
+      console.log('[PWA] Deferred prompt details:', {
+        platforms: deferredPrompt.platforms,
+        userChoice: deferredPrompt.userChoice
+      })
+      
       await deferredPrompt.prompt()
+      console.log('[PWA] Prompt shown, waiting for user choice...')
+      
       const { outcome } = await deferredPrompt.userChoice
       
-      console.log('📱 Install prompt result:', outcome)
+      console.log('[PWA] Install prompt result:', {
+        outcome,
+        timestamp: new Date().toISOString()
+      })
       
       if (outcome === 'accepted') {
         console.log('✅ User accepted the install prompt')
+        alert('App installation started! Check your home screen shortly.')
         // Close the installer on successful installation
         setTimeout(() => {
           onClose()
         }, 1000)
       } else {
         console.log('❌ User dismissed the install prompt')
-        // Show feedback that installation was cancelled
         alert('Installation cancelled. You can install later from your browser menu.')
       }
       
       setDeferredPrompt(null)
       setIsInstallable(false)
-    } catch (error) {
-      console.error('❌ Install prompt failed:', error)
-      alert('Installation failed. Please try installing manually from your browser menu.')
-      setShowInstructions(true)
-    }
+      // Clear global reference
+      ;(window as any).deferredPrompt = null
+      
+          } catch (error) {
+        console.error('[PWA] Install prompt failed:', error)
+        const errorObj = error as Error
+        console.error('[PWA] Error details:', {
+          name: errorObj.name,
+          message: errorObj.message,
+          stack: errorObj.stack
+        })
+        alert(`Installation failed: ${errorObj.message}. Please try installing manually from your browser menu.`)
+        setShowInstructions(true)
+      }
   }
 
   const getPlatformIcon = () => {
