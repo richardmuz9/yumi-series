@@ -1,7 +1,7 @@
 import React from 'react'
 import { useWizardSteps, useWizardData } from '../Shared/hooks'
 import { SocialMediaState } from '../Shared/types'
-import WizardLayout from '../Shared/WizardLayout'
+import { WizardLayout } from '../Shared/WizardLayout'
 import { PlatformSelector } from '../../components/PlatformSelector'
 import { ObjectiveSelector } from '../../components/ObjectiveSelector'
 import { StyleSelector } from '../../components/StyleSelector'

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 // import { ChevronLeft, ChevronRight, GamepadIcon, Users, Heart, MessageCircle, Settings, Sparkles, Eye, Music, Camera, Star } from 'lucide-react'
-import WizardLayout from '../Shared/WizardLayout'
+import { WizardLayout } from '../Shared/WizardLayout'
 import { useWizardData, useWizardSteps, useAuth, useContentGeneration } from '../Shared/hooks'
 import { GalgameWizardData, GalgameGenre, GalgameStyle, SceneType } from '../Shared/types'
 
@@ -440,18 +440,14 @@ export default function GalgameScriptsWizard() {
 
   return (
     <WizardLayout
-      title="Galgame Scripts"
-      subtitle="Create engaging visual novel dialogues"
-      steps={steps}
       currentStep={currentStep}
-      onStepClick={goToStep}
-      onBack={prev}
+      totalSteps={steps.length}
+      stepTitle={steps[currentStep - 1].title}
       onNext={next}
-      canGoNext={currentStep < 7}
-      canGoBack={currentStep > 1}
-      isLastStep={isLastStep}
-    >
-      {renderStepContent()}
-    </WizardLayout>
+      onPrev={prev}
+      onBack={prev}
+      canProceed={currentStep < 7}
+      children={renderStepContent()}
+    />
   )
 } 
