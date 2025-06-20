@@ -50,9 +50,13 @@ const ModeLauncher: React.FC<ModeLauncherProps> = ({
   }, [])
 
   const getDefaultModeConfig = (): ModeConfig[] => {
-    return applicationData.allModes.map(mode => ({
+    // Only include writing-helper and anime-chara-helper
+    const allowedModes = ['writing-helper', 'anime-chara-helper'];
+    return applicationData.allModes
+      .filter(mode => allowedModes.includes(mode.key))
+      .map(mode => ({
       ...mode,
-      pinned: ['web-builder', 'writing-helper', 'report-writer'].includes(mode.key),
+        pinned: ['writing-helper', 'anime-chara-helper'].includes(mode.key),
       category: getCategoryForMode(mode.key)
     }))
   }

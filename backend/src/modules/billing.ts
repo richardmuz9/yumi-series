@@ -431,8 +431,9 @@ router.post('/usage', async (req, res) => {
 })
 
 // Mock payment endpoints
-router.post('/checkout', async (req, res) => {
+router.post('/checkout', authenticateUser, async (req, res) => {
   try {
+    console.log('[Billing][POST /checkout] Request body:', req.body)
     const { packageId, successUrl, cancelUrl } = req.body
     
     // Mock checkout session for demo
@@ -441,8 +442,8 @@ router.post('/checkout', async (req, res) => {
       url: `${successUrl}?demo=true&package=${packageId}`
     })
   } catch (error) {
-    console.error('Error creating checkout session:', error)
-    res.status(500).json({ error: 'Failed to create checkout session' })
+    console.error('[Billing][POST /checkout] Error:', error)
+    res.status(500).json({ error: 'Failed to create checkout session', details: error instanceof Error ? error.message : error })
   }
 })
 

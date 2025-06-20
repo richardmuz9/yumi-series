@@ -162,6 +162,106 @@ export function setupWritingHelperRoutes(app: express.Application) {
     }
   })
 
+  // Get trending hashtags and topics for a platform
+  app.get('/api/trends/:platform', optionalAuth, (req, res) => {
+    try {
+      const { platform } = req.params
+      
+      // Mock trending data - in production this would come from actual social media APIs
+      const trendingData = {
+        linkedin: {
+          trends: [
+            { tag: '#Leadership', count: 15420 },
+            { tag: '#Innovation', count: 12890 },
+            { tag: '#AI', count: 11250 },
+            { tag: '#Productivity', count: 9870 },
+            { tag: '#RemoteWork', count: 8540 },
+            { tag: '#Technology', count: 7320 },
+            { tag: '#Business', count: 6890 },
+            { tag: '#Career', count: 6240 },
+            { tag: '#Marketing', count: 5780 },
+            { tag: '#Networking', count: 5120 }
+          ],
+          platform: 'linkedin'
+        },
+        twitter: {
+          trends: [
+            { tag: '#TechNews', count: 25600 },
+            { tag: '#AI', count: 18790 },
+            { tag: '#Crypto', count: 16540 },
+            { tag: '#Breaking', count: 14230 },
+            { tag: '#Innovation', count: 12890 },
+            { tag: '#Startup', count: 11650 },
+            { tag: '#Development', count: 10420 },
+            { tag: '#Marketing', count: 9180 },
+            { tag: '#Design', count: 8750 },
+            { tag: '#Business', count: 7890 }
+          ],
+          platform: 'twitter'
+        },
+        xiaohongshu: {
+          trends: [
+            { tag: '#生活方式', count: 32100 },
+            { tag: '#美食', count: 28560 },
+            { tag: '#旅行', count: 24890 },
+            { tag: '#时尚', count: 21450 },
+            { tag: '#护肤', count: 19230 },
+            { tag: '#健身', count: 17680 },
+            { tag: '#摄影', count: 15920 },
+            { tag: '#学习', count: 14560 },
+            { tag: '#工作', count: 13240 },
+            { tag: '#分享', count: 12180 }
+          ],
+          platform: 'xiaohongshu'
+        },
+        instagram: {
+          trends: [
+            { tag: '#InstaDaily', count: 45200 },
+            { tag: '#PhotoOfTheDay', count: 38940 },
+            { tag: '#Lifestyle', count: 32180 },
+            { tag: '#Fashion', count: 28650 },
+            { tag: '#Travel', count: 25430 },
+            { tag: '#Food', count: 22890 },
+            { tag: '#Fitness', count: 20140 },
+            { tag: '#Art', count: 18760 },
+            { tag: '#Nature', count: 16520 },
+            { tag: '#Motivation', count: 14890 }
+          ],
+          platform: 'instagram'
+        },
+        facebook: {
+          trends: [
+            { tag: '#Community', count: 18960 },
+            { tag: '#Family', count: 16420 },
+            { tag: '#News', count: 14780 },
+            { tag: '#Local', count: 13250 },
+            { tag: '#Events', count: 11890 },
+            { tag: '#Business', count: 10650 },
+            { tag: '#Education', count: 9420 },
+            { tag: '#Health', count: 8790 },
+            { tag: '#Technology', count: 7980 },
+            { tag: '#Entertainment', count: 7320 }
+          ],
+          platform: 'facebook'
+        }
+      }
+
+      const platformData = trendingData[platform as keyof typeof trendingData]
+      
+      if (!platformData) {
+        return res.status(404).json({ 
+          error: 'Platform not supported',
+          supportedPlatforms: Object.keys(trendingData)
+        })
+      }
+
+      res.json(platformData)
+    } catch (error) {
+      console.error('Trends fetch error:', error)
+      res.status(500).json({ error: 'Failed to fetch trends' })
+    }
+  })
+
   // Generate content
   app.post('/api/generate-content', authenticateUser, async (req: AuthRequest, res) => {
     try {

@@ -25,17 +25,19 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
     try {
       setLoading(true)
       setError(null)
-      
+      console.log('[Billing] Loading user billing data...')
       // Load user billing (already has fallback)
       const billing = await billingApi.getUserBilling()
       setUserBilling(billing)
+      console.log('[Billing] User billing loaded:', billing)
       
       // Load packages with fallback
       try {
         const packages = await billingApi.getTokenPackages()
         setTokenPackages(packages)
+        console.log('[Billing] Token packages loaded:', packages)
       } catch (err) {
-        console.warn('Using demo token packages:', err)
+        console.warn('[Billing] Using demo token packages:', err)
         setTokenPackages([
           {
             id: 'starter',
@@ -65,8 +67,9 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
       try {
         const plans = await billingApi.getSubscriptionPlans()
         setSubscriptionPlans(plans)
+        console.log('[Billing] Subscription plans loaded:', plans)
       } catch (err) {
-        console.warn('Using demo subscription plans:', err)
+        console.warn('[Billing] Using demo subscription plans:', err)
         setSubscriptionPlans([
           {
             id: 'monthly',
@@ -91,7 +94,8 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
         ])
       }
     } catch (err) {
-      console.error('Billing data error:', err)
+      console.error('[Billing] Billing data error:', err)
+      setError('Failed to load billing data. Please check your connection or try again later.')
       // Don't show error, just use demo data
       setUserBilling({
         id: 1,
@@ -99,7 +103,6 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
         creditsBalance: 5.00,
         totalSpent: 0,
         qwenTokensUsedMonth: 0,
-        openrouterRequestsUsedToday: 0,
         subscriptionStatus: 'inactive',
         subscriptionPlan: 'free',
         monthlyTokensUsed: 0,
@@ -107,7 +110,6 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
         premiumTokens: 10000,
         credits: 500,
         qwenTokensUsed: 0,
-        openrouterRequestsUsed: 0,
         nextReset: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
       })
@@ -136,6 +138,7 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
     try {
       setProcessingPayment(packageId)
       setError(null)
+      console.log('[Payment] Initiating token purchase for package:', packageId, 'with method:', selectedPayment)
       
       const successUrl = `${window.location.origin}/charge?success=true`
       const cancelUrl = `${window.location.origin}/charge?canceled=true`
@@ -143,6 +146,7 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
       if (selectedPayment === 'alipay') {
         const result = await billingApi.createAlipayPayment(packageId, successUrl)
         window.open(result.paymentUrl, '_blank')
+        console.log('[Payment] Alipay payment URL opened:', result.paymentUrl)
       } else {
         const result = await billingApi.createCheckoutSession({
           packageId,
@@ -151,9 +155,10 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
           cancelUrl
         })
         window.location.href = result.url
+        console.log('[Payment] Stripe checkout session started:', result.url)
       }
     } catch (err) {
-      console.error('Payment error:', err)
+      console.error('[Payment] Payment error:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setError(`Failed to initiate payment: ${errorMessage}. Please check your internet connection and try again.`)
     } finally {
@@ -167,14 +172,16 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
     try {
       setProcessingPayment(planId)
       setError(null)
+      console.log('[Payment] Initiating subscription for plan:', planId)
       
       const successUrl = `${window.location.origin}/charge?success=true`
       const cancelUrl = `${window.location.origin}/charge?canceled=true`
       
       const result = await billingApi.createSubscriptionSession(planId, successUrl, cancelUrl)
       window.location.href = result.url
+      console.log('[Payment] Subscription session started:', result.url)
     } catch (err) {
-      console.error('Subscription error:', err)
+      console.error('[Payment] Subscription error:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setError(`Failed to initiate subscription: ${errorMessage}`)
     } finally {
@@ -191,11 +198,13 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
   const handleManageSubscription = async () => {
     try {
       const returnUrl = window.location.origin + '/charge'
+      console.log('[Billing] Opening billing portal with returnUrl:', returnUrl)
       const result = await billingApi.createPortalSession(returnUrl)
       window.open(result.url, '_blank')
+      console.log('[Billing] Billing portal opened:', result.url)
     } catch (err) {
       setError('Failed to open billing portal')
-      console.error('Portal error:', err)
+      console.error('[Billing] Portal error:', err)
     }
   }
 

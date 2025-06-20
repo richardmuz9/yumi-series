@@ -5,6 +5,157 @@ export interface PostVariation {
   confidence: number
 }
 
+// Wizard Data Types
+export interface SocialWizardData {
+  contentType: 'social-media'
+  platform: string
+  audience: string
+  objective: string
+  tone: string
+  stylePack: string
+  animePersona: string
+  topic: string
+  keyPoints: string[]
+  pastPost: string
+  trendingHashtags: string[]
+  customInstructions: string
+}
+
+export interface BlogWizardData {
+  contentType: 'blog-article'
+  objective: string
+  tone: string
+  style: string
+  topic: string
+  keyPoints: string[]
+  targetAudience: string
+  wordCount: number
+  keywords: string[]
+  animePersona: string
+  customInstructions: string
+}
+
+export interface CreativeWizardData {
+  contentType: 'creative-writing'
+  genre: string
+  style: string
+  tone: string
+  theme: string
+  setting: string
+  characters: string[]
+  plotPoints: string[]
+  wordCount: number
+  animePersona: string
+  customInstructions: string
+}
+
+export interface GalgameWizardData {
+  contentType: 'galgame-script'
+  genre: string
+  style: string
+  sceneType: string
+  characters: string[]
+  setting: string
+  plotSummary: string
+  dialogueLength: 'short' | 'medium' | 'long'
+  includeChoices: boolean
+  animePersona: string
+  customInstructions: string
+}
+
+// Option Types
+export interface SocialMediaPlatform {
+  id: string
+  name: string
+  description: string
+  maxLength: number
+  icon: any
+}
+
+export interface SocialMediaAudience {
+  id: string
+  name: string
+  description: string
+}
+
+export interface SocialMediaObjective {
+  id: string
+  name: string
+  description: string
+  icon: any
+}
+
+export interface SocialMediaTone {
+  id: string
+  name: string
+  description: string
+}
+
+export interface SocialMediaStylePack {
+  id: string
+  name: string
+  description: string
+}
+
+export interface BlogArticleObjective {
+  id: string
+  name: string
+  description: string
+  icon: any
+}
+
+export interface BlogArticleTone {
+  id: string
+  name: string
+  description: string
+}
+
+export interface BlogArticleStyle {
+  id: string
+  name: string
+  description: string
+  example: string
+}
+
+export interface CreativeGenre {
+  id: string
+  name: string
+  description: string
+  icon: any
+}
+
+export interface CreativeStyle {
+  id: string
+  name: string
+  description: string
+}
+
+export interface CreativeTone {
+  id: string
+  name: string
+  description: string
+}
+
+export interface GalgameGenre {
+  id: string
+  name: string
+  description: string
+  icon: any
+}
+
+export interface GalgameStyle {
+  id: string
+  name: string
+  description: string
+}
+
+export interface SceneType {
+  id: string
+  name: string
+  description: string
+}
+
+// Legacy types for compatibility
 export interface BaseWizardState {
   step: number
   objective: string
@@ -66,14 +217,22 @@ export interface GalgameScriptState extends BaseWizardState {
 
 export type WizardState = SocialMediaState | BlogArticleState | CreativeWritingState | GalgameScriptState
 
+// Component Props
 export interface WizardLayoutProps {
+  title: string
+  subtitle: string
+  steps: Array<{
+    id: number
+    title: string
+    description: string
+  }>
   currentStep: number
-  totalSteps: number
-  stepTitle: string
-  onNext: () => void
-  onPrev: () => void
+  onStepClick: (step: number) => void
   onBack: () => void
-  canProceed: boolean
+  onNext: () => void
+  canGoNext: boolean
+  canGoBack: boolean
+  isLastStep: boolean
   children: React.ReactNode
 }
 
@@ -90,16 +249,17 @@ export interface User {
   id: number
   email: string
   username: string
-  tokensRemaining: number
-  totalTokensUsed: number
-  freeTokensUsedThisMonth: number
-  subscriptionStatus: string
-  createdAt: string
+  tokens?: number
+  tokensRemaining?: number
+  totalTokensUsed?: number
+  freeTokensUsedThisMonth?: number
+  subscriptionStatus?: string
+  createdAt?: string
 }
 
 export interface AuthState {
   user: User | null
   isAuthenticated: boolean
+  isDemo: boolean
   authLoading: boolean
-  isDemoMode: boolean
 } 

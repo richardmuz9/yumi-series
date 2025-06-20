@@ -173,9 +173,10 @@ class BillingApi {
 
   async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
     try {
+      console.log('[BillingApi] Fetching subscription plans...')
       return await this.request<SubscriptionPlan[]>('/subscriptions')
     } catch (error) {
-      console.warn('Failed to get subscription plans, using fallback:', error)
+      console.warn('[BillingApi] Failed to get subscription plans, using fallback:', error)
       return [
         {
           id: 'monthly-pro',
@@ -199,21 +200,23 @@ class BillingApi {
 
   async getModelPricing(): Promise<ModelPricing> {
     try {
+      console.log('[BillingApi] Fetching model pricing...')
       return await this.request<ModelPricing>('/model-pricing')
     } catch (error) {
-      console.warn('Failed to get model pricing, using fallback:', error)
+      console.warn('[BillingApi] Failed to get model pricing, using fallback:', error)
       return {}
     }
   }
 
   async checkModelAvailability(provider: string, modelId: string): Promise<ModelAvailability> {
     try {
+      console.log('[BillingApi] Checking model availability:', provider, modelId)
       return await this.request<ModelAvailability>('/model-check', {
         method: 'POST',
         body: JSON.stringify({ provider, modelId }),
       })
     } catch (error) {
-      console.warn('Failed to check model availability:', error)
+      console.warn('[BillingApi] Failed to check model availability:', error)
       return {
         available: true,
         isFree: false,
@@ -230,22 +233,24 @@ class BillingApi {
     remainingCredits: number
   }> {
     try {
+      console.log('[BillingApi] Logging token usage:', { provider, modelId, inputTokens, outputTokens })
       return await this.request('/usage', {
         method: 'POST',
         body: JSON.stringify({ provider, modelId, inputTokens, outputTokens }),
       })
     } catch (error) {
-      console.warn('Failed to log token usage:', error)
+      console.warn('[BillingApi] Failed to log token usage:', error)
       return { success: false, cost: 0, remainingCredits: 0 }
     }
   }
 
   async getTokenPackages(): Promise<TokenPackage[]> {
     try {
+      console.log('[BillingApi] Fetching token packages...')
       const response = await this.request('/packages') as { packages?: TokenPackage[] };
       return response.packages || [];
     } catch (error) {
-      console.warn('Failed to fetch token packages, using fallback');
+      console.warn('[BillingApi] Failed to fetch token packages, using fallback', error);
       return [
         {
           id: 'starter',
@@ -273,15 +278,21 @@ class BillingApi {
   }
 
   async createAlipayPayment(packageId: string, successUrl: string): Promise<{ paymentUrl: string }> {
-    const response = await this.request('/alipay', {
-      method: 'POST',
-      body: JSON.stringify({
-        packageId,
-        successUrl,
-        paymentMethod: 'alipay'
-      })
-    });
-    return response as { paymentUrl: string };
+    try {
+      console.log('[BillingApi] Creating Alipay payment:', { packageId, successUrl })
+      const response = await this.request('/alipay', {
+        method: 'POST',
+        body: JSON.stringify({
+          packageId,
+          successUrl,
+          paymentMethod: 'alipay'
+        })
+      });
+      return response as { paymentUrl: string };
+    } catch (error) {
+      console.error('[BillingApi] Alipay payment error:', error)
+      throw new Error('Failed to create Alipay payment')
+    }
   }
 
   async createCheckoutSession(params: {
@@ -290,31 +301,49 @@ class BillingApi {
     successUrl: string;
     cancelUrl: string;
   }): Promise<{ url: string }> {
-    const response = await this.request('/checkout', {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
-    return response as { url: string };
+    try {
+      console.log('[BillingApi] Creating checkout session:', params)
+      const response = await this.request('/checkout', {
+        method: 'POST',
+        body: JSON.stringify(params)
+      });
+      return response as { url: string };
+    } catch (error) {
+      console.error('[BillingApi] Checkout session error:', error)
+      throw new Error('Failed to create checkout session')
+    }
   }
 
   async createPortalSession(returnUrl: string): Promise<{ url: string }> {
-    const response = await this.request('/portal', {
-      method: 'POST',
-      body: JSON.stringify({ returnUrl })
-    });
-    return response as { url: string };
+    try {
+      console.log('[BillingApi] Creating portal session:', returnUrl)
+      const response = await this.request('/portal', {
+        method: 'POST',
+        body: JSON.stringify({ returnUrl })
+      });
+      return response as { url: string };
+    } catch (error) {
+      console.error('[BillingApi] Portal session error:', error)
+      throw new Error('Failed to create portal session')
+    }
   }
 
   async createSubscriptionSession(planId: string, successUrl?: string, cancelUrl?: string): Promise<{ url: string }> {
-    const response = await this.request('/subscription', {
-      method: 'POST',
-      body: JSON.stringify({ 
-        planId, 
-        successUrl: successUrl || `${window.location.origin}/billing-success`,
-        cancelUrl: cancelUrl || `${window.location.origin}/billing-cancel`
-      })
-    });
-    return response as { url: string };
+    try {
+      console.log('[BillingApi] Creating subscription session:', { planId, successUrl, cancelUrl })
+      const response = await this.request('/subscription', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          planId, 
+          successUrl: successUrl || `${window.location.origin}/billing-success`,
+          cancelUrl: cancelUrl || `${window.location.origin}/billing-cancel`
+        })
+      });
+      return response as { url: string };
+    } catch (error) {
+      console.error('[BillingApi] Subscription session error:', error)
+      throw new Error('Failed to create subscription session')
+    }
   }
 
   // Helper to calculate estimated tokens for a price (updated for 3x pricing)

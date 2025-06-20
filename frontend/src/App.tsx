@@ -1,6 +1,8 @@
 import React, { useState, Suspense, useEffect } from 'react'
 import MainPage from './MainPage'
 import { dynamicLoader } from './utils/dynamicLoader'
+import { useAssistantStore } from './store/assistant'
+import AIAssistant from './components/AIAssistant'
 
 type AppMode = 'main' | 'web-builder' | 'writing-helper' | 'report-writer' | 'anime-chara-helper' | 'study-advisor'
 
@@ -107,7 +109,8 @@ const DynamicModeComponent = ({ modeId, onBack }: { modeId: string, onBack: () =
   return <Component {...getComponentProps()} />;
 };
 
-function App() {
+const App: React.FC = () => {
+  const { isOpen, openAssistant, closeAssistant, mode } = useAssistantStore();
   const [currentMode, setCurrentMode] = useState<AppMode>('main')
 
   const handleModeSelect = (mode: string) => {
@@ -126,42 +129,61 @@ function App() {
   }, []);
 
   return (
-    <Suspense fallback={<LoadingComponent />}>
-      {currentMode === 'main' && (
-        <MainPage onModeSelect={handleModeSelect} />
-      )}
-      {currentMode !== 'main' && (
-        <>
-          {currentMode === 'study-advisor' ? (
-            <div style={{ position: 'relative' }}>
-              <button
-                onClick={handleBackToMain}
-                style={{
-                  position: 'absolute',
-                  top: '20px',
-                  left: '20px',
-                  zIndex: 1000,
-                  padding: '10px 20px',
-                  background: 'rgba(255,255,255,0.9)',
-                  border: '2px solid #667eea',
-                  borderRadius: '25px',
-                  color: '#667eea',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                ← Back to Main
-              </button>
+    <>
+      <Suspense fallback={<LoadingComponent />}>
+        {currentMode === 'main' && (
+          <MainPage onModeSelect={handleModeSelect} />
+        )}
+        {currentMode !== 'main' && (
+          <>
+            {currentMode === 'study-advisor' ? (
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={handleBackToMain}
+                  style={{
+                    position: 'absolute',
+                    top: '20px',
+                    left: '20px',
+                    zIndex: 1000,
+                    padding: '10px 20px',
+                    background: 'rgba(255,255,255,0.9)',
+                    border: '2px solid #667eea',
+                    borderRadius: '25px',
+                    color: '#667eea',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  ← Back to Main
+                </button>
+                <DynamicModeComponent modeId={currentMode} onBack={handleBackToMain} />
+              </div>
+            ) : (
               <DynamicModeComponent modeId={currentMode} onBack={handleBackToMain} />
-            </div>
-          ) : (
-            <DynamicModeComponent modeId={currentMode} onBack={handleBackToMain} />
-          )}
-        </>
+            )}
+          </>
+        )}
+      </Suspense>
+      {/* Floating AI Assistant Button */}
+      <div className="floating-ai-assistant-global">
+        <button
+          className="ai-assistant-btn-global"
+          onClick={openAssistant}
+          title="Yumi AI Assistant - Get help anywhere"
+        >
+          <span className="ai-assistant-icon">🤖</span>
+        </button>
+      </div>
+      {/* Global AI Assistant Modal */}
+      {isOpen && (
+        <AIAssistant
+          mode={mode}
+          onClose={closeAssistant}
+        />
       )}
-    </Suspense>
+    </>
   )
 }
 

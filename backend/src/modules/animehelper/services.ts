@@ -9,6 +9,7 @@ const openai = new OpenAI({
 // Generate clarification questions for character design
 export async function generateClarificationQuestions(designBrief: DesignBrief, originalDescription: string): Promise<string[]> {
   try {
+    console.log('[AnimeHelper] Generating clarification questions for:', designBrief, originalDescription)
     const questions = []
     
     // Analyze what might be missing or unclear
@@ -32,9 +33,10 @@ export async function generateClarificationQuestions(designBrief: DesignBrief, o
       questions.push("Are there any special features or unique elements you'd like to add? (e.g., markings, tattoos, accessories)")
     }
     
+    console.log('[AnimeHelper] Clarification questions generated:', questions)
     return questions.slice(0, 3) // Limit to 3 questions
   } catch (error) {
-    console.error('Error generating clarification questions:', error)
+    console.error('[AnimeHelper] Error generating clarification questions:', error)
     return []
   }
 }

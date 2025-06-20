@@ -6,6 +6,7 @@ import AppDownloadSection from './components/AppDownloadSection';
 import AIAssistant from './components/AIAssistant';
 import { AuthModal } from './components/AuthModal';
 import ModeLauncher from './components/ModeLauncher';
+import PWAInstaller from './components/PWAInstaller';
 import { billingApi } from './services/billingApi';
 import { getTranslation, type Translation } from './translations';
 import { useStore } from './store';
@@ -31,6 +32,7 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showDownloads, setShowDownloads] = useState(false);
+  const [showPWAInstaller, setShowPWAInstaller] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showAIWelcome, setShowAIWelcome] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -120,8 +122,8 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
       setInstalledModes(installed);
     } catch (error) {
       console.error('Failed to load installed modes:', error);
-      // Default to core mode only
-      setInstalledModes(['web-builder']);
+      // Default to core modes
+      setInstalledModes(['writing-helper', 'anime-chara-helper']);
     }
   };
 
@@ -144,11 +146,8 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
   };
 
   const handleModeSelect = async (modeKey: string) => {
-    // Check if user is authenticated for premium features
-    if (!user && ['report-writer', 'writing-helper'].includes(modeKey)) {
-      setShowAuthModal(true);
-      return;
-    }
+    // Allow access to all modes without authentication for now
+    // Users will be prompted to authenticate when they try to use AI features
     
     // Log mode usage when user enters mode
     await modeManager.logModeUsage(modeKey);
@@ -192,34 +191,16 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
 
   const allModes = [
     {
-      icon: '🌐',
-      title: t.webBuilder,
-      description: t.webBuilderDesc,
-      key: 'web-builder'
-    },
-    {
       icon: '✒️',
       title: 'Writing Helper',
       description: 'AI-powered writing assistant for scripts, blogs, posts & creative content',
       key: 'writing-helper'
     },
     {
-      icon: '📊',
-      title: t.reportWriter,
-      description: t.reportWriterDesc,
-      key: 'report-writer'
-    },
-    {
       icon: '🎨',
       title: t.animeCharaHelper,
       description: t.animeCharaHelperDesc,
       key: 'anime-chara-helper'
-    },
-    {
-      icon: '🎓',
-      title: t.studyAdvisor,
-      description: t.studyAdvisorDesc,
-      key: 'study-advisor'
     }
   ];
 
@@ -292,6 +273,15 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
                 <span className="download-icon">📱</span>
                 <span className="download-text">Download</span>
               </button>
+
+              <button 
+                className="install-app-btn"
+                onClick={() => setShowPWAInstaller(true)}
+                title="Install Yumi Series as an app"
+              >
+                <span className="install-icon">⬇️</span>
+                <span className="install-text">Install App</span>
+              </button>
             </div>
           </div>
           
@@ -355,6 +345,13 @@ const MainPage: React.FC<MainPageProps> = ({ onModeSelect }) => {
       {showDownloads && (
         <AppDownloadSection 
           onClose={() => setShowDownloads(false)} 
+        />
+      )}
+
+      {/* PWA Installer Modal */}
+      {showPWAInstaller && (
+        <PWAInstaller 
+          onClose={() => setShowPWAInstaller(false)} 
         />
       )}
 

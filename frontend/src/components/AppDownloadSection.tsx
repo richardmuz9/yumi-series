@@ -11,7 +11,12 @@ const AppDownloadSection: React.FC<AppDownloadSectionProps> = ({ onClose }) => {
   const [userAgent, setUserAgent] = useState('')
 
   useEffect(() => {
-    setUserAgent(navigator.userAgent)
+    try {
+      setUserAgent(navigator.userAgent)
+      console.log('[Download] User agent detected:', navigator.userAgent)
+    } catch (err) {
+      console.error('[Download] Failed to detect user agent:', err)
+    }
   }, [])
 
   const isIOS = /iPad|iPhone|iPod/.test(userAgent)

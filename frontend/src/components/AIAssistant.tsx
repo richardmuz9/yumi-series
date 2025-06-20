@@ -72,27 +72,21 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose }) => {
 
   const handleSendMessage = async () => {
     if (!currentMessage.trim()) return
-
     const userMessage: ChatMessage = {
       role: 'user',
       content: currentMessage,
       timestamp: new Date()
     }
-
     setChatMessages(prev => [...prev, userMessage])
     setCurrentMessage('')
     setIsLoading(true)
-
     try {
+      console.log('[AI Assistant] Sending message:', currentMessage)
       // First, try local FAQ responses for instant answers
       let response = getLocalAnswer(currentMessage)
-      
-      // If no local answer, check knowledge base
       if (!response) {
         response = handleKnowledgeQuery(currentMessage)
       }
-      
-      // If still no answer, fallback to AI API
       if (!response) {
         const aiResponse = await apiService.chat({
           messages: [
@@ -108,20 +102,21 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose }) => {
           model: 'google/gemini-2.5-pro'
         })
         response = aiResponse.response
+        console.log('[AI Assistant] AI response received:', response)
+      } else {
+        console.log('[AI Assistant] Local/knowledge base response used:', response)
       }
-
       const assistantMessage: ChatMessage = {
         role: 'assistant',
         content: response,
         timestamp: new Date()
       }
-
       setChatMessages(prev => [...prev, assistantMessage])
     } catch (error) {
-      console.error('Assistant error:', error)
+      console.error('[AI Assistant] Error during chat:', error)
       const errorMessage: ChatMessage = {
         role: 'assistant',
-        content: '😅 Sorry, I\'m having trouble connecting right now. But I can still help with Yumi-Series questions! Try asking about our features or billing.',
+        content: '\ud83d\ude05 Sorry, I\'m having trouble connecting right now. But I can still help with Yumi-Series questions! Try asking about our features or billing.',
         timestamp: new Date()
       }
       setChatMessages(prev => [...prev, errorMessage])

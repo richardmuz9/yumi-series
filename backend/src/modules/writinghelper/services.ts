@@ -120,6 +120,7 @@ export async function generateWritingContent(
   let content: string
   
   try {
+    console.log('[WritingHelper] Generating content with prompt:', userPrompt)
     const completion = await qwen.chat.completions.create({
       model: modelsConfig.providers.qwen.defaultModel,
       messages: [
@@ -130,9 +131,10 @@ export async function generateWritingContent(
       temperature: 0.7
     })
     content = completion.choices[0]?.message?.content || ''
+    console.log('[WritingHelper] Content generated:', content)
   } catch (error) {
-    console.error('Content generation error:', error)
-    throw new Error('Failed to generate content')
+    console.error('[WritingHelper] Content generation error:', error)
+    throw new Error('Failed to generate content: ' + (error instanceof Error ? error.message : error))
   }
 
   // Determine max length

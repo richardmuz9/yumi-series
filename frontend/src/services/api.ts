@@ -339,9 +339,12 @@ export const authService = new AuthService()
 export const apiService = {
   async chat(request: ChatRequest): Promise<ChatResponse> {
     try {
-      return await apiClient.post<ChatResponse>('/api/chat', request)
+      console.log('[API Service] Sending chat request:', request)
+      const response = await apiClient.post<ChatResponse>('/api/chat', request)
+      console.log('[API Service] Chat response received:', response)
+      return response
     } catch (error) {
-      console.error('Chat API error:', error)
+      console.error('[API Service] Chat API error:', error)
       throw new Error(error instanceof Error ? error.message : 'Failed to send message')
     }
   },
@@ -349,8 +352,7 @@ export const apiService = {
   async getModels(): Promise<ModelsResponse> {
     try {
       const data = await apiClient.get<any>('/api/models')
-      
-      console.log('Raw models data from backend:', data)
+      console.log('[API Service] Raw models data from backend:', data)
       
       // Handle the backend's complex model structure and extract just the IDs
       const validatedData: ModelsResponse = {
@@ -365,11 +367,11 @@ export const apiService = {
           : ['claude-3-opus-20240229', 'claude-3-sonnet-20240229']
       }
       
-      console.log('Processed models data:', validatedData)
+      console.log('[API Service] Processed models data:', validatedData)
       
       return validatedData
     } catch (error) {
-      console.error('Models API error:', error)
+      console.error('[API Service] Models API error:', error)
       throw new Error('Failed to fetch models')
     }
   },
