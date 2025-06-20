@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store';
 import { getTranslation } from '../translations';
-import WritingHelper from './components/WritingHelper';
+import WritingHelper from './WritingHelper';
 import './WritingHelper.css';
 
 interface WritingHelperAppProps {
@@ -150,7 +150,7 @@ const WritingHelperApp: React.FC<WritingHelperAppProps> = ({ onBackToMain }) => 
           backdropFilter: 'blur(10px)'
         }}
       >
-        <WritingHelper />
+        <WritingHelper onBackToMain={onBackToMain} />
       </div>
 
       <style>{`
