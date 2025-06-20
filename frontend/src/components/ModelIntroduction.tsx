@@ -248,14 +248,6 @@ const ModelIntroduction: React.FC<ModelIntroductionProps> = ({ onClose }) => {
           'qwen2-72b-instruct',
           'qwen2.5-72b-instruct'
         ],
-                  // openrouter: [ // REMOVED
-          'meta-llama/llama-3.1-8b-instruct:free',
-          'microsoft/wizardlm-2-8x22b:free',
-          'google/gemma-2-9b-it:free',
-          'mistralai/mistral-7b-instruct:free',
-          'huggingfaceh4/zephyr-7b-beta:free',
-          'meta-llama/llama-3.1-70b-instruct:free'
-        ],
         openai: [
           'gpt-4o',
           'gpt-4o-mini',

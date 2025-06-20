@@ -62,17 +62,6 @@ const modelPricing = {
     'claude-sonnet-4-20250514': { inputCost: 0.009, outputCost: 0.045, unit: '1K tokens' }, // 3x of $3/$15 per 1M tokens
     'claude-opus-4-20250514': { inputCost: 0.045, outputCost: 0.225, unit: '1K tokens' } // 3x of $15/$75 per 1M tokens
   },
-        // openrouter: { // REMOVED
-    // Free models with daily limits (still free to provide value)
-    'google/gemini-2.5-pro': { inputCost: 0, outputCost: 0, unit: 'free', dailyLimit: 50 },
-    'google/gemini-2.5-pro-vision': { inputCost: 0, outputCost: 0, unit: 'free', dailyLimit: 50 },
-    'google/gemini-2.5-pro-preview': { inputCost: 0, outputCost: 0, unit: 'free', dailyLimit: 50 },
-    'meta-llama/llama-3-70b-instruct': { inputCost: 0, outputCost: 0, unit: 'free', dailyLimit: 50 },
-    'meta-llama/llama-3-8b-instruct': { inputCost: 0, outputCost: 0, unit: 'free', dailyLimit: 50 },
-    'mistralai/mistral-7b-instruct': { inputCost: 0, outputCost: 0, unit: 'free', dailyLimit: 50 },
-    'mistralai/mixtral-8x7b-instruct': { inputCost: 0, outputCost: 0, unit: 'free', dailyLimit: 50 },
-    'microsoft/wizardlm-2-8x22b': { inputCost: 0, outputCost: 0, unit: 'free', dailyLimit: 50 }
-  },
   qwen: {
     // Free models with monthly token limits (still free to provide value)
     'qwen-turbo': { inputCost: 0, outputCost: 0, unit: 'free', monthlyLimit: 1000000 },
