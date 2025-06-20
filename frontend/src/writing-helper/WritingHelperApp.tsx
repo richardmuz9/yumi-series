@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store';
 import { getTranslation } from '../translations';
-import WritingHelper from '../components/writing-helper/WritingHelper';
+import WritingHelper from './components/WritingHelper';
 import './WritingHelper.css';
 
 interface WritingHelperAppProps {

@@ -235,7 +235,7 @@ export function analyzeContentQuality(content: string, contentType: string): {
       score -= 5
     }
 
-    if (/[😀-🙿]/.test(content)) {
+    if (/[\u{1F600}-\u{1F64F}]/u.test(content)) {
       strengths.push('Uses emojis for visual appeal')
       score += 3
     }

@@ -81,4 +81,9 @@ export interface StylePack {
     [tone: string]: string
   }
   templateModifiers: string[]
+}
+
+export interface VariationStrategy {
+  name: string
+  apply: (text: string) => string
 } 

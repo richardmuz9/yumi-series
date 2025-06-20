@@ -1,5 +1,5 @@
 // WritingHelper Module Data and Configuration
-import { WritingRequest, ContentTypeConfig, PlatformLimits, AnimePersonaConfig } from './types'
+import { WritingRequest, ContentTypeConfig, PlatformLimits, AnimePersonaConfig, VariationStrategy } from './types'
 
 // Content type prompts and configurations
 export const contentTypePrompts = {

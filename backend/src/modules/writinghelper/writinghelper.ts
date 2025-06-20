@@ -12,69 +12,8 @@ import {
   AuthRequest
 } from '../shared'
 import { generateWritingContent, optimizeForPlatform } from './services'
-import { WritingRequest } from './types'
-import { contentTypePrompts, platformLimits } from './data'
-
-interface WritingRequest {
-  contentType: 'social-media' | 'creative-writing' | 'blog-article' | 'script'
-  platform?: string
-  audience: string
-  objective: string
-  tone: string
-  stylePack?: string
-  animePersona?: string
-  topic: string
-  keyPoints: string[]
-  pastPost?: string
-  trendingHashtags?: string[]
-  customInstructions?: string
-  generateVariations?: boolean
-  variationCount?: number
-  model?: string
-  provider?: string
-}
-
-interface WritingVariation {
-  id: string
-  content: string
-  changes: string[]
-  confidence: number
-}
-
-interface WritingResponse {
-  content: string
-  contentType: string
-  platform?: string
-  characterCount: number
-  maxLength: number
-  withinLimit: boolean
-  provider: string
-  model: string
-  tokensUsed?: number
-  tokensRemaining?: number
-  variations?: WritingVariation[]
-  variationCount?: number
-}
-
-// Creative writing templates and prompts
-const contentTypePrompts = {
-  'social-media': {
-    systemPrompt: 'You are a social media expert who creates engaging, authentic posts.',
-    basePrompt: (req: WritingRequest) => `Create a ${req.platform} post for ${req.audience} audience with ${req.objective} objective and ${req.tone} tone.`
-  },
-  'creative-writing': {
-    systemPrompt: 'You are a creative writing assistant who helps craft compelling stories, poems, and narratives.',
-    basePrompt: (req: WritingRequest) => `Create a creative piece for ${req.audience} with ${req.objective} objective in a ${req.tone} tone.`
-  },
-  'blog-article': {
-    systemPrompt: 'You are a professional content writer who creates informative and engaging blog articles.',
-    basePrompt: (req: WritingRequest) => `Write a blog article for ${req.audience} about ${req.topic} with ${req.objective} objective in a ${req.tone} tone.`
-  },
-  'script': {
-    systemPrompt: 'You are a visual novel and galgame script writer who creates engaging character dialogues and scenes.',
-    basePrompt: (req: WritingRequest) => `Write a galgame/visual novel script scene for ${req.audience} with ${req.objective} objective in a ${req.tone} tone.`
-  }
-}
+import { WritingRequest, WritingVariation, WritingResponse } from './types'
+import { contentTypePrompts, platformLimits, animePersonaPrompts } from './data'
 
 // Enhanced variation generation for different content types
 function generateContentVariations(baseContent: string, contentType: string, count: number): WritingVariation[] {
@@ -120,13 +59,7 @@ function generateContentVariations(baseContent: string, contentType: string, cou
   return variations
 }
 
-// Anime persona integration
-const animePersonaPrompts = {
-  gojo_satoru: "Write with Gojo Satoru's confident, playful, and slightly arrogant personality. Use phrases like 'Throughout Heaven and Earth, I alone am the honored one' style confidence.",
-  rem: "Write with Rem's devoted, gentle, and emotionally expressive personality. Show loyalty and care in the tone.",
-  tanjiro: "Write with Tanjiro's kind, determined, and empathetic personality. Show compassion and strong moral values.",
-  default: ""
-}
+
 
 export function setupWritingHelperRoutes(app: express.Application) {
   // Get writing templates and configuration
@@ -473,8 +406,8 @@ export function setupWritingHelperRoutes(app: express.Application) {
       const contentTypes = Object.keys(contentTypePrompts).map(type => ({
         id: type,
         name: type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        description: contentTypePrompts[type].description || `Generate ${type} content`,
-        fields: contentTypePrompts[type].fields || []
+        description: (contentTypePrompts as any)[type].description || `Generate ${type} content`,
+        fields: (contentTypePrompts as any)[type].fields || []
       }))
 
       res.json({ contentTypes })

@@ -10,10 +10,10 @@ import { PostPreview } from './PostPreview'
 import { AnimePersonaSelector } from './AnimePersonaSelector'
 import { PostVariations } from './PostVariations'
 import { postGeneratorService } from '../../services/postGeneratorApi'
-import ImageUpload from '../ImageUpload'
-import SpeechToText from '../SpeechToText'
+import ImageUpload from '../../components/ImageUpload'
+import SpeechToText from '../../components/SpeechToText'
 import writingHelperData from '../../data/writingHelperData.json'
-import IconButton from '../IconButton'
+import IconButton from '../../components/IconButton'
 
 interface PostVariation {
   id: string

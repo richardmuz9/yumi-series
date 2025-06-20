@@ -14,7 +14,7 @@ import {
   calculateTokenCost,
   deductTokens,
   AuthRequest
-} from './shared'
+} from '../shared'
 
 interface PostGenerateRequest {
   platform: string
