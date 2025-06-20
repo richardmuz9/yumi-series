@@ -8,746 +8,442 @@ import TemplateLibrary from './components/TemplateLibrary';
 import OutlineGenerator from './components/OutlineGenerator';
 import ProgressAnalyzer from './components/ProgressAnalyzer';
 import CanvasArea, { CanvasAreaRef } from './components/CanvasArea';
+import StepNavigation from './components/StepNavigation';
+import TopToolbar from './components/TopToolbar';
+import ColorPaletteEngine from './components/ColorPaletteEngine';
+import PoseLibrary from './components/PoseLibrary';
+import Playbook from './components/Playbook';
+import MasterclassModule from './components/MasterclassModule';
+import CaseStudies from './components/CaseStudies';
+import OutlineUploadModal from './components/OutlineUploadModal';
+import DraggableResizableImage from './components/DraggableResizableImage';
 import './AnimeCharaHelper.css';
 
 interface AnimeCharaHelperAppProps {
   onBack: () => void;
 }
 
-type Step = 'idea' | 'template' | 'outline' | 'drawing' | 'analysis' | 'refinement';
-
-interface DesignBrief {
-  character: {
-    name?: string;
-    personality: string;
-    age: string;
-    gender: string;
-  };
-  appearance: {
-    hair: {
-      color: string;
-      style: string;
-      length: string;
-    };
-    eyes: {
-      color: string;
-      shape: string;
-      expression: string;
-    };
-    outfit: {
-      style: string;
-      colors: string[];
-      accessories: string[];
-    };
-    body: {
-      height: string;
-      build: string;
-    };
-  };
-  mood: string;
-  colorPalette: string[];
-  specialFeatures: string[];
-  pose: string;
-  background?: string;
-}
-
-interface Template {
-  id: string;
-  name: string;
-  style: string;
-  description: string;
-  thumbnail: string;
-  proportions: {
-    headRatio: number;
-    bodyRatio: number;
-    limbRatio: number;
-  };
-  characteristics: string[];
-}
+type Step = 'idea' | 'template' | 'outline' | 'drawing' | 'complete';
 
 const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => {
-  const [currentStep, setCurrentStep] = useState<Step>('drawing');
-  const { setProvider, setModel, language } = useStore()
-  const [localShowCustomizer, setLocalShowCustomizer] = useState(false);
+  const { language, showLayoutCustomizer, setShowLayoutCustomizer } = useStore();
   const t = getTranslation(language);
   const canvasRef = useRef<CanvasAreaRef>(null);
 
-  // Enhanced UI state for compact layout
-  const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
-  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
-  const [activeLeftTab, setActiveLeftTab] = useState<'selection' | 'ai' | 'history'>('selection');
-  const [activeRightTab, setActiveRightTab] = useState<'actions' | 'export' | 'settings'>('actions');
-  const [isFullScreenMode, setIsFullScreenMode] = useState(false);
-
-  // Use free Qwen provider for Anime Character Designer
-  useEffect(() => {
-    setProvider('qwen')
-    setModel('qwen-turbo')
-  }, [setProvider, setModel])
+  // Core state
+  const [currentStep, setCurrentStep] = useState<Step>('idea');
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [designBrief, setDesignBrief] = useState<DesignBrief | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [localShowCustomizer, setLocalShowCustomizer] = useState(false);
+
+  // Data state
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [designBrief, setDesignBrief] = useState<any>(null);
   const [outlineUrl, setOutlineUrl] = useState<string | null>(null);
-  const [clarificationQuestions, setClarificationQuestions] = useState<string[]>([]);
-  const [currentSelection] = useState({
-    style: 'Neon Cyberpunk',
-    colors: ['#ff0080', '#00ffff', '#ffff00'],
-    pose: 'Confident Stand',
-    poseDescription: 'Standing with hands on hips, confident pose'
-  });
-  const [aiSuggestions] = useState([
-    'Clean up line art and remove guides',
-    'Add final highlights and shadows',
-    'Consider background elements'
-  ]);
-  const [progressStage, setProgressStage] = useState<'Outline' | 'Coloring' | 'Details' | 'Final'>('Final');
+  const [analysisData, setAnalysisData] = useState<any>(null);
 
-  const steps = [
-    { key: 'idea', title: 'Idea & Feedback', icon: '💭' },
-    { key: 'template', title: 'Template Selection', icon: '🎭' },
-    { key: 'outline', title: 'Outline Generation', icon: '✏️' },
-    { key: 'drawing', title: 'Drawing Canvas', icon: '🎨' },
-    { key: 'analysis', title: 'Progress Analysis', icon: '🔍' },
-    { key: 'refinement', title: 'Final Refinement', icon: '✨' }
-  ] as const;
+  // UI state
+  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [selectedLeftTab, setSelectedLeftTab] = useState<'selection' | 'ai-help' | 'history'>('selection');
+  const [selectedRightTab, setSelectedRightTab] = useState<'actions' | 'export' | 'settings'>('actions');
 
-  const getCurrentStepIndex = () => {
-    return steps.findIndex(step => step.key === currentStep);
+  // Modal state
+  const [showPaletteEngine, setShowPaletteEngine] = useState(false);
+  const [showPoseLibrary, setShowPoseLibrary] = useState(false);
+  const [showMasterclass, setShowMasterclass] = useState(false);
+  const [showCaseStudies, setShowCaseStudies] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [pendingOutline, setPendingOutline] = useState<string | null>(null);
+  const [showOutlineOverlay, setShowOutlineOverlay] = useState(false);
+  const [overlayImage, setOverlayImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (showLayoutCustomizer !== localShowCustomizer) {
+      setLocalShowCustomizer(showLayoutCustomizer);
+    }
+  }, [showLayoutCustomizer]);
+
+  // Step management
+  const handleStepChange = (step: Step) => {
+    setCurrentStep(step);
   };
 
-  const handleStepComplete = (data: any) => {
-    switch (currentStep) {
-      case 'idea':
-        if (data.sessionId && data.designBrief) {
-          setSessionId(data.sessionId);
-          setDesignBrief(data.designBrief);
-          setClarificationQuestions(data.clarificationQuestions || []);
-          setCurrentStep('template');
-        }
-        break;
-      case 'template':
-        if (data.template) {
-          setSelectedTemplate(data.template);
-          setCurrentStep('outline');
-        }
-        break;
-      case 'outline':
-        if (data.outlineUrl) {
-          setOutlineUrl(data.outlineUrl);
-          setCurrentStep('drawing');
-        }
-        break;
-      case 'drawing':
-        setCurrentStep('analysis');
-        break;
-      case 'analysis':
-        setCurrentStep('refinement');
-        break;
-      case 'refinement':
-        // Character design complete
-        break;
+  const handleNext = () => {
+    const steps: Step[] = ['idea', 'template', 'outline', 'drawing', 'complete'];
+    const currentIndex = steps.indexOf(currentStep);
+    if (currentIndex < steps.length - 1) {
+      setCurrentStep(steps[currentIndex + 1]);
     }
   };
 
-  const handleStepBack = () => {
-    const currentIndex = getCurrentStepIndex();
+  const handlePrevious = () => {
+    const steps: Step[] = ['idea', 'template', 'outline', 'drawing', 'complete'];
+    const currentIndex = steps.indexOf(currentStep);
     if (currentIndex > 0) {
-      setCurrentStep(steps[currentIndex - 1].key as Step);
+      setCurrentStep(steps[currentIndex - 1]);
     }
   };
 
-  const renderCurrentStep = () => {
+  const canProgressFromCurrentStep = () => {
+    switch (currentStep) {
+      case 'idea': return designBrief !== null;
+      case 'template': return selectedTemplate !== null;
+      case 'outline': return outlineUrl !== null;
+      case 'drawing': return true;
+      case 'complete': return false;
+      default: return false;
+    }
+  };
+
+  // Event handlers
+  const handleCharacterChatComplete = (data: any) => {
+    setDesignBrief(data.designBrief);
+          setSessionId(data.sessionId);
+    if (canProgressFromCurrentStep()) {
+      handleNext();
+        }
+  };
+
+  const handleTemplateSelect = (template: any) => {
+    setSelectedTemplate(template);
+    if (canProgressFromCurrentStep()) {
+      handleNext();
+        }
+  };
+
+  const handleOutlineComplete = (data: any) => {
+          setOutlineUrl(data.outlineUrl);
+    if (canvasRef.current && data.outlineUrl) {
+      canvasRef.current.loadOutline(data.outlineUrl);
+    }
+    if (canProgressFromCurrentStep()) {
+      handleNext();
+    }
+  };
+
+  const handleAnalysisComplete = (data: any) => {
+    setAnalysisData(data);
+  };
+
+  const handleExport = () => {
+    if (canvasRef.current) {
+      const drawingData = canvasRef.current.saveDrawing();
+      const layers = canvasRef.current.exportLayers();
+      
+      console.log('Exporting artwork:', {
+        drawing: drawingData,
+        layers: layers,
+        template: selectedTemplate,
+        designBrief: designBrief,
+        outline: outlineUrl
+      });
+      
+      alert('Export feature coming soon! Your artwork has been logged to console.');
+    }
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  // Render step content
+  const renderStepContent = () => {
     switch (currentStep) {
       case 'idea':
         return (
           <CharacterChat
-            onComplete={handleStepComplete}
-            clarificationQuestions={clarificationQuestions}
+            onComplete={handleCharacterChatComplete}
             existingBrief={designBrief}
           />
         );
+      
       case 'template':
         return (
           <TemplateLibrary
-            onComplete={handleStepComplete}
+            onComplete={handleTemplateSelect}
             designBrief={designBrief}
           />
         );
+      
       case 'outline':
         return (
           <OutlineGenerator
             sessionId={sessionId}
             template={selectedTemplate}
             designBrief={designBrief}
-            onComplete={handleStepComplete}
+            onComplete={handleOutlineComplete}
           />
         );
+      
       case 'drawing':
         return (
-          <div className="character-designer-interface">
-            <div className="designer-header">
-              <div className="progress-stages">
-                <span>Progress Stage:</span>
-                {['Outline', 'Coloring', 'Details', 'Final'].map((stage) => (
-                  <button
-                    key={stage}
-                    className={`stage-btn ${progressStage === stage ? 'active' : ''}`}
-                    onClick={() => setProgressStage(stage as any)}
-                  >
-                    {stage}
-                  </button>
-                ))}
-              </div>
-              
-              <div className="designer-actions">
-                <button className="action-btn adaptive-palette">🎨 Adaptive Palette</button>
-                <button className="action-btn pose-library">🤸 Pose Library</button>
-                <button className="action-btn personality">🧠 Personality</button>
-                <button className="action-btn export-sprites">📦 Export Sprites</button>
-              </div>
-            </div>
-
-            <div className="designer-content">
-              <div className="left-panel">
-                <div className="current-selection">
-                  <h3>🎯 Current Selection</h3>
-                  
-                  <div className="selection-item">
-                    <div className="selection-header">
-                      <div className="style-icon">🌈</div>
-                      <span className="style-name">{currentSelection.style}</span>
-                    </div>
-                    <div className="color-palette">
-                      {currentSelection.colors.map((color, index) => (
-                        <div
-                          key={index}
-                          className="color-swatch"
-                          style={{ backgroundColor: color }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="selection-item">
-                    <div className="selection-header">
-                      <div className="pose-icon">🤸</div>
-                      <span className="pose-name">{currentSelection.pose}</span>
-                    </div>
-                    <p className="pose-description">{currentSelection.poseDescription}</p>
-                  </div>
-                </div>
-
-                <div className="ai-suggestions">
-                  <h3>🤖 AI Suggestions</h3>
-                  {aiSuggestions.map((suggestion, index) => (
-                    <div key={index} className="suggestion-item">
-                      <span className="suggestion-icon">💡</span>
-                      <span className="suggestion-text">{suggestion}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="center-panel">
-                <CanvasArea 
-                  ref={canvasRef}
-                  className="main-canvas"
-                  onDrawingChange={(_hasDrawing) => {
-                    // Update UI based on drawing state
-                  }}
-                />
-              </div>
-
-              <div className="right-panel">
-                <div className="quick-actions">
-                  <h4>Quick Actions</h4>
-                  <button 
-                    className="quick-action-btn start-drawing"
-                    onClick={() => {
-                      canvasRef.current?.setDrawingMode(true);
-                      canvasRef.current?.clearCanvas();
-                    }}
-                  >
-                    🎨 Start Drawing
-                  </button>
-                  <button 
-                    className="quick-action-btn load-template"
-                    onClick={() => {
-                      // Load a sample template/outline
-                      const sampleOutline = '/yumi-tusr.png'; // Use existing image as placeholder
-                      canvasRef.current?.loadOutline(sampleOutline);
-                    }}
-                  >
-                    📄 Load Template
-                  </button>
-                  <button 
-                    className="quick-action-btn save-progress"
-                    onClick={() => {
-                      const imageData = canvasRef.current?.saveDrawing();
-                      if (imageData) {
-                        // Create download link
-                        const link = document.createElement('a');
-                        link.href = imageData;
-                        link.download = 'character-progress.png';
-                        link.click();
-                      }
-                    }}
-                  >
-                    💾 Save Progress
-                  </button>
-                </div>
-              </div>
+          <div className="drawing-workspace">
+            <CanvasArea ref={canvasRef} />
+            <ProgressAnalyzer
+              sessionId={sessionId}
+              onComplete={handleAnalysisComplete}
+            />
+          </div>
+        );
+      
+      case 'complete':
+        return (
+          <div className="completion-screen">
+            <h2>🎉 Character Complete!</h2>
+            <p>Your anime character design is ready!</p>
+            <div className="final-actions">
+              <button onClick={handleExport} className="export-final-btn">
+                📤 Export Artwork
+                </button>
+              <button onClick={() => setCurrentStep('idea')} className="restart-btn">
+                🔄 Create New Character
+                </button>
             </div>
           </div>
         );
-      case 'analysis':
-        return (
-          <ProgressAnalyzer
-            sessionId={sessionId}
-            onComplete={handleStepComplete}
-          />
-        );
-      case 'refinement':
-        return (
-          <div className="refinement-pane">
-            <div className="refinement-header">
-              <h2>✨ Final Refinement</h2>
-              <p>Your anime character design is complete!</p>
-            </div>
-            
-            <div className="completion-summary">
-              <div className="character-showcase">
-                {outlineUrl && (
-                  <img src={outlineUrl} alt="Final character" className="final-character" />
-                )}
-                
-                <div className="character-details">
-                  {designBrief && (
-                    <>
-                      <h3>{designBrief.character.name || 'Your Character'}</h3>
-                      <div className="detail-grid">
-                        <div className="detail-item">
-                          <strong>Personality:</strong> {designBrief.character.personality}
-                        </div>
-                        <div className="detail-item">
-                          <strong>Style:</strong> {selectedTemplate?.name}
-                        </div>
-                        <div className="detail-item">
-                          <strong>Mood:</strong> {designBrief.mood}
-                        </div>
-                        <div className="detail-item">
-                          <strong>Hair:</strong> {designBrief.appearance.hair.color} {designBrief.appearance.hair.style}
-                        </div>
-                        <div className="detail-item">
-                          <strong>Eyes:</strong> {designBrief.appearance.eyes.color} {designBrief.appearance.eyes.shape}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-              
-              <div className="completion-actions">
-                <button 
-                  className="new-character-btn"
-                  onClick={() => {
-                    setCurrentStep('idea');
-                    setSessionId(null);
-                    setDesignBrief(null);
-                    setSelectedTemplate(null);
-                    setOutlineUrl(null);
-                  }}
-                >
-                  🎨 Create New Character
-                </button>
-                <button 
-                  className="export-btn"
-                  onClick={() => {
-                    const characterData = {
-                      sessionId,
-                      template: selectedTemplate,
-                      designBrief,
-                      outlineUrl,
-                      timestamp: new Date().toISOString()
-                    };
-                    const blob = new Blob([JSON.stringify(characterData, null, 2)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `character-${designBrief?.character.name || 'design'}.json`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                  }}
-                >
-                  📤 Export Character Data
-                </button>
-              </div>
-            </div>
-          </div>
-        );
+      
       default:
-        return <div>Unknown step</div>;
+        return null;
     }
   };
 
-  // Icon button component for consistent styling
-  const IconButton: React.FC<{
-    icon: string;
-    tooltip: string;
-    onClick: () => void;
-    active?: boolean;
-    disabled?: boolean;
-  }> = ({ icon, tooltip, onClick, active = false, disabled = false }) => (
-    <button
-      className={`icon-btn ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
-      onClick={onClick}
-      disabled={disabled}
-      title={tooltip}
-      aria-label={tooltip}
-    >
-      <span className="icon">{icon}</span>
-    </button>
-  );
-
   return (
-    <div className={`anime-chara-helper enhanced ${isFullScreenMode ? 'fullscreen' : ''}`}>
-      {/* Icon-only Top Toolbar */}
-      <div className="top-toolbar">
-        {/* Navigation */}
-        <div className="toolbar-section">
-          <IconButton
-            icon="←"
-            tooltip="Back to Main"
-            onClick={onBack}
+    <div className={`anime-chara-helper enhanced ${isFullscreen ? 'fullscreen' : ''}`}>
+      {/* Top Toolbar */}
+      <TopToolbar
+        isFullscreen={isFullscreen}
+        currentStep={currentStep}
+        onToggleFullscreen={toggleFullscreen}
+        onTogglePalette={() => setShowPaletteEngine(true)}
+        onTogglePoseLibrary={() => setShowPoseLibrary(true)}
+        onTogglePersonality={() => setSelectedLeftTab('ai-help')}
+        onExport={handleExport}
+        onBack={onBack}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        canGoNext={canProgressFromCurrentStep()}
+        t={t}
+        onShowUploadModal={() => setShowUploadModal(true)}
           />
-          <div className="toolbar-divider" />
-          <IconButton
-            icon="🏠"
-            tooltip="Home"
-            onClick={() => setCurrentStep('idea')}
-          />
-        </div>
-
-        {/* Step Navigation - Compact Icons */}
-        <div className="toolbar-section step-nav">
-          {steps.map((step, index) => (
-            <IconButton
-              key={step.key}
-              icon={step.icon}
-              tooltip={`${step.title} (Step ${index + 1})`}
-              onClick={() => setCurrentStep(step.key)}
-              active={currentStep === step.key}
-            />
-          ))}
-        </div>
-
-        {/* Tools & Actions */}
-        <div className="toolbar-section">
-          <IconButton
-            icon="⚡"
-            tooltip="AI Model Settings"
-            onClick={() => {/* Show model selector in flyout */}}
-          />
-          <div className="toolbar-divider" />
-          <IconButton
-            icon="🔍"
-            tooltip="Full Screen Mode"
-            onClick={() => setIsFullScreenMode(!isFullScreenMode)}
-            active={isFullScreenMode}
-          />
-          <IconButton
-            icon="⚙️"
-            tooltip="Layout Customizer"
-            onClick={() => setLocalShowCustomizer(true)}
-          />
-        </div>
-      </div>
 
       {/* Main Content Area */}
-      <div className="main-layout">
-        {/* Left Panel - Selection & AI */}
-        <div className={`side-panel left-panel ${isLeftPanelCollapsed ? 'collapsed' : ''}`}>
-          {!isLeftPanelCollapsed && (
-            <>
-              {/* Tab Headers */}
+      <div className="main-content-area">
+        {/* Playbook Sidebar */}
+        <Playbook />
+        {/* Left Panel */}
+        <div className={`left-panel ${leftPanelCollapsed ? 'collapsed' : ''}`}>
+          <div className="panel-header">
               <div className="panel-tabs">
                 <button
-                  className={`tab ${activeLeftTab === 'selection' ? 'active' : ''}`}
-                  onClick={() => setActiveLeftTab('selection')}
-                  title="Current Selection"
+                className={`tab-btn ${selectedLeftTab === 'selection' ? 'active' : ''}`}
+                onClick={() => setSelectedLeftTab('selection')}
                 >
-                  <span className="tab-icon">🎯</span>
-                  <span className="tab-label">Selection</span>
+                🎯 Selection
                 </button>
                 <button
-                  className={`tab ${activeLeftTab === 'ai' ? 'active' : ''}`}
-                  onClick={() => setActiveLeftTab('ai')}
-                  title="AI Suggestions"
+                className={`tab-btn ${selectedLeftTab === 'ai-help' ? 'active' : ''}`}
+                onClick={() => setSelectedLeftTab('ai-help')}
                 >
-                  <span className="tab-icon">🤖</span>
-                  <span className="tab-label">AI Help</span>
+                🤖 AI Help
                 </button>
                 <button
-                  className={`tab ${activeLeftTab === 'history' ? 'active' : ''}`}
-                  onClick={() => setActiveLeftTab('history')}
-                  title="History & Versions"
-                >
-                  <span className="tab-icon">📚</span>
-                  <span className="tab-label">History</span>
+                className={`tab-btn ${selectedLeftTab === 'history' ? 'active' : ''}`}
+                onClick={() => setSelectedLeftTab('history')}
+              >
+                📚 History
+              </button>
+            </div>
+            <button
+              className="collapse-btn"
+              onClick={() => setLeftPanelCollapsed(!leftPanelCollapsed)}
+            >
+              {leftPanelCollapsed ? '→' : '←'}
                 </button>
               </div>
 
-              {/* Tab Content */}
+          {!leftPanelCollapsed && (
               <div className="panel-content">
-                {activeLeftTab === 'selection' && (
-                  <div className="selection-panel">
-                    <h3>🎯 Current Selection</h3>
-                    <div className="selection-items">
-                      <div className="selection-item">
-                        <div className="item-header">
-                          <span className="item-icon">🌈</span>
-                          <span className="item-name">{currentSelection.style}</span>
-                        </div>
-                        <div className="color-palette">
-                          {currentSelection.colors.map((color, index) => (
-                            <div
-                              key={index}
-                              className="color-swatch"
-                              style={{ backgroundColor: color }}
-                              title={`Color ${index + 1}: ${color}`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div className="selection-item">
-                        <div className="item-header">
-                          <span className="item-icon">🤸</span>
-                          <span className="item-name">{currentSelection.pose}</span>
-                        </div>
-                        <p className="item-description">{currentSelection.poseDescription}</p>
-                      </div>
-                    </div>
+              {selectedLeftTab === 'selection' && (
+                <StepNavigation
+                  currentStep={currentStep}
+                  onStepChange={handleStepChange}
+                  canProgress={canProgressFromCurrentStep()}
+                  onPrevious={handlePrevious}
+                  onNext={handleNext}
+                  t={t}
+                />
+                )}
+              {selectedLeftTab === 'ai-help' && (
+                <div className="ai-help-panel">
+                  <h3>🤖 AI Assistant</h3>
+                  <p>AI help content for current step: {currentStep}</p>
                   </div>
                 )}
-
-                {activeLeftTab === 'ai' && (
-                  <div className="ai-panel">
-                    <h3>🤖 AI Suggestions</h3>
-                    <div className="suggestions-list">
-                      {aiSuggestions.map((suggestion, index) => (
-                        <div key={index} className="suggestion-item">
-                          <span className="suggestion-icon">💡</span>
-                          <span className="suggestion-text">{suggestion}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {activeLeftTab === 'history' && (
+              {selectedLeftTab === 'history' && (
                   <div className="history-panel">
-                    <h3>📚 History</h3>
-                    <div className="history-items">
-                      <div className="history-item">
-                        <span className="history-icon">💾</span>
-                        <div className="history-info">
-                          <div className="history-name">Previous Design</div>
-                          <div className="history-time">2 hours ago</div>
-                        </div>
-                      </div>
-                    </div>
+                  <h3>📚 Design History</h3>
+                  <p>Previous designs and sessions</p>
                   </div>
                 )}
               </div>
-            </>
           )}
-
-          {/* Collapse Toggle */}
-          <button
-            className="panel-toggle left"
-            onClick={() => setIsLeftPanelCollapsed(!isLeftPanelCollapsed)}
-            title={isLeftPanelCollapsed ? 'Expand Panel' : 'Collapse Panel'}
-          >
-            <span className={`toggle-icon ${isLeftPanelCollapsed ? 'collapsed' : ''}`}>
-              {isLeftPanelCollapsed ? '→' : '←'}
-            </span>
-          </button>
         </div>
 
-        {/* Center Canvas Area - Maximized for drawing */}
-        <div className="canvas-area">
-          <div className="canvas-header">
-            {!isFullScreenMode && (
-              <div className="progress-indicator">
-                <span className="stage-text">Progress: {progressStage}</span>
-                <div className="mini-steps">
-                  {['Outline', 'Coloring', 'Details', 'Final'].map((stage) => (
-                    <button
-                      key={stage}
-                      className={`mini-stage ${progressStage === stage ? 'active' : ''}`}
-                      onClick={() => setProgressStage(stage as any)}
-                      title={stage}
-                    >
-                      {stage.charAt(0)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="canvas-container">
-            {renderCurrentStep()}
+        {/* Center Content */}
+        <div className="center-content">
+          <div className="step-content">
+            {renderStepContent()}
           </div>
         </div>
 
-        {/* Right Panel - Actions & Export */}
-        <div className={`side-panel right-panel ${isRightPanelCollapsed ? 'collapsed' : ''}`}>
-          {!isRightPanelCollapsed && (
-            <>
-              {/* Tab Headers */}
+        {/* Right Panel */}
+        <div className={`right-panel ${rightPanelCollapsed ? 'collapsed' : ''}`}>
+          <div className="panel-header">
+            <button
+              className="collapse-btn"
+              onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+            >
+              {rightPanelCollapsed ? '←' : '→'}
+            </button>
               <div className="panel-tabs">
                 <button
-                  className={`tab ${activeRightTab === 'actions' ? 'active' : ''}`}
-                  onClick={() => setActiveRightTab('actions')}
-                  title="Quick Actions"
+                className={`tab-btn ${selectedRightTab === 'actions' ? 'active' : ''}`}
+                onClick={() => setSelectedRightTab('actions')}
                 >
-                  <span className="tab-icon">⚡</span>
-                  <span className="tab-label">Actions</span>
+                ⚡ Actions
                 </button>
                 <button
-                  className={`tab ${activeRightTab === 'export' ? 'active' : ''}`}
-                  onClick={() => setActiveRightTab('export')}
-                  title="Export & Share"
+                className={`tab-btn ${selectedRightTab === 'export' ? 'active' : ''}`}
+                onClick={() => setSelectedRightTab('export')}
                 >
-                  <span className="tab-icon">📤</span>
-                  <span className="tab-label">Export</span>
+                📤 Export
                 </button>
                 <button
-                  className={`tab ${activeRightTab === 'settings' ? 'active' : ''}`}
-                  onClick={() => setActiveRightTab('settings')}
-                  title="Settings"
+                className={`tab-btn ${selectedRightTab === 'settings' ? 'active' : ''}`}
+                onClick={() => setSelectedRightTab('settings')}
                 >
-                  <span className="tab-icon">⚙️</span>
-                  <span className="tab-label">Settings</span>
+                ⚙️ Settings
                 </button>
+            </div>
               </div>
 
-              {/* Tab Content */}
+          {!rightPanelCollapsed && (
               <div className="panel-content">
-                {activeRightTab === 'actions' && (
+              {selectedRightTab === 'actions' && (
                   <div className="actions-panel">
                     <h3>⚡ Quick Actions</h3>
-                    <div className="action-buttons">
-                      <button 
-                        className="action-btn primary"
-                        onClick={() => {
-                          canvasRef.current?.setDrawingMode(true);
-                          canvasRef.current?.clearCanvas();
-                        }}
-                        title="Start Drawing"
-                      >
-                        <span className="btn-icon">🎨</span>
-                        <span className="btn-label">Start Drawing</span>
-                      </button>
-                      
-                      <button 
-                        className="action-btn secondary"
-                        onClick={() => {
-                          const sampleOutline = '/yumi-tusr.png';
-                          canvasRef.current?.loadOutline(sampleOutline);
-                        }}
-                        title="Load Template"
-                      >
-                        <span className="btn-icon">📄</span>
-                        <span className="btn-label">Load Template</span>
-                      </button>
-                      
-                      <button 
-                        className="action-btn secondary"
-                        onClick={() => {
-                          const imageData = canvasRef.current?.saveDrawing();
-                          if (imageData) {
-                            const link = document.createElement('a');
-                            link.href = imageData;
-                            link.download = 'character-progress.png';
-                            link.click();
-                          }
-                        }}
-                        title="Save Progress"
-                      >
-                        <span className="btn-icon">💾</span>
-                        <span className="btn-label">Save Progress</span>
-                      </button>
-                    </div>
+                  <button onClick={() => setShowPaletteEngine(true)}>🎨 Color Palette</button>
+                  <button onClick={() => setShowPoseLibrary(true)}>🎭 Pose Library</button>
+                  <button onClick={handleExport}>📤 Export</button>
+                  <button onClick={() => setShowMasterclass(true)}>🌟 Masterclass</button>
+                  <button onClick={() => setShowCaseStudies(true)}>🧑‍🎨 Case Studies</button>
                   </div>
                 )}
-
-                {activeRightTab === 'export' && (
+              {selectedRightTab === 'export' && (
                   <div className="export-panel">
-                    <h3>📤 Export & Share</h3>
-                    <div className="export-options">
-                      <button className="export-option">
-                        <span className="option-icon">🖼️</span>
-                        <span className="option-label">Export as PNG</span>
-                      </button>
-                      <button className="export-option">
-                        <span className="option-icon">📄</span>
-                        <span className="option-label">Export as PDF</span>
-                      </button>
-                      <button className="export-option">
-                        <span className="option-icon">📊</span>
-                        <span className="option-label">Export Data</span>
-                      </button>
-                    </div>
+                  <h3>📤 Export Options</h3>
+                  <button onClick={handleExport}>Export Current</button>
                   </div>
                 )}
-
-                {activeRightTab === 'settings' && (
+              {selectedRightTab === 'settings' && (
                   <div className="settings-panel">
                     <h3>⚙️ Settings</h3>
-                    <div className="setting-items">
-                      <div className="setting-item">
-                        <span className="setting-label">Auto-save</span>
-                        <label className="toggle-switch">
-                          <input type="checkbox" defaultChecked />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                      <div className="setting-item">
-                        <span className="setting-label">Grid lines</span>
-                        <label className="toggle-switch">
-                          <input type="checkbox" />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                    </div>
+                  <ModelSwitcher />
+                  <button onClick={() => setLocalShowCustomizer(true)}>Customize Layout</button>
                   </div>
                 )}
               </div>
-            </>
           )}
-
-          {/* Collapse Toggle */}
-          <button
-            className="panel-toggle right"
-            onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
-            title={isRightPanelCollapsed ? 'Expand Panel' : 'Collapse Panel'}
-          >
-            <span className={`toggle-icon ${isRightPanelCollapsed ? 'collapsed' : ''}`}>
-              {isRightPanelCollapsed ? '←' : '→'}
-            </span>
-          </button>
         </div>
       </div>
 
-      {/* Layout Customizer Modal */}
+      {/* Modals */}
       {localShowCustomizer && (
         <LayoutCustomizer 
           isOpen={localShowCustomizer}
           onClose={() => setLocalShowCustomizer(false)}
           t={t}
+        />
+      )}
+
+      {showPaletteEngine && (
+        <ColorPaletteEngine
+          selectedPalette={designBrief?.palette || { id: 'default', name: 'Default' }}
+          onPaletteSelect={(palette) => {
+            setDesignBrief((prev: any) => ({ ...prev, palette }));
+            setShowPaletteEngine(false);
+          }}
+          onClose={() => setShowPaletteEngine(false)}
+        />
+      )}
+
+      {showPoseLibrary && (
+        <PoseLibrary
+          selectedPose={designBrief?.pose || { id: 'default', name: 'Default' }}
+          onPoseSelect={(pose) => {
+            setDesignBrief((prev: any) => ({ ...prev, pose }));
+            setShowPoseLibrary(false);
+          }}
+          onClose={() => setShowPoseLibrary(false)}
+        />
+      )}
+
+      {showMasterclass && (
+        <MasterclassModule />
+      )}
+
+      {showCaseStudies && (
+        <CaseStudies />
+      )}
+
+      {/* Upload Outline Modal */}
+      {showUploadModal && (
+        <OutlineUploadModal
+          onClose={() => setShowUploadModal(false)}
+          onOutlineProcessed={(outlineData: string) => {
+            setPendingOutline(outlineData);
+            setOverlayImage(outlineData);
+            setShowOutlineOverlay(true);
+            setShowUploadModal(false);
+          }}
+        />
+      )}
+      {showOutlineOverlay && overlayImage && (
+        <DraggableResizableImage
+          src={overlayImage}
+          onConfirm={(x, y, scale) => {
+            // Draw the outline onto the canvas at (x, y) with scale
+            if (canvasRef.current) {
+              const canvas = canvasRef.current;
+              const mainCanvas = (canvas as any).canvasRef?.current as HTMLCanvasElement;
+              const ctx = mainCanvas?.getContext('2d');
+              if (mainCanvas && ctx) {
+                const img = new window.Image();
+                img.onload = () => {
+                  ctx.save();
+                  ctx.globalAlpha = 0.5;
+                  ctx.drawImage(
+                    img,
+                    x,
+                    y,
+                    img.width * scale,
+                    img.height * scale
+                  );
+                  ctx.restore();
+                };
+                img.src = overlayImage;
+              }
+            }
+            setShowOutlineOverlay(false);
+            setOverlayImage(null);
+            setPendingOutline(null);
+          }}
+          onCancel={() => {
+            setShowOutlineOverlay(false);
+            setOverlayImage(null);
+            setPendingOutline(null);
+          }}
         />
       )}
     </div>
