@@ -1,258 +1,24 @@
 import express from 'express'
 import { authenticateUser, AuthRequest, db } from '../shared'
 import OpenAI from 'openai'
+import { characterTemplates as templateData } from './data'
+import { authenticateUser as requireUser } from '../shared'
+import { generateAnimeCharacter } from './services'
+import { CharacterTemplate, DesignBrief } from './types'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Character design templates
-interface CharacterTemplate {
-  id: string
-  name: string
-  style: string
-  description: string
-  thumbnail: string
-  proportions: {
-    headRatio: number
-    bodyRatio: number
-    limbRatio: number
-  }
-  characteristics: string[]
-}
+const characterTemplates: CharacterTemplate[] = templateData;
 
-const characterTemplates: CharacterTemplate[] = [
-  {
-    id: 'chibi',
-    name: 'Chibi Style',
-    style: 'Super deformed, cute proportions',
-    description: 'Large head, small body, expressive eyes',
-    thumbnail: '/templates/chibi.png',
-    proportions: { headRatio: 0.4, bodyRatio: 0.6, limbRatio: 0.8 },
-    characteristics: ['Large eyes', 'Small nose', 'Rounded features', 'Simplified anatomy']
-  },
-  {
-    id: 'bishojo',
-    name: 'Bishōjo Style',
-    style: 'Beautiful girl aesthetic',
-    description: 'Elegant proportions, detailed features',
-    thumbnail: '/templates/bishojo.png',
-    proportions: { headRatio: 0.15, bodyRatio: 0.85, limbRatio: 1.0 },
-    characteristics: ['Detailed eyes', 'Flowing hair', 'Graceful pose', 'Realistic proportions']
-  },
-  {
-    id: 'shonen',
-    name: 'Shōnen Style',
-    style: 'Dynamic action hero',
-    description: 'Strong, energetic character design',
-    thumbnail: '/templates/shonen.png',
-    proportions: { headRatio: 0.12, bodyRatio: 0.88, limbRatio: 1.1 },
-    characteristics: ['Sharp features', 'Dynamic pose', 'Strong jawline', 'Spiky hair']
-  },
-  {
-    id: 'mecha-girl',
-    name: 'Mecha Girl',
-    style: 'Sci-fi android aesthetic',
-    description: 'Futuristic character with tech elements',
-    thumbnail: '/templates/mecha-girl.png',
-    proportions: { headRatio: 0.14, bodyRatio: 0.86, limbRatio: 0.95 },
-    characteristics: ['Mechanical details', 'Glowing elements', 'Sleek design', 'Tech accessories']
-  },
-  {
-    id: 'magical-girl',
-    name: 'Magical Girl',
-    style: 'Fantasy magical aesthetic',
-    description: 'Whimsical character with magical elements',
-    thumbnail: '/templates/magical-girl.png',
-    proportions: { headRatio: 0.16, bodyRatio: 0.84, limbRatio: 0.9 },
-    characteristics: ['Flowing costume', 'Magical accessories', 'Sparkle effects', 'Cute expression']
-  },
-  // NEW ENHANCED STYLE PRESETS
-  {
-    id: 'gorgeous-anime',
-    name: 'Gorgeous Anime',
-    style: 'Ultra-detailed beautiful style',
-    description: 'Studio-quality detailed artwork with photorealistic shading',
-    thumbnail: '/templates/gorgeous-anime.png',
-    proportions: { headRatio: 0.14, bodyRatio: 0.86, limbRatio: 1.0 },
-    characteristics: ['Hyper-detailed eyes', 'Realistic hair physics', 'Perfect proportions', 'Professional lighting', 'Soft gradients', 'High-end anime quality']
-  },
-  {
-    id: 'manga-sketch',
-    name: 'Manga Sketch',
-    style: 'Black and white manga style',
-    description: 'Traditional manga artwork with clean line art',
-    thumbnail: '/templates/manga-sketch.png',
-    proportions: { headRatio: 0.13, bodyRatio: 0.87, limbRatio: 1.0 },
-    characteristics: ['Clean line art', 'Screentone effects', 'Dynamic angles', 'Speed lines', 'Bold outlines', 'Monochrome palette']
-  },
-  {
-    id: 'semi-realistic',
-    name: 'Semi-Realistic',
-    style: 'Anime-realistic hybrid',
-    description: 'Realistic proportions with anime features',
-    thumbnail: '/templates/semi-realistic.png',
-    proportions: { headRatio: 0.11, bodyRatio: 0.89, limbRatio: 1.05 },
-    characteristics: ['Realistic anatomy', 'Anime facial features', 'Natural lighting', 'Detailed textures', 'Human proportions', 'Sophisticated shading']
-  },
-  {
-    id: 'kawaii-moe',
-    name: 'Kawaii Moe',
-    style: 'Ultra-cute moe style',
-    description: 'Adorable characters with maximum cuteness',
-    thumbnail: '/templates/kawaii-moe.png',
-    proportions: { headRatio: 0.18, bodyRatio: 0.82, limbRatio: 0.85 },
-    characteristics: ['Giant sparkling eyes', 'Soft pastel colors', 'Blushing cheeks', 'Innocent expressions', 'Fluffy details', 'Heart motifs']
-  },
-  {
-    id: 'cyberpunk-neon',
-    name: 'Cyberpunk Neon',
-    style: 'Futuristic cyberpunk aesthetic',
-    description: 'High-tech character with neon accents',
-    thumbnail: '/templates/cyberpunk-neon.png',
-    proportions: { headRatio: 0.13, bodyRatio: 0.87, limbRatio: 1.0 },
-    characteristics: ['Neon highlights', 'Tech augmentations', 'Glowing elements', 'Sharp edges', 'Urban aesthetic', 'Digital effects']
-  },
-  {
-    id: 'gothic-lolita',
-    name: 'Gothic Lolita',
-    style: 'Dark elegant gothic style',
-    description: 'Sophisticated gothic fashion with dark themes',
-    thumbnail: '/templates/gothic-lolita.png',
-    proportions: { headRatio: 0.15, bodyRatio: 0.85, limbRatio: 0.95 },
-    characteristics: ['Dark color palette', 'Elaborate frills', 'Gothic accessories', 'Mysterious aura', 'Victorian influences', 'Dramatic lighting']
-  },
-  {
-    id: 'shoujo-sparkle',
-    name: 'Shoujo Sparkle',
-    style: 'Classic shoujo manga style',
-    description: 'Romantic shoujo with sparkles and flowers',
-    thumbnail: '/templates/shoujo-sparkle.png',
-    proportions: { headRatio: 0.16, bodyRatio: 0.84, limbRatio: 0.9 },
-    characteristics: ['Sparkle effects', 'Flower backgrounds', 'Long eyelashes', 'Romantic poses', 'Soft features', 'Dream-like quality']
-  },
-  {
-    id: 'pixel-art',
-    name: 'Pixel Art',
-    style: '8-bit retro pixel style',
-    description: 'Retro gaming inspired pixel character',
-    thumbnail: '/templates/pixel-art.png',
-    proportions: { headRatio: 0.2, bodyRatio: 0.8, limbRatio: 0.9 },
-    characteristics: ['Pixelated style', 'Limited color palette', 'Blocky features', 'Retro gaming feel', 'Sharp edges', '8-bit aesthetic']
-  },
-  {
-    id: 'watercolor-soft',
-    name: 'Watercolor Soft',
-    style: 'Soft watercolor painting style',
-    description: 'Gentle watercolor artwork with soft edges',
-    thumbnail: '/templates/watercolor-soft.png',
-    proportions: { headRatio: 0.15, bodyRatio: 0.85, limbRatio: 0.95 },
-    characteristics: ['Soft brushstrokes', 'Watercolor textures', 'Gentle gradients', 'Organic shapes', 'Pastel tones', 'Artistic flow']
-  },
-  {
-    id: 'minimalist-clean',
-    name: 'Minimalist Clean',
-    style: 'Simple minimalist design',
-    description: 'Clean, simple lines with minimal detail',
-    thumbnail: '/templates/minimalist-clean.png',
-    proportions: { headRatio: 0.14, bodyRatio: 0.86, limbRatio: 1.0 },
-    characteristics: ['Simple lines', 'Minimal details', 'Clean composition', 'Geometric shapes', 'Limited colors', 'Modern aesthetic']
-  },
-  {
-    id: 'vintage-retro',
-    name: 'Vintage Retro',
-    style: 'Classic retro anime style',
-    description: '80s-90s classic anime aesthetic',
-    thumbnail: '/templates/vintage-retro.png',
-    proportions: { headRatio: 0.12, bodyRatio: 0.88, limbRatio: 1.1 },
-    characteristics: ['Retro color palette', 'Classic proportions', 'Bold outlines', 'Vintage shading', 'Nostalgic feel', '80s aesthetic']
-  },
-  {
-    id: 'dark-fantasy',
-    name: 'Dark Fantasy',
-    style: 'Dark fantasy aesthetic',
-    description: 'Mysterious and dramatic dark fantasy style',
-    thumbnail: '/templates/dark-fantasy.png',
-    proportions: { headRatio: 0.13, bodyRatio: 0.87, limbRatio: 1.0 },
-    characteristics: ['Dark atmosphere', 'Dramatic lighting', 'Fantasy elements', 'Mystical details', 'Rich shadows', 'Ethereal quality']
-  },
-  {
-    id: 'sports-dynamic',
-    name: 'Sports Dynamic',
-    style: 'Athletic action style',
-    description: 'Dynamic sports anime with action poses',
-    thumbnail: '/templates/sports-dynamic.png',
-    proportions: { headRatio: 0.11, bodyRatio: 0.89, limbRatio: 1.1 },
-    characteristics: ['Athletic build', 'Dynamic poses', 'Motion lines', 'Sports equipment', 'Energetic aura', 'Action-focused']
-  },
-  {
-    id: 'slice-of-life',
-    name: 'Slice of Life',
-    style: 'Everyday realistic style',
-    description: 'Natural, everyday anime style',
-    thumbnail: '/templates/slice-of-life.png',
-    proportions: { headRatio: 0.13, bodyRatio: 0.87, limbRatio: 1.0 },
-    characteristics: ['Natural expressions', 'Casual clothing', 'Realistic settings', 'Warm lighting', 'Comfortable poses', 'Relatable features']
-  },
-  {
-    id: 'horror-creepy',
-    name: 'Horror Creepy',
-    style: 'Eerie horror aesthetic',
-    description: 'Unsettling horror anime style',
-    thumbnail: '/templates/horror-creepy.png',
-    proportions: { headRatio: 0.14, bodyRatio: 0.86, limbRatio: 0.95 },
-    characteristics: ['Eerie atmosphere', 'Distorted features', 'Dark shadows', 'Unsettling details', 'Horror elements', 'Creepy ambiance']
-  }
-]
-
-interface DesignBrief {
-  character: {
-    name?: string
-    personality: string
-    age: string
-    gender: string
-  }
-  appearance: {
-    hair: {
-      color: string
-      style: string
-      length: string
-    }
-    eyes: {
-      color: string
-      shape: string
-      expression: string
-    }
-    outfit: {
-      style: string
-      colors: string[]
-      accessories: string[]
-    }
-    body: {
-      height: string
-      build: string
-    }
-  }
-  mood: string
-  colorPalette: string[]
-  specialFeatures: string[]
-  pose: string
-  background?: string
-}
+const router = express.Router();
 
 export function setupAnimeCharaHelperRoutes(app: express.Application) {
   
-  // Get character templates
-  app.get('/api/anime-chara/templates', authenticateUser, async (req: AuthRequest, res) => {
-    try {
-      res.json({
-        templates: characterTemplates,
-        total: characterTemplates.length
-      })
-    } catch (error) {
-      console.error('Get templates error:', error)
-      res.status(500).json({ error: 'Failed to get character templates' })
-    }
+  // Get all character templates
+  app.get('/api/anime-chara/templates', (req, res) => {
+    res.json(characterTemplates)
   })
 
   // Start character design session
@@ -478,14 +244,9 @@ Provide feedback in JSON format:
         return res.status(500).json({ error: 'Failed to analyze drawing progress' })
       }
 
-      res.json({
-        analysis,
-        timestamp: new Date().toISOString(),
-        stage: stage || 'general'
-      })
-
+      res.json(analysis)
     } catch (error) {
-      console.error('Analyze progress error:', error)
+      console.error('Error analyzing drawing progress:', error)
       res.status(500).json({ error: 'Failed to analyze drawing progress' })
     }
   })
@@ -639,6 +400,21 @@ Provide feedback in JSON format:
       res.status(500).json({ error: 'Failed to download style' })
     }
   })
+
+  // AI Character Generation
+  router.post('/generate', requireUser, async (req: AuthRequest, res) => {
+    try {
+      const result = await generateAnimeCharacter(
+        req.user!.id.toString(),
+        req.body.description,
+        req.body.settings
+      );
+      res.json(result);
+    } catch (error) {
+      console.error('[AI-GEN]', error);
+      res.status(500).json({ error: 'Failed to generate character image' });
+    }
+  });
 }
 
 // Helper functions
@@ -728,4 +504,6 @@ Maintain consistency with the existing character while improving the masked regi
     console.error('Region regeneration failed:', error)
     throw new Error('Failed to regenerate character region')
   }
-} 
+}
+
+export default router; 

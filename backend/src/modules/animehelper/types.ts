@@ -95,4 +95,42 @@ export interface ProgressAnalysis {
   favoriteStyles: string[]
   improvementSuggestions: string[]
   skillLevel: 'beginner' | 'intermediate' | 'advanced'
+}
+
+export interface StructuredPrompt {
+  subject: string;
+  pose: string;
+  expression: string;
+  clothingAndAccessories: string;
+  hairAndColorPalette: string;
+  lightingAndMood: string;
+  artStyleAndDetail: string;
+  finishAndPostProcess: string;
+}
+
+export interface AIGenerationSettings {
+  referenceImage?: string; // base64 encoded image
+  iterations: number; // number of variations to generate
+  useCustomModel: boolean;
+  postProcessing: {
+    upscale: boolean;
+    denoise: boolean;
+    lineArtCleanup: boolean;
+    colorCorrection: {
+      contrast: number;
+      saturation: number;
+      bloom: number;
+    };
+  };
+}
+
+export interface GeneratedImage {
+  url: string;
+  prompt: StructuredPrompt;
+  settings: AIGenerationSettings;
+  metadata: {
+    referenceImageId?: string;
+    modelUsed: string;
+    timestamp: number;
+  };
 } 
