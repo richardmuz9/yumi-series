@@ -1,5 +1,6 @@
 import sharp from 'sharp';
-import fetch from 'node-fetch';
+// Using dynamic import for node-fetch
+import type { Response } from 'node-fetch';
 
 interface PostProcessingOptions {
   upscale: boolean;
@@ -13,8 +14,11 @@ interface PostProcessingOptions {
 }
 
 export async function processImage(imageUrl: string, options: PostProcessingOptions): Promise<string> {
+  // Dynamically import node-fetch
+  const fetch = (await import('node-fetch')).default;
+  
   // Download the image
-  const response = await fetch(imageUrl);
+  const response: Response = await fetch(imageUrl);
   const buffer = await response.arrayBuffer();
 
   let image = sharp(Buffer.from(buffer));

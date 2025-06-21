@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3'
 import { promisify } from 'util'
 import path from 'path'
+import fs from 'fs'
 
 // Database interface
 export interface User {
@@ -51,11 +52,23 @@ class Database {
   private allAsync: (sql: string, params?: any[]) => Promise<any[]>
 
   constructor() {
-    // Use /tmp/ for Railway production, local path for development
-    const dbPath = process.env.NODE_ENV === 'production' 
-      ? '/tmp/database.sqlite' 
-      : path.join(__dirname, '../database.sqlite')
+    // Define database directory and path
+    const dbDir = process.env.NODE_ENV === 'production'
+      ? path.join(process.cwd(), 'data')
+      : path.join(__dirname, '../data')
+    
+    const dbPath = path.join(dbDir, 'database.sqlite')
       
+    // Ensure database directory exists
+    if (!fs.existsSync(dbDir)) {
+      try {
+        fs.mkdirSync(dbDir, { recursive: true })
+        console.log('📁 Created database directory:', dbDir)
+      } catch (err) {
+        console.error('❌ Failed to create database directory:', err)
+      }
+    }
+    
     console.log('📂 Database path:', dbPath)
     console.log('📁 Current working directory:', process.cwd())
     console.log('📁 __dirname:', __dirname)
@@ -64,11 +77,9 @@ class Database {
     this.db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
         console.error('❌ SQLite connection error:', err)
-        // Try creating database in memory as fallback for Railway
-        if (process.env.NODE_ENV === 'production') {
-          console.warn('🔄 Falling back to in-memory SQLite database')
-          this.db = new sqlite3.Database(':memory:')
-        }
+        // Try creating database in memory as fallback
+        console.warn('🔄 Falling back to in-memory SQLite database')
+        this.db = new sqlite3.Database(':memory:')
       } else {
         console.log('✅ SQLite database connected successfully')
       }
