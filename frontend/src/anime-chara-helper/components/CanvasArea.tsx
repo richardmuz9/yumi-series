@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
-import { CanvasState } from '../types';
+import { CanvasState, LayerData, DrawingTool, BlendMode } from '../types';
 
 export interface CanvasAreaProps {
   tool: DrawingTool;
@@ -25,20 +25,6 @@ export interface CanvasAreaRef {
   importLayers: (layers: LayerData[]) => void;
   regenerateRegion: (maskData: string) => Promise<void>;
 }
-
-// Layer system interfaces
-export interface LayerData {
-  id: string;
-  name: string;
-  canvas: HTMLCanvasElement;
-  visible: boolean;
-  opacity: number;
-  blendMode: BlendMode;
-  locked: boolean;
-}
-
-export type DrawingTool = 'brush' | 'eraser' | 'mask' | 'selection';
-export type BlendMode = 'normal' | 'multiply' | 'overlay' | 'screen' | 'soft-light';
 
 const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>((props, ref) => {
   const {

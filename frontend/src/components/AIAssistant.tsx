@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useStore } from '../store'
 import { useChat } from '../hooks/useChat'
-import './AIAssistant/styles.css'
+import './AIAssistant.css'
 
 const GUIDES = [
   {
