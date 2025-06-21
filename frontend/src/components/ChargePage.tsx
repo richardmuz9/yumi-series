@@ -42,23 +42,31 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
           {
             id: 'starter',
             name: 'Starter Pack',
-            tokens: 1000,
-            price: 9.99,
-            description: '1,000 tokens for basic usage'
+            tokens: 300000,
+            price: 500,
+            description: '300K tokens for basic writing and character design'
+          },
+          {
+            id: 'creative',
+            name: 'Creative Pack',
+            tokens: 700000,
+            price: 1000,
+            description: '700K tokens for regular content creation',
+            recommended: true
           },
           {
             id: 'pro',
-            name: 'Pro Pack',
-            tokens: 5000,
-            price: 39.99,
-            description: '5,000 tokens for power users'
+            name: 'Professional Pack',
+            tokens: 1800000,
+            price: 2000,
+            description: '1.8M tokens for serious writers and artists'
           },
           {
-            id: 'enterprise',
-            name: 'Enterprise Pack',
-            tokens: 15000,
-            price: 99.99,
-            description: '15,000 tokens for teams'
+            id: 'studio',
+            name: 'Studio Pack',
+            tokens: 4500000,
+            price: 5000,
+            description: '4.5M tokens for professional studios'
           }
         ])
       }
@@ -140,12 +148,16 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
       setError(null)
       console.log('[Payment] Initiating token purchase for package:', packageId, 'with method:', selectedPayment)
       
-      const successUrl = `${window.location.origin}/charge?success=true`
+      const successUrl = `${window.location.origin}/charge?success=true&demo=true&plan=monthly-pro`
       const cancelUrl = `${window.location.origin}/charge?canceled=true`
       
       if (selectedPayment === 'alipay') {
         const result = await billingApi.createAlipayPayment(packageId, successUrl)
-        window.open(result.paymentUrl, '_blank')
+        // Open Alipay in a new window to prevent main window refresh
+        const paymentWindow = window.open(result.paymentUrl, '_blank')
+        if (!paymentWindow) {
+          throw new Error('Popup blocked. Please allow popups and try again.')
+        }
         console.log('[Payment] Alipay payment URL opened:', result.paymentUrl)
       } else {
         const result = await billingApi.createCheckoutSession({
@@ -154,7 +166,8 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
           successUrl,
           cancelUrl
         })
-        window.location.href = result.url
+        // Use window.location.assign to prevent form submission
+        window.location.assign(result.url)
         console.log('[Payment] Stripe checkout session started:', result.url)
       }
     } catch (err) {
@@ -317,86 +330,65 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
             </button>
           </div>
 
-          <div className="payment-method-section">
-            <h3 className="section-title">Payment Method</h3>
-            <div className="payment-methods-enhanced">
-              <label className={`payment-method-card ${selectedPayment === 'card' ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="payment"
-                  value="card"
-                  checked={selectedPayment === 'card'}
-                  onChange={(e) => setSelectedPayment(e.target.value as 'card' | 'alipay')}
-                />
-                <div className="payment-method-content">
-                  <span className="payment-icon">💳</span>
-                  <span className="payment-name">Credit Card</span>
-                  <span className="payment-desc">Visa, Mastercard, Amex</span>
-                </div>
-                <div className="payment-check">✓</div>
-              </label>
-              <label className={`payment-method-card ${selectedPayment === 'alipay' ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="payment"
-                  value="alipay"
-                  checked={selectedPayment === 'alipay'}
-                  onChange={(e) => setSelectedPayment(e.target.value as 'card' | 'alipay')}
-                />
-                <div className="payment-method-content">
-                  <span className="payment-icon">🏧</span>
-                  <span className="payment-name">Alipay</span>
-                  <span className="payment-desc">支付宝</span>
-                </div>
-                <div className="payment-check">✓</div>
-              </label>
+          <div className="token-packages">
+            <h3>Token Packages</h3>
+            <div className="package-grid">
+              {tokenPackages.map((pkg) => (
+                <button
+                  key={pkg.id}
+                  type="button"
+                  onClick={() => handleTokenPurchase(pkg.id)}
+                  disabled={processingPayment === pkg.id}
+                  className={`package-card ${pkg.recommended ? 'recommended' : ''}`}
+                >
+                  <div className="package-header">
+                    <h4>{pkg.name}</h4>
+                    {pkg.recommended && <span className="recommended-badge">Recommended</span>}
+                  </div>
+                  <div className="package-tokens">{formatTokens(pkg.tokens)} tokens</div>
+                  <div className="package-price">{formatPrice(pkg.price)}</div>
+                  <div className="package-description">{pkg.description}</div>
+                  {processingPayment === pkg.id ? (
+                    <div className="processing">Processing...</div>
+                  ) : (
+                    <div className="package-cta">Select Package →</div>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
 
-          {activeTab === 'tokens' && (
-            <div className="tokens-section-enhanced">
-              <h3 className="section-title">Select Token Package</h3>
-              <div className="packages-grid-enhanced">
-                {tokenPackages.map((pkg) => (
-                  <div 
-                    key={pkg.id} 
-                    className={`package-card-enhanced ${pkg.recommended ? 'recommended' : ''}`}
-                  >
-                    {pkg.recommended && <div className="recommended-badge">Most Popular</div>}
-                    <div className="package-header-enhanced">
-                      <h4 className="package-name">{pkg.name}</h4>
-                      <div className="package-price-enhanced">{formatPrice(pkg.price)}</div>
-                    </div>
-                    <div className="package-tokens-enhanced">
-                      <span className="token-amount">{formatTokens(pkg.tokens || (pkg.credits || 0) * 50000)}</span>
-                      <span className="token-label">tokens</span>
-                    </div>
-                    <p className="package-description">{pkg.description}</p>
-                    <div className="package-value">
-                      {pkg.tokens ? 
-                        `$${((pkg.price / 100) / (pkg.tokens / 1000000)).toFixed(2)} per 1M tokens` :
-                        `~${formatTokens((pkg.credits || 0) * 50000)} estimated tokens`
-                      }
-                    </div>
-                    <button
-                      className="purchase-btn-enhanced"
-                      onClick={() => handleTokenPurchase(pkg.id)}
-                      disabled={processingPayment === pkg.id}
-                    >
-                      {processingPayment === pkg.id ? (
-                        <>
-                          <span className="spinner small"></span>
-                          Processing...
-                        </>
-                      ) : (
-                        `Continue to Payment`
-                      )}
-                    </button>
-                  </div>
-                ))}
-              </div>
+          <div className="payment-methods">
+            <h3>Payment Method</h3>
+            <div className="method-grid">
+              <button
+                type="button"
+                onClick={() => setSelectedPayment('card')}
+                className={`method-card ${selectedPayment === 'card' ? 'selected' : ''}`}
+              >
+                <div className="method-icon">💳</div>
+                <div className="method-name">Credit Card</div>
+                <div className="method-subtitle">Visa, Mastercard, Amex</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedPayment('alipay')}
+                className={`method-card ${selectedPayment === 'alipay' ? 'selected' : ''}`}
+              >
+                <div className="method-icon">🌏</div>
+                <div className="method-name">Alipay</div>
+                <div className="method-subtitle">支付宝</div>
+              </button>
             </div>
-          )}
+          </div>
+
+          <div className="secure-notice">
+            <div className="notice-icon">🔒</div>
+            <div className="notice-text">
+              Secure payment powered by Stripe
+              <div className="notice-subtext">Your payment information is encrypted and secure</div>
+            </div>
+          </div>
 
           {activeTab === 'subscription' && (
             <div className="subscription-section-enhanced">

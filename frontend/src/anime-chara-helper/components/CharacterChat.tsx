@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ColorPaletteEngine, { COLOR_PALETTES } from './ColorPaletteEngine'
 import PoseLibrary, { CHARACTER_POSES } from './PoseLibrary'
+import { CharacterData } from '../types'
 
 interface ColorPalette {
   id: string
@@ -30,21 +31,19 @@ interface CharacterPersonality {
 }
 
 interface CharacterChatProps {
-  onComplete?: (data: any) => void;
-  clarificationQuestions?: string[];
-  existingBrief?: any;
+  characterData: CharacterData;
+  onCharacterDataChange: (data: CharacterData) => void;
 }
 
-const CharacterChat: React.FC<CharacterChatProps> = ({ 
-  onComplete,
-  clarificationQuestions = [],
-  existingBrief 
+const CharacterChat: React.FC<CharacterChatProps> = ({
+  characterData,
+  onCharacterDataChange
 }) => {
   const [selectedPalette, setSelectedPalette] = useState<ColorPalette>(COLOR_PALETTES[0])
   const [selectedPose, setSelectedPose] = useState<CharacterPose>(CHARACTER_POSES[0])
   const [characterPersonality, setCharacterPersonality] = useState<CharacterPersonality>(() => {
-    if (existingBrief?.character) {
-      return existingBrief.character
+    if (characterData?.character) {
+      return characterData.character
     }
     return {
       name: '',
@@ -75,8 +74,8 @@ const CharacterChat: React.FC<CharacterChatProps> = ({
     
     console.log(`Generating bio for ${characterPersonality.name} with traits: ${traits} and motifs: ${motifs}`)
     
-    if (onComplete && characterPersonality.name && characterPersonality.traits.length > 0) {
-      onComplete({
+    if (onCharacterDataChange && characterPersonality.name && characterPersonality.traits.length > 0) {
+      onCharacterDataChange({
         sessionId: `session_${Date.now()}`,
         designBrief: {
           character: characterPersonality,
@@ -84,7 +83,7 @@ const CharacterChat: React.FC<CharacterChatProps> = ({
           pose: selectedPose,
           stage: progressStage
         },
-        clarificationQuestions: clarificationQuestions
+        clarificationQuestions: []
       })
     }
   }
@@ -303,21 +302,6 @@ const CharacterChat: React.FC<CharacterChatProps> = ({
             </div>
           </div>
         )}
-
-        {/* Clarification Questions */}
-        {clarificationQuestions.length > 0 && (
-          <div className="form-section">
-            <h3>❓ Clarification Questions</h3>
-            <div className="questions-list">
-              {clarificationQuestions.map((question: string, index: number) => (
-                <div key={index} className="question-item">
-                  <span className="question-icon">❓</span>
-                  <span className="question-text">{question}</span>
-                </div>
-              ))}
-              </div>
-            </div>
-          )}
 
         {/* Action Buttons */}
         <div className="form-actions">

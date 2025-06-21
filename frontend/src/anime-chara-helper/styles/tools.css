@@ -1,0 +1,254 @@
+/* Drawing Tools Styles */
+.drawing-tools.enhanced {
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  width: 60px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.tool-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tool-group label {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.tool-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tool-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.tool-btn:hover {
+  background: #e0e0e0;
+}
+
+.tool-btn.active {
+  background: #6c5ce7;
+  color: white;
+}
+
+.size-slider, .opacity-slider {
+  width: 100%;
+  margin: 5px 0;
+}
+
+/* Mobile Responsive Enhancements */
+@media (max-width: 768px) {
+  .drawing-tools.enhanced {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    margin-bottom: 1rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem;
+    max-height: none;
+  }
+
+  .tool-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tool-group label {
+    margin-bottom: 0;
+    min-width: 60px;
+    font-size: 0.8rem;
+  }
+
+  .tool-buttons {
+    gap: 0.25rem;
+  }
+
+  .tool-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+
+  .size-slider, .opacity-slider {
+    width: 80px;
+  }
+}
+
+.tools-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.tool-group-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+
+.tool-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  transition: all 0.2s ease;
+}
+
+.tool-button:hover {
+  background: var(--surface-3);
+}
+
+.tool-button.active {
+  background: var(--active-bg);
+  color: var(--active-text);
+}
+
+.tool-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-label {
+  font-size: 14px;
+}
+
+.tool-settings {
+  padding: 12px;
+  background: var(--surface-2);
+  border-radius: 6px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.setting-row:last-child {
+  margin-bottom: 0;
+}
+
+.setting-label {
+  font-size: 14px;
+  color: var(--text-2);
+  min-width: 80px;
+}
+
+.setting-control {
+  flex: 1;
+}
+
+.color-picker {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.size-slider {
+  width: 100%;
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  -webkit-appearance: none;
+}
+
+.size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.size-slider::-webkit-slider-thumb:hover {
+  background: var(--accent-2);
+  transform: scale(1.1);
+}
+
+.opacity-slider {
+  width: 100%;
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  -webkit-appearance: none;
+}
+
+.opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.opacity-slider::-webkit-slider-thumb:hover {
+  background: var(--accent-2);
+  transform: scale(1.1);
+}
+
+.blend-mode-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--surface-1);
+  color: var(--text-1);
+  cursor: pointer;
+}
+
+.blend-mode-select:hover {
+  border-color: var(--accent-1);
+}
+
+.blend-mode-select:focus {
+  outline: none;
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 2px var(--accent-1-alpha);
+} 

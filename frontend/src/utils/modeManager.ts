@@ -26,15 +26,6 @@ class ModeManager {
   private readonly CACHE_PREFIX = 'yumi-mode-';
   
   private modeConfigs: Record<string, ModeConfig> = {
-    'web-builder': {
-      id: 'web-builder',
-      name: 'Web Builder',
-      version: '1.0.0',
-      size: 2200000, // 2.2 MB
-      dependencies: ['@monaco-editor/react', 'react-dnd'],
-      cacheKeys: ['web-builder-templates', 'web-builder-components'],
-      assets: ['webbuilder-icons.png', 'webbuilder-templates.json']
-    },
     'writing-helper': {
       id: 'writing-helper',
       name: 'Writing Helper',
@@ -44,15 +35,6 @@ class ModeManager {
       cacheKeys: ['writing-templates', 'character-styles', 'genre-templates'],
       assets: ['writing-templates.json', 'character-personas.json', 'genre-styles.json']
     },
-    'report-writer': {
-      id: 'report-writer',
-      name: 'Report Writer',
-      version: '1.0.0',
-      size: 1500000, // 1.5 MB
-      dependencies: ['latex-js', 'chart.js'],
-      cacheKeys: ['report-templates', 'latex-packages'],
-      assets: ['report-templates.json', 'chart-themes.json']
-    },
     'anime-chara-helper': {
       id: 'anime-chara-helper',
       name: 'Anime Character Designer',
@@ -61,20 +43,11 @@ class ModeManager {
       dependencies: ['fabric', 'color-picker'],
       cacheKeys: ['anime-assets', 'character-presets'],
       assets: ['anime-parts.json', 'character-templates.json', 'anime-backgrounds.png']
-    },
-    'study-advisor': {
-      id: 'study-advisor',
-      name: 'Study Advisor',
-      version: '1.0.0',
-      size: 1200000, // 1.2 MB
-      dependencies: ['chart.js'],
-      cacheKeys: ['university-data', 'textbook-data'],
-      assets: ['universities.js', 'textbooks.js']
     }
   };
 
   // Core modes that cannot be uninstalled
-  private readonly coreModes = ['web-builder'];
+  private readonly coreModes = ['writing-helper', 'anime-chara-helper']
 
   /**
    * Get list of currently installed modes

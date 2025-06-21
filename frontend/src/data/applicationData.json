@@ -1,34 +1,16 @@
 {
   "allModes": [
     {
-      "icon": "🌐",
-      "title": "Web Builder", 
-      "description": "Create websites and web applications with AI assistance",
-      "key": "web-builder"
-    },
-    {
       "icon": "✒️",
       "title": "Writing Helper",
       "description": "AI-powered writing assistant for scripts, blogs, posts & creative content",
       "key": "writing-helper"
     },
     {
-      "icon": "📊",
-      "title": "Report Writer",
-      "description": "Professional report and document generation with AI",
-      "key": "report-writer"
-    },
-    {
       "icon": "🎨",
       "title": "Anime Character Helper",
       "description": "Create anime characters with AI assistance",
       "key": "anime-chara-helper"
-    },
-    {
-      "icon": "🎓",
-      "title": "Study Advisor",
-      "description": "AI-powered academic guidance and study planning",
-      "key": "study-advisor"
     }
   ],
   "languages": [

@@ -159,8 +159,17 @@ export const corsOptions = {
 };
 
 // Shared interfaces
-export interface ChatMessage {
-  role: 'user' | 'assistant'
+interface User {
+  id: string
+  isPaid?: boolean
+}
+
+interface ExtendedUser extends User {
+  isPaid?: boolean
+}
+
+interface ChatMessage {
+  role: 'system' | 'user' | 'assistant'
   content: string
 }
 
@@ -381,17 +390,6 @@ export function addHealthCheck(app: express.Application) {
         mode = 'assistant' 
       } = req.body
 
-      // Force free providers to avoid credit issues
-      let provider = requestedProvider
-      let model = requestedModel
-      
-      // Redirect expensive providers to free Qwen
-      if (requestedProvider === 'openai' || requestedProvider === 'claude') {
-        console.log(`🔄 Redirecting ${requestedProvider}/${requestedModel} to qwen/qwen-turbo (free provider)`)
-        provider = 'qwen'
-        model = 'qwen-turbo'
-      }
-
       // Support both single message and messages array formats
       let userMessage: string
       if (messages && Array.isArray(messages) && messages.length > 0) {
@@ -403,39 +401,86 @@ export function addHealthCheck(app: express.Application) {
         return res.status(400).json({ error: 'Message or messages array is required' })
       }
 
-      const client = getOpenAICompatibleClient(provider)
+      // Check user's paid status
+      const isPaid = req.user?.subscriptionStatus === 'premium_monthly' || req.user?.subscriptionStatus === 'paid_tokens'
       
-      const response = await client.chat.completions.create({
-        model,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a helpful AI assistant that recommends the best AI models for users based on their needs. Be concise and practical in your recommendations.'
-          },
-          {
-            role: 'user',
-            content: userMessage
-          }
-        ],
-        max_tokens: 300,
-        temperature: 0.7
-      })
+      // Determine provider and model based on paid status
+      let provider = requestedProvider
+      let model = requestedModel
 
-      const assistantMessage = response.choices[0]?.message?.content || 'I apologize, but I cannot provide a recommendation at this time.'
-
-      // Deduct tokens for chat
-      const tokenCost = calculateTokenCost(model, userMessage.length)
-      if (req.user) {
-        await deductTokens(req.user.id, tokenCost, model, 'Model recommendation chat')
+      if (!isPaid && (provider === 'openai' || provider === 'claude')) {
+        console.log(`🔄 Redirecting ${provider}/${model} to qwen/qwen-turbo (free provider)`)
+        provider = 'qwen'
+        model = 'qwen-turbo'
       }
 
-      res.json({ 
-        response: assistantMessage,  // Frontend expects 'response' field
-        message: assistantMessage,   // Keep for backward compatibility
-        model,
-        provider,
-        tokensUsed: tokenCost
-      })
+      // Get the appropriate client
+      const client = getOpenAICompatibleClient(provider)
+      
+      // Prepare system prompt based on mode
+      let systemPrompt = 'You are a helpful AI assistant.'
+      if (mode === 'writing') {
+        systemPrompt = 'You are a writing assistant helping users create engaging content.'
+      } else if (mode === 'anime') {
+        systemPrompt = 'You are an anime character design assistant helping users create unique characters.'
+      }
+
+      // Prepare messages array
+      const messageArray: ChatMessage[] = [
+        {
+          role: 'system',
+          content: systemPrompt
+        }
+      ]
+
+      // Add chat history if provided
+      if (messages && Array.isArray(messages)) {
+        messageArray.push(...(messages as ChatMessage[]))
+      } else {
+        messageArray.push({
+          role: 'user',
+          content: userMessage
+        })
+      }
+
+      try {
+        const response = await client.chat.completions.create({
+          model,
+          messages: messageArray,
+          max_tokens: 1000,
+          temperature: 0.7
+        })
+
+        const assistantMessage = response.choices[0]?.message?.content || 'I apologize, but I cannot provide a response at this time.'
+
+        // Deduct tokens for chat
+        const tokenCost = calculateTokenCost(model, userMessage.length)
+        if (req.user) {
+          await deductTokens(req.user.id, tokenCost, model, 'Chat')
+        }
+
+        res.json({ 
+          response: assistantMessage,
+          message: assistantMessage,
+          model,
+          provider,
+          tokensUsed: tokenCost
+        })
+      } catch (error: any) {
+        console.error('Chat API error:', error)
+        
+        if (error.message?.includes('rate limit') || error.message?.includes('quota')) {
+          res.status(429).json({ 
+            error: 'Rate limit exceeded. Please try again later.',
+            retryAfter: 60
+          })
+        } else {
+          res.status(500).json({ 
+            error: 'Failed to process your request. Please try again.',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+          })
+        }
+      }
     } catch (error) {
       console.error('Chat error:', error)
       res.status(500).json({ error: 'Failed to process chat request' })

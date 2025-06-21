@@ -24,24 +24,14 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
   const [showInstructions, setShowInstructions] = useState(false)
 
   useEffect(() => {
-    console.log('[PWA] PWAInstaller component mounted')
-    
     // Check if app is already installed
     const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches
-    console.log('[PWA] App installation status:', {
-      standalone: (window.navigator as any).standalone,
-      displayMode: window.matchMedia('(display-mode: standalone)').matches,
-      isInstalled: isStandalone
-    })
-    
     if (isStandalone) {
       setIsInstalled(true)
     }
 
     // Detect platform
     const userAgent = navigator.userAgent.toLowerCase()
-    console.log('[PWA] User agent:', userAgent)
-    
     if (userAgent.includes('android')) {
       setPlatform('android')
     } else if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
@@ -55,26 +45,16 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
     }
 
     // Listen for the beforeinstallprompt event
-    const handleBeforeInstallPrompt = (e: Event) => {
-      console.log('[PWA] beforeinstallprompt fired!', e)
-      console.log('[PWA] Event details:', {
-        type: e.type,
-        platforms: (e as BeforeInstallPromptEvent).platforms,
-        defaultPrevented: e.defaultPrevented
-      })
-      
+    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      // Prevent Chrome's default mini-infobar from appearing
       e.preventDefault()
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
+      // Save the event so we can trigger it later
+      setDeferredPrompt(e)
       setIsInstallable(true)
-      
-      // Store globally for debugging
-      ;(window as any).deferredPrompt = e
-      console.log('[PWA] Deferred prompt stored, isInstallable set to true')
     }
 
     // Listen for app installed event
     const handleAppInstalled = () => {
-      console.log('[PWA] App installed event fired!')
       setIsInstalled(true)
       setDeferredPrompt(null)
       setIsInstallable(false)
@@ -91,98 +71,45 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
       }
     }
 
-    // Global PWA debugging
-    console.log('[PWA] Service Worker support:', 'serviceWorker' in navigator)
-    console.log('[PWA] Current protocol:', window.location.protocol)
-    console.log('[PWA] Is HTTPS:', window.location.protocol === 'https:')
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as any)
     window.addEventListener('appinstalled', handleAppInstalled)
 
-    // Check if we already have a deferred prompt stored
-    if ((window as any).deferredPrompt) {
-      console.log('[PWA] Found existing deferred prompt on window')
-      setDeferredPrompt((window as any).deferredPrompt)
-      setIsInstallable(true)
-    }
-
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as any)
       window.removeEventListener('appinstalled', handleAppInstalled)
     }
   }, [])
 
   const handleInstallClick = async () => {
-    console.log('[PWA] Install button clicked!')
-    console.log('[PWA] Current state:', {
-      deferredPrompt: !!deferredPrompt,
-      isInstallable,
-      platform,
-      isInstalled
-    })
-    
     if (!deferredPrompt) {
-      console.log('[PWA] No deferred prompt available, showing instructions')
-      console.log('[PWA] Checking global window.deferredPrompt:', !!(window as any).deferredPrompt)
-      
-      // Try to use global deferred prompt as fallback
-      if ((window as any).deferredPrompt) {
-        console.log('[PWA] Using global deferred prompt as fallback')
-        setDeferredPrompt((window as any).deferredPrompt)
-        setIsInstallable(true)
-        // Retry with the global prompt
-        return handleInstallClick()
-      }
-      
       setShowInstructions(true)
       return
     }
 
     try {
-      console.log('[PWA] Starting PWA installation...')
-      console.log('[PWA] Deferred prompt details:', {
-        platforms: deferredPrompt.platforms,
-        userChoice: deferredPrompt.userChoice
-      })
-      
+      // Hide the install button
+      setIsInstallable(false)
+      // Show the native install prompt
       await deferredPrompt.prompt()
-      console.log('[PWA] Prompt shown, waiting for user choice...')
-      
+      // Wait for the user to respond
       const { outcome } = await deferredPrompt.userChoice
       
-      console.log('[PWA] Install prompt result:', {
-        outcome,
-        timestamp: new Date().toISOString()
-      })
-      
       if (outcome === 'accepted') {
-        console.log('✅ User accepted the install prompt')
-        alert('App installation started! Check your home screen shortly.')
         // Close the installer on successful installation
         setTimeout(() => {
           onClose()
         }, 1000)
       } else {
-        console.log('❌ User dismissed the install prompt')
-        alert('Installation cancelled. You can install later from your browser menu.')
-      }
-      
-      setDeferredPrompt(null)
-      setIsInstallable(false)
-      // Clear global reference
-      ;(window as any).deferredPrompt = null
-      
-          } catch (error) {
-        console.error('[PWA] Install prompt failed:', error)
-        const errorObj = error as Error
-        console.error('[PWA] Error details:', {
-          name: errorObj.name,
-          message: errorObj.message,
-          stack: errorObj.stack
-        })
-        alert(`Installation failed: ${errorObj.message}. Please try installing manually from your browser menu.`)
+        // Show instructions if user dismisses
         setShowInstructions(true)
       }
+      
+      // Clear the deferred prompt - it can only be used once
+      setDeferredPrompt(null)
+    } catch (error) {
+      console.error('Install failed:', error)
+      setShowInstructions(true)
+    }
   }
 
   const getPlatformIcon = () => {
@@ -249,182 +176,65 @@ const PWAInstaller: React.FC<PWAInstallerProps> = ({ onClose }) => {
             <h2>✅ App Installed!</h2>
             <button className="close-btn" onClick={onClose}>×</button>
           </div>
-          <div className="pwa-body">
-            <div className="install-success">
-              <div className="success-icon">🎉</div>
-              <h3>Yumi Series is now installed!</h3>
-              <p>You can access the app directly from your {getPlatformName()} home screen or desktop.</p>
-              
-              <div className="installed-features">
-                <div className="feature-item">
-                  <span className="feature-icon">⚡</span>
-                  <span>Faster loading</span>
-                </div>
-                <div className="feature-item">
-                  <span className="feature-icon">📱</span>
-                  <span>Native app experience</span>
-                </div>
-                <div className="feature-item">
-                  <span className="feature-icon">🔔</span>
-                  <span>Push notifications</span>
-                </div>
-                <div className="feature-item">
-                  <span className="feature-icon">🌐</span>
-                  <span>Offline capabilities</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <p>You can now access Yumi Series from your home screen or app launcher.</p>
+          <button className="primary-btn" onClick={onClose}>Got it!</button>
         </div>
       </div>
     )
   }
+
+  const instructions = getInstallInstructions()
 
   return (
     <div className="pwa-installer">
       <div className="pwa-overlay" onClick={onClose} />
       <div className="pwa-content">
         <div className="pwa-header">
-          <h2>
-            {getPlatformIcon()} Install Yumi Series
-          </h2>
+          <h2>{getPlatformIcon()} Install Yumi Series on {getPlatformName()}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
 
-        <div className="pwa-body">
-          {!showInstructions ? (
-            <>
-              <div className="install-hero">
-                <div className="app-preview">
-                  <img src="/yumi-tusr.png" alt="Yumi Series" className="app-icon" />
-                  <div className="app-info">
-                    <h3>Yumi Series</h3>
-                    <p>AI-Powered Creative Suite</p>
-                    <div className="app-rating">
-                      <span className="stars">⭐⭐⭐⭐⭐</span>
-                      <span className="rating-text">Excellent</span>
-                    </div>
-                  </div>
-                </div>
+        {showInstructions ? (
+          <div className="pwa-instructions">
+            <h3>{instructions.title}</h3>
+            <ul>
+              {instructions.steps.map((step, index) => (
+                <li key={index}>{step}</li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="pwa-benefits">
+            <h3>Why install Yumi Series?</h3>
+            <ul>
+              <li>✨ Instant access to Writing Helper and Anime Designer</li>
+              <li>📱 Works offline - create content anywhere</li>
+              <li>🚀 Faster performance and smoother animations</li>
+              <li>💾 Efficient storage with smart caching</li>
+              <li>🔄 Automatic updates and syncing</li>
+              <li>🎨 Full-screen canvas for character design</li>
+              <li>📝 Distraction-free writing environment</li>
+            </ul>
+          </div>
+        )}
 
-                <div className="install-benefits">
-                  <h4>Get the app for the best experience</h4>
-                  <div className="benefits-grid">
-                    <div className="benefit-item">
-                      <span className="benefit-icon">🚀</span>
-                      <div>
-                        <strong>Faster loading and performance</strong>
-                        <p>Optimized for speed with advanced caching</p>
-                      </div>
-                    </div>
-                    <div className="benefit-item">
-                      <span className="benefit-icon">📱</span>
-                      <div>
-                        <strong>Works offline with cached content</strong>
-                        <p>Continue working even without internet</p>
-                      </div>
-                    </div>
-                    <div className="benefit-item">
-                      <span className="benefit-icon">🔔</span>
-                      <div>
-                        <strong>Get notifications for updates</strong>
-                        <p>Stay informed about new features</p>
-                      </div>
-                    </div>
-                    <div className="benefit-item">
-                      <span className="benefit-icon">🎯</span>
-                      <div>
-                        <strong>Quick access from home screen</strong>
-                        <p>Launch instantly like a native app</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {isInstallable && !showInstructions && (
+          <button className="primary-btn" onClick={handleInstallClick}>
+            Install Now
+          </button>
+        )}
 
-              <div className="install-actions">
-                <button 
-                  className="install-btn primary"
-                  onClick={handleInstallClick}
-                  disabled={!isInstallable && platform !== 'ios'}
-                >
-                  <span className="btn-icon">💻</span>
-                  Install App
-                </button>
-                
-                {platform === 'ios' && (
-                  <button 
-                    className="install-btn secondary"
-                    onClick={() => setShowInstructions(true)}
-                  >
-                    <span className="btn-icon">📖</span>
-                    Show Instructions
-                  </button>
-                )}
-              </div>
+        {!isInstallable && !showInstructions && (
+          <button className="secondary-btn" onClick={() => setShowInstructions(true)}>
+            Show Install Instructions
+          </button>
+        )}
 
-              <div className="install-note">
-                <p>
-                  <strong>Native Apps Coming Soon!</strong> 📱
-                  <br />
-                  We're working on dedicated iOS and Android apps with enhanced features.
-                </p>
-              </div>
-            </>
-          ) : (
-            <div className="install-instructions">
-              <button 
-                className="back-btn"
-                onClick={() => setShowInstructions(false)}
-              >
-                ← Back
-              </button>
-              
-              <h3>{getInstallInstructions().title}</h3>
-              <div className="instructions-list">
-                {getInstallInstructions().steps.map((step, index) => (
-                  <div key={index} className="instruction-step">
-                    <span className="step-number">{index + 1}</span>
-                    <span className="step-text">{step}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="visual-guide">
-                <p>Having trouble? Here's a visual guide:</p>
-                <div className="guide-images">
-                  {platform === 'ios' && (
-                    <div className="guide-image">
-                      <div className="mock-safari">
-                        <div className="safari-bar">
-                          <span>📱 Safari</span>
-                          <span>📤</span>
-                        </div>
-                        <div className="safari-content">
-                          <p>Tap the share button (📤) then "Add to Home Screen"</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {platform === 'android' && (
-                    <div className="guide-image">
-                      <div className="mock-chrome">
-                        <div className="chrome-bar">
-                          <span>🤖 Chrome</span>
-                          <span>⋮</span>
-                        </div>
-                        <div className="chrome-content">
-                          <p>Tap menu (⋮) then "Add to Home screen"</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        {showInstructions && (
+          <button className="secondary-btn" onClick={() => setShowInstructions(false)}>
+            Back
+          </button>
+        )}
       </div>
     </div>
   )

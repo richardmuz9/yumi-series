@@ -2,19 +2,26 @@
 import OpenAI from 'openai'
 import { DesignBrief, CharacterTemplate, ProgressAnalysis, StructuredPrompt, AIGenerationSettings, GeneratedImage } from './types'
 import { z } from 'zod'
-import { Configuration, OpenAIApi } from 'openai'
 import { chargeUserCredits } from '../billing'
-import { saveAsset } from '../shared/assets'
 import { processImage } from '../shared/imageProcessing'
+import { db } from '../shared'
+import { saveAsset } from '../shared/assets'
+import { Asset } from '../../types/shared'
+
+interface GenerateImageResult {
+  url: string;
+  prompt: StructuredPrompt;
+  settings: AIGenerationSettings;
+  metadata: {
+    referenceImageId?: string;
+    modelUsed: string;
+    timestamp: number;
+  };
+}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-const openaiApi = new OpenAIApi(configuration)
 
 const generateImagePromptSchema = z.object({
   prompt: z.string().min(1),
@@ -348,73 +355,90 @@ async function assemblePrompt(structuredPrompt: StructuredPrompt): Promise<strin
   return completion.choices[0]?.message?.content || '';
 }
 
+async function generateImage(structuredPrompt: StructuredPrompt, settings: AIGenerationSettings): Promise<string> {
+  // Assemble into DALL·E prompt
+  const finalPrompt = await assemblePrompt(structuredPrompt);
+
+  // Generate image
+  const imageResponse = await openai.images.generate({
+    model: settings.useCustomModel ? 'dall-e-3-anime' : 'dall-e-3',
+    prompt: finalPrompt,
+    n: 1,
+    size: '1024x1024',
+    response_format: 'url',
+    quality: 'hd',
+  });
+
+  if (!imageResponse.data || imageResponse.data.length === 0) {
+    throw new Error('No images generated');
+  }
+
+  return imageResponse.data[0].url;
+}
+
 export async function generateAnimeCharacter(
   userId: string,
   description: string,
   settings: AIGenerationSettings
-): Promise<GeneratedImage[]> {
-  // Estimate API cost based on iterations and features
-  const apiCost = estimateGenerationCost(settings);
-  await chargeUserCredits(userId, apiCost);
-
+): Promise<GenerateImageResult[]> {
   try {
+    // Estimate API cost based on iterations and features
+    const apiCost = estimateGenerationCost(settings);
+    
+    // Charge user credits
+    const billingResult = await chargeUserCredits(userId, apiCost);
+    if (!billingResult.success) {
+      throw new Error(billingResult.error || 'Failed to charge credits');
+    }
+
     // Step 1: Generate structured prompt
     const structuredPrompt = await generateStructuredPrompt(description);
 
-    // Step 2: Assemble into DALL·E prompt
-    const finalPrompt = await assemblePrompt(structuredPrompt);
-
-    // Step 3: Generate images
-    const imageResponse = await openai.images.generate({
-      model: settings.useCustomModel ? 'dall-e-3-anime' : 'dall-e-3',
-      prompt: finalPrompt,
-      n: settings.iterations,
-      size: '1024x1024',
-      response_format: 'url',
-      quality: 'hd',
-    });
-
-    if (!imageResponse.data) {
-      throw new Error('No images generated');
+    // Step 2: Generate image using OpenAI
+    const imageUrl = await generateImage(structuredPrompt, settings);
+    if (!imageUrl) {
+      throw new Error('Failed to generate image');
     }
 
-    // Step 4: Process and save each image
-    const results = await Promise.all(
-      imageResponse.data.map(async (image) => {
-        // Apply post-processing if requested
-        let processedImageUrl = image.url;
-        if (settings.postProcessing) {
-          processedImageUrl = await processImage(image.url, settings.postProcessing);
-        }
+    // Step 3: Process the image with the user's settings
+    const processedImageUrl = await processImage(imageUrl, {
+      upscale: settings.postProcessing.upscale,
+      denoise: settings.postProcessing.denoise,
+      lineArtCleanup: settings.postProcessing.lineArtCleanup,
+      colorCorrection: settings.postProcessing.colorCorrection
+    });
 
-        // Save to asset library
-        const savedAsset = await saveAsset(userId, {
-          url: processedImageUrl,
-          type: 'ai-generated',
-          metadata: {
-            prompt: structuredPrompt,
-            settings,
-            modelUsed: settings.useCustomModel ? 'dall-e-3-anime' : 'dall-e-3',
-            timestamp: Date.now()
-          }
-        });
+    if (!processedImageUrl) {
+      throw new Error('Failed to process image');
+    }
 
-        return {
-          url: savedAsset.url,
-          prompt: structuredPrompt,
-          settings,
-          metadata: {
-            modelUsed: settings.useCustomModel ? 'dall-e-3-anime' : 'dall-e-3',
-            timestamp: Date.now()
-          }
-        };
-      })
-    );
+    // Step 4: Save to asset library
+    const savedAsset = await saveAsset(userId, {
+      url: processedImageUrl,
+      type: 'character',
+      metadata: {
+        name: `Character - ${new Date().toISOString()}`,
+        tags: ['ai-generated', 'anime', 'character'],
+        mood: []
+      }
+    });
 
-    return results;
+    // Return the generated image with metadata
+    const result: GenerateImageResult = {
+      url: processedImageUrl,
+      prompt: structuredPrompt,
+      settings,
+      metadata: {
+        referenceImageId: settings.referenceImage ? savedAsset.id : undefined,
+        modelUsed: settings.useCustomModel ? 'dall-e-3-anime' : 'dall-e-3',
+        timestamp: Date.now()
+      }
+    };
+
+    return [result];
   } catch (error) {
-    console.error('[AI-GEN]', error);
-    throw new Error('Failed to generate character images');
+    console.error('Error generating character:', error);
+    throw error;
   }
 }
 

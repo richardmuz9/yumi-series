@@ -1,0 +1,168 @@
+/* Base Styles */
+.anime-chara-helper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.acha-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.back-btn {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: #5f3dc4;
+  transform: translateY(-2px);
+}
+
+.acha-title {
+  font-size: 2.5rem;
+  color: #2d3436;
+  margin: 0;
+  font-weight: bold;
+}
+
+.acha-subtitle {
+  font-size: 1.1rem;
+  color: #636e72;
+  margin-top: 10px;
+}
+
+.acha-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Enhanced Layout Styles */
+.anime-chara-helper.enhanced {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.anime-chara-helper.enhanced.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background: #1a1a1a;
+}
+
+:root {
+  --bg-color: #ffffff;
+  --text-color: #2d3748;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --sidebar-bg: #f8fafc;
+  --toolbar-bg: #ffffff;
+  --btn-bg: #ffffff;
+  --hover-bg: rgba(0, 0, 0, 0.05);
+  --active-bg: rgba(102, 126, 234, 0.1);
+  --active-text: #667eea;
+  --item-bg: rgba(0, 0, 0, 0.02);
+  --surface-1: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+  --text-1: #2d3748;
+  --text-2: #4a5568;
+  --text-3: #718096;
+  --accent-1: #667eea;
+  --accent-2: #5a67d8;
+  --accent-3: #4c51bf;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --text-color: #e2e8f0;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --sidebar-bg: #262626;
+    --toolbar-bg: #262626;
+    --btn-bg: #333333;
+    --hover-bg: rgba(255, 255, 255, 0.1);
+    --active-bg: rgba(102, 126, 234, 0.2);
+    --active-text: #9f7aea;
+    --item-bg: rgba(255, 255, 255, 0.05);
+    --surface-1: #1a1a1a;
+    --surface-2: #262626;
+    --surface-3: #333333;
+    --text-1: #e2e8f0;
+    --text-2: #cbd5e0;
+    --text-3: #a0aec0;
+    --accent-1: #9f7aea;
+    --accent-2: #805ad5;
+    --accent-3: #6b46c1;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  color: var(--text-color);
+  background: var(--bg-color);
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-2);
+} 

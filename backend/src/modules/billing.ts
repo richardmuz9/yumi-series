@@ -78,85 +78,58 @@ const modelPricing = {
 // Updated credit packages reflecting the new token structure
 const creditPackages = [
   { 
-    id: 'credits-1', 
-    name: 'Micro Pack', 
-    credits: 1, 
-    price: 100, // $1
-    tokens: 50000,
-    description: '$1 - 50K tokens for basic testing',
-    recommended: false
-  },
-  { 
     id: 'credits-5', 
     name: 'Starter Pack', 
     credits: 5, 
     price: 500, // $5
     tokens: 300000,
-    description: '$5 - 300K tokens for light usage',
+    description: '$5 - 300K tokens for basic writing and character design',
     recommended: false
   },
   { 
     id: 'credits-10', 
-    name: 'Popular Pack', 
+    name: 'Creative Pack', 
     credits: 10, 
     price: 1000, // $10
     tokens: 700000,
-    description: '$10 - 700K tokens for regular use',
+    description: '$10 - 700K tokens for regular content creation',
     recommended: true
   },
   { 
-    id: 'credits-15', 
-    name: 'Professional Pack', 
-    credits: 15, 
-    price: 1500, // $15
-    tokens: 1200000,
-    description: '$15 - 1.2M tokens for power users',
-    recommended: false
-  },
-  { 
     id: 'credits-20', 
-    name: 'Power Pack', 
+    name: 'Professional Pack', 
     credits: 20, 
     price: 2000, // $20
     tokens: 1800000,
-    description: '$20 - 1.8M tokens for heavy usage',
+    description: '$20 - 1.8M tokens for serious writers and artists',
     recommended: false
   },
   { 
     id: 'credits-50', 
-    name: 'Enterprise Pack', 
+    name: 'Studio Pack', 
     credits: 50, 
     price: 5000, // $50
     tokens: 4500000,
-    description: '$50 - 4.5M tokens for teams',
-    recommended: false
-  },
-  { 
-    id: 'credits-100', 
-    name: 'Ultimate Pack', 
-    credits: 100, 
-    price: 10000, // $100
-    tokens: 10000000,
-    description: '$100 - 10M tokens for enterprise',
+    description: '$50 - 4.5M tokens for professional studios',
     recommended: false
   }
 ]
 
-// Monthly subscription plan with polish writing and study advisor access
+// Monthly subscription plan with writing and character design features
 const subscriptionPlans = [
   {
     id: 'monthly-pro',
-    name: 'Monthly Pro',
+    name: 'Creative Pro',
     price: 1000, // $10/month
     tokensPerDay: 33000, // ~1M tokens per month (33K * 30 days)
     tokensPerMonth: 1000000,
-    description: '33K tokens daily + Polish Writing + Study Advisor access',
+    description: '33K tokens daily for Writing Helper and Anime Character Designer',
     benefits: [
       '33,000 tokens every day',
-      'Polish Writing & Study Advisor',
+      'Advanced writing features',
+      'Professional character design tools',
       'Priority processing',
       'Premium model access',
-      'Advanced features',
       'Email support',
       'Usage analytics'
     ]
@@ -466,5 +439,27 @@ router.post('/subscription', async (req, res) => {
     res.status(500).json({ error: 'Failed to create subscription session' })
   }
 })
+
+export interface BillingResult {
+  success: boolean;
+  error?: string;
+  remainingCredits?: number;
+}
+
+export async function chargeUserCredits(userId: string, amount: number): Promise<BillingResult> {
+  try {
+    // For now, just return success since we're not implementing real billing yet
+    return {
+      success: true,
+      remainingCredits: 100
+    };
+  } catch (error) {
+    console.error('Error charging user credits:', error);
+    return {
+      success: false,
+      error: 'Failed to charge credits'
+    };
+  }
+}
 
 export default router 

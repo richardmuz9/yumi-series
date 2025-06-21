@@ -1,23 +1,48 @@
 import { create } from 'zustand';
 
-interface AssistantState {
-  isOpen: boolean;
-  mode: string;
-  chatHistory: any[];
-  openAssistant: () => void;
-  closeAssistant: () => void;
-  setMode: (mode: string) => void;
-  addMessage: (msg: any) => void;
-  clearChat: () => void;
+interface Message {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  timestamp: Date;
+  provider?: string;
+  model?: string;
 }
 
-export const useAssistantStore = create<AssistantState>((set: any) => ({
-  isOpen: false,
-  mode: 'main',
-  chatHistory: [],
-  openAssistant: () => set({ isOpen: true }),
-  closeAssistant: () => set({ isOpen: false }),
-  setMode: (mode: string) => set({ mode }),
-  addMessage: (msg: any) => set((state: AssistantState) => ({ chatHistory: [...state.chatHistory, msg] })),
-  clearChat: () => set({ chatHistory: [] }),
+interface AssistantState {
+  mode: 'writing' | 'anime';
+  messages: Message[];
+  provider: 'openai' | 'qwen' | 'claude';
+  model: string;
+  isLoading: boolean;
+  setMode: (mode: 'writing' | 'anime') => void;
+  setProvider: (provider: 'openai' | 'qwen' | 'claude') => void;
+  setModel: (model: string) => void;
+  addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void;
+  clearMessages: () => void;
+  setLoading: (loading: boolean) => void;
+}
+
+export const useAssistantStore = create<AssistantState>((set) => ({
+  mode: 'writing',
+  messages: [],
+  provider: 'qwen',
+  model: 'qwen-turbo',
+  isLoading: false,
+  setMode: (mode) => set({ mode }),
+  setProvider: (provider) => set({ provider }),
+  setModel: (model) => set({ model }),
+  addMessage: (message) =>
+    set((state) => ({
+      messages: [
+        ...state.messages,
+        {
+          ...message,
+          id: Math.random().toString(36).substr(2, 9),
+          timestamp: new Date(),
+        },
+      ],
+    })),
+  clearMessages: () => set({ messages: [] }),
+  setLoading: (loading) => set({ isLoading: loading }),
 })); 

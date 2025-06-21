@@ -59,8 +59,6 @@ function generateContentVariations(baseContent: string, contentType: string, cou
   return variations
 }
 
-
-
 export function setupWritingHelperRoutes(app: express.Application) {
   // Get writing templates and configuration
   app.get('/api/writing-helper/templates', optionalAuth, (req, res) => {
@@ -485,18 +483,17 @@ export function setupWritingHelperRoutes(app: express.Application) {
   // Generate content endpoint
   app.post('/api/writing-helper/generate', authenticateUser, async (req: AuthRequest, res) => {
     try {
-      const writingRequest: WritingRequest = req.body
       const userId = req.user?.id
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' })
+      }
 
-      const response = await generateWritingContent(writingRequest, userId)
-      
+      const request: WritingRequest = req.body
+      const response = await generateWritingContent(request, userId)
       res.json(response)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Writing generation error:', error)
-      res.status(500).json({ 
-        error: 'Failed to generate content',
-        details: error.message 
-      })
+      res.status(500).json({ error: 'Failed to generate writing content' })
     }
   })
 

@@ -139,10 +139,32 @@ class ApiClient {
   async delete<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'DELETE' });
   }
+
+  // API methods
+  async chat(request: ChatRequest): Promise<ChatResponse> {
+    return this.post<ChatResponse>('/api/chat', request);
+  }
+
+  async getModels(): Promise<ModelsResponse> {
+    return this.get<ModelsResponse>('/api/models');
+  }
+
+  async healthCheck(): Promise<{ status: string }> {
+    return this.get<{ status: string }>('/api/health');
+  }
+
+  async editWebsite(instructions: string): Promise<string> {
+    return this.post<string>('/api/edit', { instructions });
+  }
+
+  async generateAnimeCharacter(prompt: string, settings: AIGenerationSettings) {
+    return this.post('/api/anime-chara-helper/generate', { prompt, settings });
+  }
 }
 
 // Global API client instance
 export const apiClient = new ApiClient();
+export const apiService = apiClient;
 
 class AuthService {
   private baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -202,6 +224,9 @@ class AuthService {
       });
 
       const data = await response.json();
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+      }
       return data;
     } catch (error) {
       console.error('[Auth][Frontend] Login error:', error);
@@ -211,13 +236,8 @@ class AuthService {
 
   async logout(): Promise<{ success: boolean }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include'
-      });
-
-      const data = await response.json();
-      return data;
+      localStorage.removeItem('authToken');
+      return { success: true };
     } catch (error) {
       console.error('[Auth][Frontend] Logout error:', error);
       throw error;
@@ -227,11 +247,11 @@ class AuthService {
   async getProfile(): Promise<{ success: boolean; user?: User; error?: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/api/auth/profile`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
         credentials: 'include'
       });
-
-      const data = await response.json();
-      return data;
+      return response.json();
     } catch (error) {
       console.error('[Auth][Frontend] Get profile error:', error);
       throw error;
@@ -251,98 +271,13 @@ class AuthService {
     return !!this.getToken();
   }
 
-  getAuthHeaders(): Record<string, string> {
+  private getAuthHeaders(): Record<string, string> {
     const token = this.getToken();
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
-  }
-}
-
-export const authService = new AuthService();
-
-// API functions
-export async function chat(request: ChatRequest): Promise<ChatResponse> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authService.getAuthHeaders()
-      },
-      credentials: 'include',
-      body: JSON.stringify(request)
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Chat request failed');
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error('[API] Chat error:', error);
-    throw error;
-  }
-}
-
-export async function getModels(): Promise<ModelsResponse> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/models`, {
-      headers: authService.getAuthHeaders(),
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch models');
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error('[API] Get models error:', error);
-    throw error;
-  }
-}
-
-export async function healthCheck(): Promise<{ status: string }> {
-  const response = await fetch(`${API_BASE_URL}/health`);
-  if (!response.ok) {
-    throw new Error('Health check failed');
-  }
-  return response.json();
-}
-
-export async function editWebsite(instructions: string): Promise<string> {
-  const response = await fetch(`${API_BASE_URL}/api/webbuilder/edit`, {
-    method: 'POST',
-    headers: {
+    return {
       'Content-Type': 'application/json',
-      ...authService.getAuthHeaders()
-    },
-    credentials: 'include',
-    body: JSON.stringify({ instructions })
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to edit website');
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
   }
-
-  return response.json();
 }
 
-export async function generateAnimeCharacter(prompt: string, settings: AIGenerationSettings) {
-  const response = await fetch('/api/anime/generate', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ prompt, settings }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to generate character');
-  }
-
-  return response.json();
-} 
+export const authService = new AuthService(); 

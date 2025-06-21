@@ -134,35 +134,35 @@ class BillingApi {
       console.warn('❌ Failed to get credit packages from API, using fallback:', error)
       const fallbackPackages = [
         { 
+          id: 'credits-5', 
+          name: 'Starter Pack', 
+          credits: 5, 
+          price: 500,
+          description: '$5 - 300K tokens for basic writing and character design',
+          recommended: false
+        },
+        { 
+          id: 'credits-10', 
+          name: 'Creative Pack', 
+          credits: 10, 
+          price: 1000,
+          description: '$10 - 700K tokens for regular content creation',
+          recommended: true
+        },
+        { 
           id: 'credits-20', 
-          name: 'Starter Credits', 
+          name: 'Professional Pack', 
           credits: 20, 
           price: 2000,
-          description: '$20 - Approximately 800K GPT-4o-mini tokens or 350K GPT-4o tokens',
+          description: '$20 - 1.8M tokens for serious writers and artists',
           recommended: false
         },
         { 
           id: 'credits-50', 
-          name: 'Popular Credits', 
+          name: 'Studio Pack', 
           credits: 50, 
-          price: 4500,
-          description: '$45 - Approximately 2M GPT-4o-mini tokens or 850K GPT-4o tokens',
-          recommended: true
-        },
-        { 
-          id: 'credits-100', 
-          name: 'Power User Credits', 
-          credits: 100, 
-          price: 8000,
-          description: '$80 - Approximately 4M GPT-4o-mini tokens or 1.7M GPT-4o tokens',
-          recommended: false
-        },
-        { 
-          id: 'credits-200', 
-          name: 'Professional Credits', 
-          credits: 200, 
-          price: 14000,
-          description: '$140 - Approximately 8M GPT-4o-mini tokens or 3.4M GPT-4o tokens',
+          price: 5000,
+          description: '$50 - 4.5M tokens for professional studios',
           recommended: false
         }
       ]
@@ -247,33 +247,67 @@ class BillingApi {
   async getTokenPackages(): Promise<TokenPackage[]> {
     try {
       console.log('[BillingApi] Fetching token packages...')
-      const response = await this.request('/packages') as { packages?: TokenPackage[] };
-      return response.packages || [];
+      const response = await this.request<TokenPackage[] | { packages?: TokenPackage[] }>('/packages')
+      
+      // Handle both array and object response formats
+      const packages = Array.isArray(response) ? response : response.packages || []
+      
+      // If no packages returned, use fallback
+      if (!packages || packages.length === 0) {
+        console.warn('[BillingApi] No packages returned from API, using fallback')
+        return [
+          {
+            id: 'basic',
+            name: 'Basic Pack',
+            tokens: 10000,
+            price: 999,
+            description: '10K tokens for getting started'
+          },
+          {
+            id: 'pro',
+            name: 'Pro Pack',
+            tokens: 50000,
+            price: 3999,
+            description: '50K tokens for regular users',
+            recommended: true
+          },
+          {
+            id: 'enterprise',
+            name: 'Enterprise Pack',
+            tokens: 200000,
+            price: 14999,
+            description: '200K tokens for power users'
+          }
+        ]
+      }
+      
+      return packages
     } catch (error) {
-      console.warn('[BillingApi] Failed to fetch token packages, using fallback', error);
+      console.warn('[BillingApi] Failed to get token packages, using fallback:', error)
       return [
         {
-          id: 'starter',
-          name: 'Starter Credits',
-          tokens: 1000000, // 1M tokens
-          price: 2000, // $20
-          description: '1M API tokens for basic usage'
+          id: 'basic',
+          name: 'Basic Pack',
+          tokens: 10000,
+          price: 999,
+          description: '10K tokens for getting started'
         },
         {
-          id: 'premium',
-          name: 'Premium Credits',
-          tokens: 5000000, // 5M tokens  
-          price: 8000, // $80
-          description: '5M API tokens - Best value!'
+          id: 'pro',
+          name: 'Pro Pack',
+          tokens: 50000,
+          price: 3999,
+          description: '50K tokens for regular users',
+          recommended: true
         },
         {
           id: 'enterprise',
-          name: 'Enterprise Credits',
-          tokens: 15000000, // 15M tokens
-          price: 20000, // $200
-          description: '15M API tokens for teams'
+          name: 'Enterprise Pack',
+          tokens: 200000,
+          price: 14999,
+          description: '200K tokens for power users'
         }
-      ];
+      ]
     }
   }
 

@@ -40,20 +40,6 @@ const ModeManagerSettings: React.FC<ModeManagerSettingsProps> = ({ onClose }) =>
       
       const modesList: ModeInfo[] = [
         {
-          id: 'web-builder',
-          name: 'Web Builder',
-          nameJapanese: 'ウェブビルダー',
-          icon: '🌐',
-          description: 'AI-powered website creation and management',
-          size: '2.1 MB',
-          category: 'productivity',
-          installed: installedModes.includes('web-builder'),
-          installing: false,
-          uninstalling: false,
-          lastUsed: usageStats['web-builder']?.lastUsed,
-          usageCount: usageStats['web-builder']?.count || 0
-        },
-        {
           id: 'writing-helper',
           name: 'Writing Helper',
           nameJapanese: '書き助',
@@ -68,20 +54,6 @@ const ModeManagerSettings: React.FC<ModeManagerSettingsProps> = ({ onClose }) =>
           usageCount: usageStats['writing-helper']?.count || 0
         },
         {
-          id: 'report-writer',
-          name: 'Report Writer',
-          nameJapanese: 'レポートライター',
-          icon: '📊',
-          description: 'Generate comprehensive reports and documents',
-          size: '1.5 MB',
-          category: 'productivity',
-          installed: installedModes.includes('report-writer'),
-          installing: false,
-          uninstalling: false,
-          lastUsed: usageStats['report-writer']?.lastUsed,
-          usageCount: usageStats['report-writer']?.count || 0
-        },
-        {
           id: 'anime-chara-helper',
           name: 'Anime Character Designer',
           nameJapanese: 'アニメキャラデザイナー',
@@ -94,20 +66,6 @@ const ModeManagerSettings: React.FC<ModeManagerSettingsProps> = ({ onClose }) =>
           uninstalling: false,
           lastUsed: usageStats['anime-chara-helper']?.lastUsed,
           usageCount: usageStats['anime-chara-helper']?.count || 0
-        },
-        {
-          id: 'study-advisor',
-          name: 'Study Advisor',
-          nameJapanese: '学習アドバイザー',
-          icon: '🎓',
-          description: 'Personalized learning paths and university guidance',
-          size: '1.2 MB',
-          category: 'learning',
-          installed: installedModes.includes('study-advisor'),
-          installing: false,
-          uninstalling: false,
-          lastUsed: usageStats['study-advisor']?.lastUsed,
-          usageCount: usageStats['study-advisor']?.count || 0
         }
       ];
 

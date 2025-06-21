@@ -8,6 +8,7 @@ import billingRoutes from './modules/billing'
 import { setupAnimeCharaHelperRoutes } from './modules/animehelper/animecharahelper'
 import YumiPersonalityManager from './modules/yumiPersonality'
 import { authenticateUser, hashPassword, comparePassword, generateToken, AuthRequest } from './auth'
+import assetsRouter from './modules/shared/assets'
 
 // Initialize database
 db.initialize().catch(err => {
@@ -456,6 +457,9 @@ app.post('/api/edit-website', authenticateUser, async (req, res) => {
     })
   }
 })
+
+// Register routes
+app.use('/api/assets', assetsRouter)
 
 // Error handling middleware
 app.use((error: any, req: any, res: any, next: any) => {

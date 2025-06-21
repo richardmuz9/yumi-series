@@ -1,8 +1,24 @@
 import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
+import { CanvasState } from '../types';
+
+export interface CanvasAreaProps {
+  tool: DrawingTool;
+  color: string;
+  size: number;
+  opacity: number;
+  blendMode: BlendMode;
+  zoom: number;
+  position: { x: number; y: number };
+  activeLayer?: LayerData;
+  onStateChange: (updates: Partial<CanvasState>) => void;
+  layers: LayerData[];
+  activeLayerId: string;
+  onLayerChange: (layerId: string, canvas: HTMLCanvasElement) => void;
+}
 
 export interface CanvasAreaRef {
-  loadOutline: (svgUrl: string) => void;
-  saveDrawing: () => string | null;
+  loadOutline: (url: string) => void;
+  saveDrawing: () => string;
   clearCanvas: () => void;
   setDrawingMode: (enabled: boolean) => void;
   exportLayers: () => LayerData[];
@@ -10,33 +26,41 @@ export interface CanvasAreaRef {
   regenerateRegion: (maskData: string) => Promise<void>;
 }
 
-interface CanvasAreaProps {
-  className?: string;
-  onDrawingChange?: (hasDrawing: boolean) => void;
-}
-
 // Layer system interfaces
-interface LayerData {
+export interface LayerData {
   id: string;
   name: string;
   canvas: HTMLCanvasElement;
   visible: boolean;
   opacity: number;
-  blendMode: string;
+  blendMode: BlendMode;
   locked: boolean;
 }
 
-type DrawingTool = 'brush' | 'eraser' | 'mask' | 'selection';
-type BlendMode = 'normal' | 'multiply' | 'overlay' | 'screen' | 'soft-light';
+export type DrawingTool = 'brush' | 'eraser' | 'mask' | 'selection';
+export type BlendMode = 'normal' | 'multiply' | 'overlay' | 'screen' | 'soft-light';
 
-const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDrawingChange }, ref) => {
+const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>((props, ref) => {
+  const {
+    tool,
+    color,
+    size,
+    opacity,
+    blendMode: initialBlendMode,
+    zoom,
+    position,
+    activeLayer,
+    onStateChange,
+    layers,
+    activeLayerId,
+    onLayerChange
+  } = props;
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   
   // Layer management
-  const [layers, setLayers] = useState<LayerData[]>([]);
-  const [activeLayerId, setActiveLayerId] = useState<string>('');
   const [layerPanelVisible, setLayerPanelVisible] = useState(false);
   
   // Drawing state
@@ -50,7 +74,7 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
   const [brushColor, setBrushColor] = useState('#000000');
   const [brushSize, setBrushSize] = useState(3);
   const [brushOpacity, setBrushOpacity] = useState(100);
-  const [blendMode, setBlendMode] = useState<BlendMode>('normal');
+  const [currentBlendMode, setCurrentBlendMode] = useState<BlendMode>(initialBlendMode);
   
   // Masking and selection
   const [maskMode, setMaskMode] = useState(false);
@@ -82,8 +106,10 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
       locked: false
     };
 
-    setLayers(prev => [...prev, newLayer]);
-    setActiveLayerId(newLayer.id);
+    onStateChange({
+      layers: [...layers, newLayer]
+    });
+    onLayerChange(newLayer.id, layerCanvas);
     return newLayer;
   };
 
@@ -173,24 +199,11 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
         newMaskCanvas.height = canvas.height;
         setMaskCanvas(newMaskCanvas);
       }
-      
-      const maskContext = maskCanvas?.getContext('2d');
-      if (maskContext) {
-        maskContext.lineCap = 'round';
-        maskContext.lineJoin = 'round';
-        maskContext.lineWidth = brushSize;
-        maskContext.strokeStyle = '#ffffff';
-        maskContext.globalCompositeOperation = 'source-over';
-        maskContext.beginPath();
-        maskContext.moveTo(x, y);
-      }
-      setIsDrawing(true);
-      return;
     }
 
+    setIsDrawing(true);
     layerContext.beginPath();
     layerContext.moveTo(x, y);
-    setIsDrawing(true);
   };
 
   const draw = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -224,7 +237,7 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
 
     if (!hasDrawing) {
       setHasDrawing(true);
-      onDrawingChange?.(true);
+      onStateChange({ hasDrawing: true });
     }
   };
 
@@ -263,29 +276,35 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
   const deleteLayer = (layerId: string) => {
     if (layers.length <= 1) return; // Keep at least one layer
     
-    setLayers(prev => prev.filter(l => l.id !== layerId));
+    onStateChange({
+      layers: layers.filter(l => l.id !== layerId)
+    });
     
     if (activeLayerId === layerId) {
       const remainingLayers = layers.filter(l => l.id !== layerId);
-      setActiveLayerId(remainingLayers[0]?.id || '');
+      onLayerChange(remainingLayers[0]?.id || '', remainingLayers[0]?.canvas || new HTMLCanvasElement());
     }
   };
 
   const toggleLayerVisibility = (layerId: string) => {
-    setLayers(prev => prev.map(layer => 
-      layer.id === layerId 
-        ? { ...layer, visible: !layer.visible }
-        : layer
-    ));
+    onStateChange({
+      layers: layers.map(layer => 
+        layer.id === layerId 
+          ? { ...layer, visible: !layer.visible }
+          : layer
+      )
+    });
     redrawCanvas();
   };
 
   const updateLayerOpacity = (layerId: string, opacity: number) => {
-    setLayers(prev => prev.map(layer => 
-      layer.id === layerId 
-        ? { ...layer, opacity: Math.max(0, Math.min(100, opacity)) }
-        : layer
-    ));
+    onStateChange({
+      layers: layers.map(layer => 
+        layer.id === layerId 
+          ? { ...layer, opacity: Math.max(0, Math.min(100, opacity)) }
+          : layer
+      )
+    });
     redrawCanvas();
   };
 
@@ -383,7 +402,7 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
   };
 
   useImperativeHandle(ref, () => ({
-    loadOutline: (imageUrl: string) => {
+    loadOutline: (url: string) => {
       const img = new Image();
       img.onload = () => {
         const canvas = canvasRef.current;
@@ -397,13 +416,14 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
         redrawCanvas();
       };
       img.crossOrigin = 'anonymous';
-      img.src = imageUrl;
+      img.src = url;
     },
 
     saveDrawing: () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return null;
-      return canvas.toDataURL('image/png');
+      if (canvasRef.current) {
+        return canvasRef.current.toDataURL();
+      }
+      return '';
     },
 
     clearCanvas: () => {
@@ -416,7 +436,7 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
       
       redrawCanvas();
       setHasDrawing(false);
-      onDrawingChange?.(false);
+      onStateChange({ hasDrawing: false });
     },
 
     setDrawingMode: (enabled: boolean) => {
@@ -431,9 +451,11 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
     },
 
     importLayers: (importedLayers: LayerData[]) => {
-      setLayers(importedLayers);
+      onStateChange({
+        layers: importedLayers
+      });
       if (importedLayers.length > 0) {
-        setActiveLayerId(importedLayers[0].id);
+        onLayerChange(importedLayers[0].id, importedLayers[0].canvas);
       }
       redrawCanvas();
     },
@@ -442,7 +464,7 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
   }));
 
   return (
-    <div className={`canvas-area enhanced ${className || ''}`}>
+    <div className={`canvas-area enhanced`}>
       <div className="canvas-container">
         <canvas
           ref={canvasRef}
@@ -456,7 +478,8 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
           onTouchEnd={handleTouchEnd}
           style={{
             cursor: drawingMode ? 'crosshair' : 'default',
-            pointerEvents: 'auto'
+            pointerEvents: 'auto',
+            transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
           }}
         />
         
@@ -601,13 +624,16 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
                 <div 
                   key={layer.id}
                   className={`layer-item ${layer.id === activeLayerId ? 'active' : ''}`}
-                  onClick={() => setActiveLayerId(layer.id)}
+                  onClick={() => onLayerChange(layer.id, layer.canvas)}
                 >
                   <div className="layer-info">
                     <input
                       type="checkbox"
                       checked={layer.visible}
-                      onChange={() => toggleLayerVisibility(layer.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleLayerVisibility(layer.id);
+                      }}
                       onClick={(e) => e.stopPropagation()}
                     />
                     <span className="layer-name">{layer.name}</span>
@@ -619,7 +645,10 @@ const CanvasArea = forwardRef<CanvasAreaRef, CanvasAreaProps>(({ className, onDr
                       min="0"
                       max="100"
                       value={layer.opacity}
-                      onChange={(e) => updateLayerOpacity(layer.id, Number(e.target.value))}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        updateLayerOpacity(layer.id, Number(e.target.value));
+                      }}
                       onClick={(e) => e.stopPropagation()}
                       className="opacity-slider"
                     />

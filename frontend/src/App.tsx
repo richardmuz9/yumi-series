@@ -114,7 +114,7 @@ const App: React.FC = () => {
   const [currentMode, setCurrentMode] = useState<AppMode>('main')
 
   const handleModeSelect = (mode: string) => {
-    if (mode === 'web-builder' || mode === 'writing-helper' || mode === 'report-writer' || mode === 'anime-chara-helper' || mode === 'study-advisor') {
+    if (mode === 'writing-helper' || mode === 'anime-chara-helper') {
       setCurrentMode(mode as AppMode)
     }
   }

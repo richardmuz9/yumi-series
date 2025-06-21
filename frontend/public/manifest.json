@@ -56,31 +56,10 @@
       "icons": [{ "src": "/pwa-192.svg", "sizes": "192x192" }]
     },
     {
-      "name": "Web Builder", 
-      "short_name": "Build",
-      "description": "Create websites with AI",
-      "url": "/?mode=web-builder",
-      "icons": [{ "src": "/pwa-192.svg", "sizes": "192x192" }]
-    },
-    {
-      "name": "Report Writer",
-      "short_name": "Report", 
-      "description": "Generate professional reports",
-      "url": "/?mode=report-writer",
-      "icons": [{ "src": "/pwa-192.svg", "sizes": "192x192" }]
-    },
-    {
-      "name": "Study Advisor",
-      "short_name": "Study",
-      "description": "University guidance and learning",
-      "url": "/?mode=study-advisor", 
-      "icons": [{ "src": "/pwa-192.svg", "sizes": "192x192" }]
-    },
-    {
       "name": "Anime Designer",
       "short_name": "Design",
       "description": "Character creation and art",
-      "url": "/?mode=anime-designer",
+      "url": "/?mode=anime-chara-helper",
       "icons": [{ "src": "/pwa-192.svg", "sizes": "192x192" }]
     }
   ],

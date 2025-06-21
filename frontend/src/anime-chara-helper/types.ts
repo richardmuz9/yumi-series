@@ -31,7 +31,7 @@ export interface LayerData {
   canvas: HTMLCanvasElement
   visible: boolean
   opacity: number
-  blendMode: string
+  blendMode: BlendMode
   locked: boolean
 }
 
@@ -65,6 +65,9 @@ export interface CanvasState {
   size: number
   opacity: number
   blendMode: BlendMode
+  layers: LayerData[]
+  activeLayerId: string
+  hasDrawing: boolean
 }
 
 export interface Translation {

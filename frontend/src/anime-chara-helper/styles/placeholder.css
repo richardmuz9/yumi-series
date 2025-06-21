@@ -1,0 +1,92 @@
+.placeholder {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 20px 0;
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  color: #999;
+  margin-bottom: 12px;
+}
+
+.placeholder-text {
+  margin: 0;
+}
+
+.placeholder-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.placeholder-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.placeholder-button.primary {
+  background: #1976d2;
+  color: white;
+  border: none;
+}
+
+.placeholder-button.primary:hover {
+  background: #1565c0;
+}
+
+.placeholder-button.secondary {
+  background: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.placeholder-button.secondary:hover {
+  background: #f1f3f5;
+  border-color: #ccc;
+}
+
+.placeholder-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.placeholder-loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #999;
+  animation: loading 1s infinite;
+}
+
+.placeholder-loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.placeholder-loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loading {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+} 
