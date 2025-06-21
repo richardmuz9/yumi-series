@@ -165,6 +165,8 @@ class ApiClient {
 // Global API client instance
 export const apiClient = new ApiClient();
 export const apiService = apiClient;
+export const generateAnimeCharacter = (prompt: string, settings: AIGenerationSettings) => 
+  apiClient.generateAnimeCharacter(prompt, settings);
 
 class AuthService {
   private baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
