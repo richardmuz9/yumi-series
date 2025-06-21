@@ -5,7 +5,7 @@ import {
   calculateTokenCost,
   deductTokens
 } from '../../shared'
-import { WritingRequest, WritingResponse } from '../types'
+import { WritingRequest, WritingResponse, WritingVariation } from '../types'
 import { contentTypePrompts, platformLimits } from '../data'
 import { generateContentVariations } from './variations'
 
@@ -84,9 +84,14 @@ export async function generateWritingContent(request: WritingRequest, userId?: n
     : 5000
 
   // Generate variations if requested
-  let variations = undefined
+  let variations: WritingVariation[] = []
   if (generateVariations && variationCount) {
-    variations = generateContentVariations(content, contentType, variationCount)
+    try {
+      variations = await generateContentVariations(content, contentType, variationCount)
+    } catch (error) {
+      console.error('[WritingHelper] Error generating variations:', error)
+      variations = [] // Fallback to empty array on error
+    }
   }
 
   return {
@@ -100,6 +105,6 @@ export async function generateWritingContent(request: WritingRequest, userId?: n
     model,
     tokensUsed: tokenCost,
     variations,
-    variationCount: variations?.length
+    variationCount: variations.length
   }
 } 

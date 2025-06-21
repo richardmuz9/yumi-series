@@ -1,7 +1,7 @@
 import { WritingVariation } from '../types'
 
 // Enhanced variation generation for different content types
-export function generateContentVariations(baseContent: string, contentType: string, count: number): WritingVariation[] {
+export async function generateContentVariations(baseContent: string, contentType: string, count: number): Promise<WritingVariation[]> {
   const variations: WritingVariation[] = []
   
   const variationStrategies = {

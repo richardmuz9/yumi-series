@@ -373,7 +373,12 @@ async function generateImage(structuredPrompt: StructuredPrompt, settings: AIGen
     throw new Error('No images generated');
   }
 
-  return imageResponse.data[0].url;
+  const imageUrl = imageResponse.data[0]?.url;
+  if (!imageUrl) {
+    throw new Error('Generated image URL is undefined');
+  }
+
+  return imageUrl;
 }
 
 export async function generateAnimeCharacter(
