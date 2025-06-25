@@ -80,11 +80,7 @@ const MainPage: React.FC = () => {
   }, []);
 
   const handleModeSelect = async (mode: string) => {
-    // only gate if user has literally zero tokens
-    if (!userBillingInfo || userBillingInfo.tokens < 1) {
-      navigate('/charge');
-      return;
-    }
+    // Remove the token check since it's too restrictive
     if (mode === 'writing' || mode === 'anime') {
       setCurrentMode(mode);
       setShowModeLauncher(false);
