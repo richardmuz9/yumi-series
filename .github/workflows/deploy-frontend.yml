@@ -6,10 +6,8 @@ on:
     branches: ["master"]
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
+# No need for top-level permissions when using PAT
+permissions: {}
 
 concurrency:
   group: "pages"
@@ -91,6 +89,9 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          deploy_key: ${{ secrets.DEPLOY_TOKEN }}
           publish_dir: ./frontend/dist
           cname: yumi77965.online
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'deploy: Update GitHub Pages'
