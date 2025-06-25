@@ -49,7 +49,7 @@ jobs:
         working-directory: ./frontend
         run: |
           echo "Creating .env.production file..."
-          echo "VITE_API_URL=https://yumi-series-production.up.railway.app" > .env.production
+          echo "VITE_API_URL=https://api.yumi77965.online" > .env.production
           echo "VITE_FRONTEND_URL=http://yumi77965.online" >> .env.production
           echo "=== .env.production created ==="
           cat .env.production
@@ -63,7 +63,7 @@ jobs:
           echo "✅ Build completed"
         env:
           NODE_ENV: production
-          VITE_API_URL: https://yumi-series-production.up.railway.app
+          VITE_API_URL: https://api.yumi77965.online
           VITE_FRONTEND_URL: http://yumi77965.online
       
       - name: Verify build created dist directory
@@ -107,3 +107,5 @@ jobs:
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'deploy: Update GitHub Pages'
+          force_orphan: 'true'
+        
