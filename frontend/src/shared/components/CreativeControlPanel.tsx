@@ -199,7 +199,7 @@ export const CreativeControlPanel: React.FC<CreativeControlPanelProps> = ({
                   {mode === 'writing' && currentPersonalityGuide.creativeSuggestions.writing.slice(0, 3).map((suggestion, index) => (
                     <span key={index} className="influence-tag">{suggestion}</span>
                   ))}
-                  {(mode === 'image' || mode === 'animation') && currentPersonalityGuide.creativeSuggestions.visual.slice(0, 3).map((suggestion, index) => (
+                  {mode === 'image' && currentPersonalityGuide.creativeSuggestions.visual.slice(0, 3).map((suggestion, index) => (
                     <span key={index} className="influence-tag">{suggestion}</span>
                   ))}
                 </div>
@@ -254,7 +254,7 @@ export const CreativeControlPanel: React.FC<CreativeControlPanelProps> = ({
           <div className="control-section">
             <h4>🚀 Quick Actions</h4>
             <div className="quick-actions">
-              {mode === 'writing' && (
+              {(mode === 'writing' || mode === 'report') && (
                 <>
                   <button className="quick-action">📖 Continue Story</button>
                   <button className="quick-action">💬 Add Dialogue</button>
@@ -266,13 +266,6 @@ export const CreativeControlPanel: React.FC<CreativeControlPanelProps> = ({
                   <button className="quick-action">🎨 New Pose</button>
                   <button className="quick-action">👗 Change Outfit</button>
                   <button className="quick-action">🌈 Adjust Mood</button>
-                </>
-              )}
-              {mode === 'report' && (
-                <>
-                  <button className="quick-action">📊 Add Analysis</button>
-                  <button className="quick-action">📈 Include Charts</button>
-                  <button className="quick-action">✏️ Rewrite Section</button>
                 </>
               )}
             </div>

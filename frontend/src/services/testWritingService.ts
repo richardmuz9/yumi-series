@@ -1,4 +1,4 @@
-import { ExamType, TestPrompt, EssaySubmission, FeedbackReport } from '../writing-helper/components/TestWriting/types.ts';
+import { ExamType, TestPrompt, EssaySubmission, FeedbackReport } from '../writing-helper/components/TestWriting/types';
 import { api } from './api';
 
 export const getPrompt = async (examType: ExamType): Promise<TestPrompt> => {
