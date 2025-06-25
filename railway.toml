@@ -1,17 +1,21 @@
 [build]
 builder = "NIXPACKS"
+buildCommand = "cd backend && npm ci && npm run build"
 
 [deploy]
-startCommand = "npm run build && npm start"
-healthcheckPath = "/health"
+startCommand = "cd backend && npm run start"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 # Environment variables that Railway should use
-[variables]
+[env]
 NODE_ENV = "production"
-PORT = "3000"
+PORT = "3001"
 
 # Tell Railway to use the backend directory as root
-workdir = "backend" 
+workdir = "backend"
+
+[variables]
+NIXPACKS_NODE_VERSION = "18" 
