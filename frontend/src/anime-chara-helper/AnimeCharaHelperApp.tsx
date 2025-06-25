@@ -16,7 +16,7 @@ interface AnimeCharaHelperAppProps {
   onBack?: () => void
 }
 
-export const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => {
+const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => {
   const { language } = useStore()
   const navigate = useNavigate()
 
@@ -255,3 +255,5 @@ export const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack
     </div>
   )
 }
+
+export default AnimeCharaHelperApp;

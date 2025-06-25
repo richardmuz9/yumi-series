@@ -8,7 +8,7 @@ import LayoutCustomizer from './components/LayoutCustomizer';
 import { billingApi } from './services/billingApi';
 import type { BillingInfo } from './services/billingApi';
 import WritingHelperScreen from './writing-helper/WritingHelperScreen';
-import { AnimeCharaHelperApp } from './anime-chara-helper/AnimeCharaHelperApp';
+import AnimeCharaHelperApp from './anime-chara-helper/AnimeCharaHelperApp';
 import './main.css';
 import './components/ModeLauncher.css';
 import { useLanguagePersistence } from './hooks/useLanguagePersistence';

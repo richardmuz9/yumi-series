@@ -48,40 +48,72 @@ export const SmartBrushPanel: React.FC<SmartBrushPanelProps> = ({
       features: ['Region detection', 'Smart boundaries', 'Color preservation']
     },
     {
-      id: 'pattern_detect' as const,
-      name: 'Pattern Detect',
-      icon: <IoGrid />,
-      description: 'Detects and fills patterns like clothes folds, hair strands',
-      features: ['Pattern recognition', 'Texture matching', 'Detail enhancement']
-    },
-    {
-      id: 'gradient_smart' as const,
-      name: 'Smart Gradient',
+      id: 'gradient_fill' as const,
+      name: 'Gradient Fill',
       icon: <IoSparkles />,
       description: 'Creates intelligent gradients based on lighting and form',
       features: ['Light analysis', 'Form following', 'Natural transitions']
+    },
+    {
+      id: 'pattern_recognition' as const,
+      name: 'Pattern Recognition',
+      icon: <IoGrid />,
+      description: 'Detects and fills patterns like clothes folds, hair strands',
+      features: ['Pattern recognition', 'Texture matching', 'Detail enhancement']
     }
   ]
 
   const presetConfigs = [
     {
       name: 'Clothing',
-      config: { mode: 'auto_fill' as const, sensitivity: 75, blendStrength: 85, preserveDetails: true },
+      config: { 
+        mode: 'auto_fill' as const, 
+        sensitivity: 75, 
+        blendStrength: 85, 
+        preserveDetails: true,
+        detailLevel: 'medium' as const,
+        edgeDetection: true,
+        colorBlending: 'smooth' as const
+      },
       description: 'Optimized for coloring clothes and fabric'
     },
     {
       name: 'Hair',
-      config: { mode: 'pattern_detect' as const, sensitivity: 60, blendStrength: 70, preserveDetails: true },
+      config: { 
+        mode: 'pattern_recognition' as const, 
+        sensitivity: 60, 
+        blendStrength: 70, 
+        preserveDetails: true,
+        detailLevel: 'fine' as const,
+        edgeDetection: true,
+        colorBlending: 'textured' as const
+      },
       description: 'Perfect for hair strands and texture'
     },
     {
       name: 'Skin',
-      config: { mode: 'gradient_smart' as const, sensitivity: 85, blendStrength: 90, preserveDetails: true },
+      config: { 
+        mode: 'gradient_fill' as const, 
+        sensitivity: 85, 
+        blendStrength: 90, 
+        preserveDetails: true,
+        detailLevel: 'ultra-fine' as const,
+        edgeDetection: true,
+        colorBlending: 'smooth' as const
+      },
       description: 'Natural skin tones and shading'
     },
     {
       name: 'Accessories',
-      config: { mode: 'auto_fill' as const, sensitivity: 90, blendStrength: 95, preserveDetails: false },
+      config: { 
+        mode: 'auto_fill' as const, 
+        sensitivity: 90, 
+        blendStrength: 95, 
+        preserveDetails: false,
+        detailLevel: 'coarse' as const,
+        edgeDetection: false,
+        colorBlending: 'crisp' as const
+      },
       description: 'Clean fills for jewelry and accessories'
     }
   ]
@@ -284,7 +316,7 @@ export const SmartBrushPanel: React.FC<SmartBrushPanelProps> = ({
             <h5>💡 Tips</h5>
             <ul>
               <li>Use <strong>Auto Fill</strong> for large, uniform areas</li>
-              <li>Try <strong>Pattern Detect</strong> for textured surfaces</li>
+              <li>Try <strong>Pattern Recognition</strong> for textured surfaces</li>
               <li>Enable <strong>Preview Mode</strong> to see changes before applying</li>
               <li>Lower sensitivity for more precise edge detection</li>
             </ul>

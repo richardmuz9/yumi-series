@@ -10,9 +10,9 @@ type LazyComponentImport = () => Promise<LazyComponentModule>;
 const loadComponent = (key: string) => {
   switch (key) {
     case 'writing-helper':
-      return lazy(() => import('../writing-helper/WritingHelperApp').then(module => ({ default: module.WritingHelperApp })));
+      return lazy(() => import('../writing-helper/WritingHelperApp'));
     case 'anime-chara':
-      return lazy(() => import('../anime-chara-helper/AnimeCharaHelperApp').then(module => ({ default: module.AnimeCharaHelperApp })));
+      return lazy(() => import('../anime-chara-helper/AnimeCharaHelperApp'));
     default:
       throw new Error(`Unknown component: ${key}`);
   }

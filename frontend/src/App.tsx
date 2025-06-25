@@ -1,16 +1,15 @@
-import React, { useState, Suspense, useEffect } from 'react'
-import MainPage from './MainPage'
-import { dynamicLoader } from './utils/dynamicLoader'
-import { useAssistantStore } from './store/assistant'
-import AIAssistant from './components/AIAssistant'
+import React, { useState, Suspense, useEffect, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { DownloadSection } from './components/DownloadSection'
-import { WritingHelperApp } from './writing-helper/WritingHelperApp'
-import { AnimeCharaHelperApp } from './anime-chara-helper/AnimeCharaHelperApp'
-import ChargePage from './components/ChargePage'
-import './App.css'
-import { LanguageProvider } from './contexts/LanguageContext'
 import { CircularProgress } from '@mui/material'
+import { LanguageProvider } from './contexts/LanguageContext'
+import { dynamicLoader } from './utils/dynamicLoader'
+
+// Lazy load components
+const MainPage = lazy(() => import('./MainPage'))
+const AIAssistant = lazy(() => import('./components/AIAssistant'))
+const ChargePage = lazy(() => import('./components/ChargePage'))
+const WritingHelperApp = lazy(() => import('./writing-helper/WritingHelperApp'))
+const AnimeCharaHelperApp = lazy(() => import('./anime-chara-helper/AnimeCharaHelperApp'))
 
 // Loading component for suspense
 const LoadingComponent = () => (
@@ -53,7 +52,9 @@ const App: React.FC = () => {
 
             {isAssistantOpen && (
               <div className="ai-assistant-container">
-                <AIAssistant onClose={() => setAssistantOpen(false)} />
+                <Suspense fallback={<LoadingComponent />}>
+                  <AIAssistant onClose={() => setAssistantOpen(false)} />
+                </Suspense>
               </div>
             )}
           </div>

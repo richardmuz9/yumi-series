@@ -12,7 +12,7 @@ import {
   IoCalculator,
   IoFlask,
   IoLeaf,
-  IoAtom,
+  IoAt,
   IoEarth
 } from 'react-icons/io5';
 import { 
@@ -20,7 +20,8 @@ import {
   RiFileTextLine,
   RiEqualizerLine
 } from 'react-icons/ri';
-import { SidebarPosition } from '../WritingHelperApp';
+
+export type SidebarPosition = 'left' | 'right';
 
 interface ReportHelperSidebarProps {
   isCollapsed: boolean;
@@ -98,7 +99,7 @@ const ReportHelperSidebar: React.FC<ReportHelperSidebarProps> = ({
   const tools: ToolConfig[] = [
     // Research
     { key: 'scientific-search', icon: IoSearch, label: 'Scientific Search', category: 'research', action: () => setActiveContext('scientific-search') },
-    { key: 'nature-physics', icon: IoAtom, label: 'Nature/Physics', category: 'research', action: () => setActiveContext('nature-physics') },
+    { key: 'nature-physics', icon: IoAt, label: 'Nature/Physics', category: 'research', action: () => setActiveContext('nature-physics') },
     { key: 'research-platforms', icon: IoLibrary, label: 'Research Platforms', category: 'research', action: () => setActiveContext('research-platforms') },
     
     // Editing

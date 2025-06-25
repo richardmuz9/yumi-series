@@ -12,7 +12,7 @@ export interface WritingHelperAppProps {
 
 export type ActiveScreen = 'main' | 'writing' | 'report';
 
-export const WritingHelperApp: React.FC<WritingHelperAppProps> = ({ onBack }) => {
+const WritingHelperApp: React.FC<WritingHelperAppProps> = ({ onBack }) => {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>('main');
   const [content, setContent] = useState('');
   
@@ -119,4 +119,6 @@ export const WritingHelperApp: React.FC<WritingHelperAppProps> = ({ onBack }) =>
         </div>
       );
   }
-}; 
+};
+
+export default WritingHelperApp; 

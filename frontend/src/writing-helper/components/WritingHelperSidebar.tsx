@@ -12,14 +12,15 @@ import {
   IoGameController,
   IoPeople,
   IoBook,
-  IoNewspaper
+  IoNewspaper,
+  IoTrendingUp
 } from 'react-icons/io5';
 import { 
   RiRobot2Line,
-  RiTrendingUpLine,
   RiTestTubeLine
 } from 'react-icons/ri';
-import { SidebarPosition } from '../WritingHelperApp';
+
+export type SidebarPosition = 'left' | 'right';
 
 interface WritingHelperSidebarProps {
   isCollapsed: boolean;
@@ -97,7 +98,7 @@ const WritingHelperSidebar: React.FC<WritingHelperSidebarProps> = ({
   const tools: ToolConfig[] = [
     // Social & Publishing
     { key: 'post-platforms', icon: IoShare, label: 'Post to Platforms', category: 'social', action: () => setActiveContext('post-platforms') },
-    { key: 'trending-search', icon: RiTrendingUpLine, label: 'Trending Search', category: 'social', action: () => setActiveContext('trending-search') },
+    { key: 'trending-search', icon: IoTrendingUp, label: 'Trending Search', category: 'social', action: () => setActiveContext('trending-search') },
     
     // AI Tools
     { key: 'ai-continuation', icon: RiRobot2Line, label: 'AI Continuation', category: 'ai', action: () => setActiveContext('ai-continuation') },
