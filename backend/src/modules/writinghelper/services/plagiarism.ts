@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { PlagiarismResult } from '../types';
 
 // Custom error class for plagiarism service
@@ -50,9 +50,9 @@ export class PlagiarismService {
   }
 
   private handleApiError(error: any, service: string): never {
-    if (axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError<{ error?: string }>;
-      if (axiosError.code === 'ECONNABORTED') {
+    if (error && error.response && error.request) {
+      // This is an axios error
+      if (error.code === 'ECONNABORTED') {
         throw new PlagiarismError(
           'TIMEOUT_ERROR',
           `${service} API request timed out`,
@@ -61,7 +61,7 @@ export class PlagiarismService {
       }
       throw new PlagiarismError(
         'API_ERROR',
-        `${service} API error: ${axiosError.response?.data?.error || axiosError.message}`,
+        `${service} API error: ${error.response?.data?.error || error.message}`,
         error
       );
     }
@@ -89,7 +89,8 @@ export class PlagiarismService {
         }
       );
 
-      const textId = submitResponse.data.data.text.id;
+      const submitData = submitResponse.data as { data: { text: { id: string } } };
+      const textId = submitData.data.text.id;
 
       // Poll for status until complete
       let status = 'processing';
@@ -107,7 +108,8 @@ export class PlagiarismService {
           }
         );
 
-        status = statusResponse.data.data.text.status;
+        const statusData = statusResponse.data as { data: { text: { status: string } } };
+        status = statusData.data.text.status;
         if (status === 'processing') {
           await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before next poll
           attempts++;
@@ -132,7 +134,8 @@ export class PlagiarismService {
         }
       );
 
-      const report = reportResponse.data.data;
+      const reportData = reportResponse.data as { data: any };
+      const report = reportData.data;
       return {
         score: report.percent,
         matches: report.matches.map((match: any) => ({
@@ -165,7 +168,8 @@ export class PlagiarismService {
         }
       );
 
-      const result = response.data.copyleaks;
+      const responseData = response.data as { copyleaks: any };
+      const result = responseData.copyleaks;
       return {
         score: result.plagiarism_score,
         matches: result.items.map((item: any) => ({

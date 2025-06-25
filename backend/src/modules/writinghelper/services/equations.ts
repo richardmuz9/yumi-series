@@ -42,7 +42,8 @@ export class EquationsService {
         }
       });
 
-      return response.data.choices[0].message.content.trim();
+      const data = response.data as { choices: Array<{ message: { content: string } }> };
+      return data.choices[0].message.content.trim();
     } catch (err) {
       console.error('Error converting speech to LaTeX:', err);
       throw new Error('Failed to convert speech to LaTeX');

@@ -150,7 +150,8 @@ const processWithQwen = async (prompt: string): Promise<string> => {
       }
     }, { headers: qwenHeaders });
     
-    return response.data.output.text;
+    const data = response.data as { output: { text: string } };
+    return data.output.text;
   });
 };
 

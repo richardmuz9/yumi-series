@@ -45,7 +45,8 @@ export class ResearchService {
       }
     });
 
-    return response.data.message.items.map(this.mapCrossrefToCitation);
+    const responseData = response.data as { message: { items: any[] } };
+    return responseData.message.items.map(this.mapCrossrefToCitation);
   }
 
   private async searchArxiv(query: string): Promise<Citation[]> {
