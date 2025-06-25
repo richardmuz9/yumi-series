@@ -41,6 +41,7 @@
     "pg": "^8.16.2",
     "prisma": "^5.10.0",
     "rate-limiter-flexible": "^4.0.1",
+    "sharp": "^0.33.2",
     "stripe": "^14.17.0",
     "typescript": "^5.3.3",
     "uuid": "^9.0.1",
