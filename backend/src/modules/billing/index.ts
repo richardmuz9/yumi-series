@@ -41,48 +41,55 @@ router.get('/info', authenticateUser, wrapAuthHandler(async (req: AuthRequest, r
     res.status(401).json({ error: 'User not authenticated' });
     return;
   }
+  
   log('Getting billing info for user:', req.user.id);
   const info = await billingService.getUserBillingInfo(String(req.user.id));
   log('Billing info retrieved:', info);
-  return info;
+  
+  return {
+    tokens: info.dailyTokensRemaining,
+    dailyTokensRemaining: info.dailyTokensRemaining,
+    blessingActive: info.hasAccessToImageGen,
+    freeTokensRemaining: info.freeTokensRemaining
+  };
 }));
 
-// Get available token packages
-router.get('/packages', authenticateUser, wrapAuthHandler((_req: AuthRequest, _res: Response) => {
-  return TOKEN_PACKAGES;
+// Get available packages and plans
+router.get('/packages', authenticateUser, wrapAuthHandler(async (_req: AuthRequest, _res: Response) => {
+  return {
+    packages: TOKEN_PACKAGES,
+    plans: PREMIUM_PLANS
+  };
 }));
 
-// Get available premium plans
-router.get('/plans', authenticateUser, wrapAuthHandler((_req: AuthRequest, _res: Response) => {
-  return PREMIUM_PLANS;
-}));
-
-// Create checkout session
-router.post('/checkout', authenticateUser, wrapAuthHandler(async (req: AuthRequest, res: Response) => {
+// Create payment session
+router.post('/payment', authenticateUser, wrapAuthHandler(async (req: AuthRequest, res: Response) => {
   if (!req.user?.id) {
     res.status(401).json({ error: 'User not authenticated' });
     return;
   }
 
-  const { packageId, planId, provider = 'stripe' } = req.body;
+  const { packageId, provider = 'stripe' } = req.body;
   
-  log('Creating checkout session:', { userId: req.user.id, packageId, planId, provider });
-  
-  if (!packageId && !planId) {
-    log('Error: Missing packageId or planId');
-    res.status(400).json({ error: 'Either packageId or planId is required' });
+  if (!packageId) {
+    res.status(400).json({ error: 'Package ID is required' });
     return;
   }
 
-  const url = await billingService.createCheckoutSession(
-    String(req.user.id),
-    packageId,
-    planId,
-    provider
-  );
-  
-  log('Checkout session created:', { url });
-  return { url };
+  try {
+    const url = await billingService.createCheckoutSession(
+      String(req.user.id),
+      packageId,
+      undefined,
+      provider
+    );
+    
+    return { url };
+  } catch (error) {
+    log('Payment session creation error:', error);
+    res.status(500).json({ error: 'Failed to create payment session' });
+    return;
+  }
 }));
 
 // Stripe webhook

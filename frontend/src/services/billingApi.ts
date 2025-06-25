@@ -1,9 +1,31 @@
 import axios, { AxiosResponse } from 'axios';
+import { getAuthToken } from '../hooks/useAuth';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001',
   withCredentials: true
 });
+
+// Add request interceptor to include auth token
+apiClient.interceptors.request.use((config) => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Add response interceptor to handle errors
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized error (e.g., redirect to login)
+      console.error('Authentication error:', error);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Billing API service for Yumi-Series pricing (3x markup for sustainable business)
 export interface UserBilling {
@@ -107,6 +129,11 @@ export interface BillingInfo {
   tokens: number;
   dailyTokensRemaining: number;
   blessingActive: boolean;
+  freeTokensRemaining?: {
+    openai: number;
+    claude: number;
+    qwen: number;
+  };
 }
 
 export interface PaymentResponse {
@@ -124,12 +151,7 @@ export const billingApi = {
       return response.data;
     } catch (error) {
       console.error('Failed to fetch billing info:', error);
-      // Return mock data for development
-      return {
-        tokens: 1000,
-        dailyTokensRemaining: 100,
-        blessingActive: false
-      };
+      throw error;
     }
   },
 
@@ -138,43 +160,11 @@ export const billingApi = {
     plans: PremiumPlan[];
   }> {
     try {
-      const response: AxiosResponse<{
-        packages: TokenPackage[];
-        plans: PremiumPlan[];
-      }> = await apiClient.get('/api/billing/packages');
+      const response = await apiClient.get('/api/billing/packages');
       return response.data;
     } catch (error) {
       console.error('Failed to fetch packages and plans:', error);
-      // Return mock data for development
-      return {
-        packages: [
-          {
-            id: 'basic',
-            name: 'Basic Package',
-            tokens: 1000,
-            price: 5,
-            currency: 'USD'
-          },
-          {
-            id: 'pro',
-            name: 'Pro Package',
-            tokens: 5000,
-            price: 20,
-            currency: 'USD',
-            recommended: true
-          }
-        ],
-        plans: [
-          {
-            id: 'yumi_blessing',
-            name: 'Yumi Blessing',
-            price: 10,
-            currency: 'USD',
-            dailyTokens: 1000,
-            features: ['Unlimited AI generations', 'Priority support', 'Advanced features']
-          }
-        ]
-      };
+      throw error;
     }
   },
 
@@ -204,6 +194,19 @@ export const billingApi = {
     }
   },
 
+  async initiatePayment(packageId: string, provider: 'stripe' | 'alipay' = 'stripe'): Promise<PaymentResponse> {
+    try {
+      const response = await apiClient.post('/api/billing/payment', {
+        packageId,
+        provider
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to initiate payment:', error);
+      throw new Error('Payment service temporarily unavailable');
+    }
+  },
+
   needsTokenPurchase(billingInfo: BillingInfo): boolean {
     return billingInfo.tokens < 1000;
   },
@@ -213,18 +216,9 @@ export const billingApi = {
   },
 
   getTokensRemaining(billingInfo: BillingInfo, provider?: 'openai' | 'claude' | 'qwen'): number {
-    return billingInfo.tokens;
-  },
-
-  initiatePayment: async (packageId: string): Promise<PaymentResponse> => {
-    try {
-      const response: AxiosResponse<PaymentResponse> = await apiClient.post('/api/billing/payment', {
-        packageId
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Failed to initiate payment:', error);
-      throw new Error('Payment service temporarily unavailable');
+    if (provider && billingInfo.freeTokensRemaining) {
+      return billingInfo.freeTokensRemaining[provider];
     }
+    return billingInfo.tokens;
   }
 }; 

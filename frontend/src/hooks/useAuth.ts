@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
 interface User {
@@ -10,10 +10,30 @@ interface User {
   };
 }
 
-export function useAuth() {
+const TOKEN_KEY = 'auth_token';
+
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem(TOKEN_KEY);
+};
+
+export const setAuthToken = (token: string): void => {
+  localStorage.setItem(TOKEN_KEY, token);
+};
+
+export const removeAuthToken = (): void => {
+  localStorage.removeItem(TOKEN_KEY);
+};
+
+export const useAuth = () => {
+  const [token, setToken] = useState<string | null>(getAuthToken());
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsAuthenticated(!!token);
+  }, [token]);
 
   useEffect(() => {
     // Check if user is logged in
@@ -31,10 +51,25 @@ export function useAuth() {
       });
   }, []);
 
+  const login = (newToken: string) => {
+    setAuthToken(newToken);
+    setToken(newToken);
+  };
+
+  const logout = () => {
+    removeAuthToken();
+    setToken(null);
+  };
+
   return {
+    token,
+    isAuthenticated,
+    login,
+    logout,
     user,
     loading,
-    error,
-    isAuthenticated: !!user
+    error
   };
-} 
+};
+
+export default useAuth; 
