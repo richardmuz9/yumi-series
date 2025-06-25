@@ -194,7 +194,7 @@ const MainPage: React.FC = () => {
       <div className="charge-sidebar">
         <button 
           className="charge-button"
-          onClick={() => navigate('/charge')}
+          onClick={() => alert('Charging feature is currently unavailable.')}
         >
           <div className="charge-icon">💎</div>
           <div className="charge-label">Charge</div>
