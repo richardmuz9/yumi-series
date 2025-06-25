@@ -17,7 +17,12 @@ const createRegexMatcher = (patterns: RegExp[]) => {
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      jsxImportSource: '@emotion/react',
+      babel: {
+        plugins: ['@emotion/babel-plugin']
+      }
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
@@ -71,69 +76,21 @@ export default defineConfig({
     chunkSizeWarningLimit: 800, // Increase warning limit for larger chunks
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          // Core dependencies
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
-            return 'core-vendor'
-          }
-          
-          // Router
-          if (id.includes('node_modules/react-router-dom/')) {
-            return 'router-vendor'
-          }
-          
-          // UI Framework chunks
-          if (id.includes('node_modules/@mui/material/') || id.includes('node_modules/@mui/system/')) {
-            return 'mui-core'
-          }
-          if (id.includes('node_modules/@mui/icons-material/')) {
-            return 'mui-icons'
-          }
-          if (id.includes('node_modules/@emotion/')) {
-            return 'mui-styles'
-          }
-          
-          // Editor
-          if (id.includes('node_modules/@monaco-editor/')) {
-            return 'editor-vendor'
-          }
-          
-          // State management
-          if (id.includes('node_modules/zustand/')) {
-            return 'state-management'
-          }
-          
-          // Internationalization
-          if (id.includes('node_modules/i18next/') || id.includes('node_modules/react-i18next/')) {
-            return 'i18n-vendor'
-          }
-          
-          // Charts
-          if (id.includes('node_modules/chart.js/') || id.includes('node_modules/react-chartjs-2/')) {
-            return 'chart-vendor'
-          }
-          
-          // Feature modules (code-split by domain)
-          if (id.includes('/anime-chara-helper/')) {
-            return 'anime-helper'
-          }
-          if (id.includes('/writing-helper/')) {
-            return 'writing-helper'
-          }
-          if (id.includes('/shared/components/')) {
-            return 'shared-components'
-          }
-          if (id.includes('/components/AIAssistant/')) {
-            return 'ai-assistant'
-          }
-        },
-        // Optimize chunk distribution
-        chunkFileNames: (chunkInfo) => {
-          const name = chunkInfo.name
-          if (name.includes('vendor')) {
-            return 'vendor/[name]-[hash].js'
-          }
-          return 'chunks/[name]-[hash].js'
+        manualChunks: {
+          'vendor': [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            '@emotion/react',
+            '@emotion/styled',
+            '@mui/material',
+            '@mui/system',
+            'chart.js',
+            'react-chartjs-2',
+            'i18next',
+            'react-i18next',
+            'zustand'
+          ]
         }
       }
     }
@@ -161,6 +118,9 @@ export default defineConfig({
       'i18next',
       'react-i18next',
       'zustand'
-    ]
+    ],
+    esbuildOptions: {
+      target: 'es2020'
+    }
   }
 }) 
