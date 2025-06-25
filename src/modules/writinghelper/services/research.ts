@@ -12,10 +12,10 @@ export interface Citation {
 
 function mapCrossrefToCitation(item: CrossrefResponse['message']['items'][0]): Citation {
   return {
-    title: item.title[0],
+    title: item.title?.[0] || 'Unknown Title',
     authors: item.author.map(a => `${a.given} ${a.family}`),
-    journal: item['container-title'][0],
-    year: item.published['date-parts'][0][0],
+    journal: item['container-title']?.[0] || 'Unknown Journal',
+    year: item.published?.['date-parts']?.[0]?.[0] || 0,
     doi: item.DOI,
     url: item.URL
   };
@@ -31,4 +31,32 @@ export async function searchCitations(query: string): Promise<Citation[]> {
     }
     throw new Error('Citation search failed with unknown error');
   }
+}
+
+interface ResearchItem {
+  title: string;
+  abstract: string;
+  URL: string;
+  score: number;
+}
+
+interface ResearchResponse {
+  message: {
+    items: ResearchItem[];
+  };
+}
+
+export async function searchResearch(query: string): Promise<Array<{
+  title: string;
+  abstract: string;
+  url: string;
+  score: number;
+}>> {
+  const response = await axios.post<ResearchResponse>('/api/research/search', { query });
+  return response.data.message.items.map((item: ResearchItem) => ({
+    title: item.title,
+    abstract: item.abstract,
+    url: item.URL,
+    score: item.score
+  }));
 } 

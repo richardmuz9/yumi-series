@@ -1,5 +1,3 @@
-import type { AxiosResponse } from 'axios';
-
 export interface AIResponse {
   output: {
     text: string;
@@ -51,13 +49,13 @@ export interface CopyleaksReportResponse {
 export interface CrossrefResponse {
   message: {
     items: Array<{
-      title: string[];
+      title?: string[];
       author: Array<{
         given: string;
         family: string;
       }>;
-      'container-title': string[];
-      published: {
+      'container-title'?: string[];
+      published?: {
         'date-parts': number[][];
       };
       DOI: string;
@@ -66,4 +64,6 @@ export interface CrossrefResponse {
   };
 }
 
-export type APIResponse<T> = Promise<AxiosResponse<T>>; 
+export interface GenericAPIResponse<T> {
+  data: T;
+} 

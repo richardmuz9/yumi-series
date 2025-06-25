@@ -1,14 +1,22 @@
 import axios from 'axios';
-import type { OpenAIResponse } from '../../../types/shared';
 
-export async function generateEquation(description: string): Promise<string> {
+interface EquationResponse {
+  choices: Array<{
+    message: {
+      content: string;
+    };
+  }>;
+}
+
+export async function generateEquation(prompt: string): Promise<string> {
   try {
-    const response = await axios.post<OpenAIResponse>('/api/equations/generate', { description });
-    return response.data.choices[0].message.content.trim();
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Equation generation failed: ${error.message}`);
+    const response = await axios.post('/api/equations/generate', { prompt });
+    const data = response.data as EquationResponse;
+    if (!data?.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response format from equation generation');
     }
-    throw new Error('Equation generation failed with unknown error');
+    return data.choices[0].message.content.trim();
+  } catch (error) {
+    throw new Error('Failed to generate equation');
   }
-} 
+}

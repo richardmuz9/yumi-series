@@ -1,14 +1,28 @@
 import axios from 'axios';
-import type { AIResponse } from '../../types/shared';
+
+/** @typedef {Object} AIOutput
+ * @property {Object} output
+ * @property {string} output.text
+ */
+
+interface AIOutput {
+  output: {
+    text: string;
+  };
+}
+
+interface AIResponse {
+  output: {
+    text: string;
+  };
+}
 
 export async function getAIResponse(prompt: string): Promise<string> {
   try {
-    const response = await axios.post<AIResponse>('/api/ai/generate', { prompt });
-    return response.data.output.text;
+    const response = await axios.post('/api/ai/generate', { prompt });
+    const data = response.data as AIResponse;
+    return data.output.text;
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`AI generation failed: ${error.message}`);
-    }
-    throw new Error('AI generation failed with unknown error');
+    throw new Error('Failed to get AI response');
   }
 } 
