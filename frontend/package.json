@@ -14,7 +14,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
+    "predeploy": "node scripts/check-env.js",
+    "deploy": "npm run build",
     "preview": "vite preview",
     "start:web": "vite",
     "start:desktop": "concurrently \"npm run build:watch\" \"wait-on http://localhost:5173 && electron .\"",
