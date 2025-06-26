@@ -1,2 +1,3 @@
-VITE_API_URL=http://137.184.89.215:3001
-VITE_FRONTEND_URL=http://yumi77965.online
+# Replace these with your actual values in .env file
+VITE_API_URL=your_api_url_here
+VITE_FRONTEND_URL=your_frontend_url_here
