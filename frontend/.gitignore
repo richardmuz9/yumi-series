@@ -24,3 +24,4 @@ node_modules
 backend/.env
 frontend/.env
 backend/.envsample
+backend/.envsample
