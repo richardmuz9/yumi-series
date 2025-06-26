@@ -7,7 +7,9 @@ import {
   IoSettings,
   IoCloudUpload,
   IoImage,
-  IoColorPalette
+  IoColorPalette,
+  IoPencil,
+  IoDocument
 } from 'react-icons/io5';
 import AIAssistant from '../components/AIAssistant';
 
@@ -22,6 +24,8 @@ interface WritingHelperScreenProps {
   content: string;
   onContentChange: (content: string) => void;
   onBack: () => void;
+  mode?: 'writing' | 'report';
+  onModeChange?: (mode: 'writing' | 'report') => void;
 }
 
 type SidebarPosition = 'left' | 'right';
@@ -29,7 +33,9 @@ type SidebarPosition = 'left' | 'right';
 const WritingHelperScreen: React.FC<WritingHelperScreenProps> = ({
   content,
   onContentChange,
-  onBack
+  onBack,
+  mode = 'writing',
+  onModeChange
 }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarPosition, setSidebarPosition] = useState<SidebarPosition>('left');
@@ -62,6 +68,40 @@ const WritingHelperScreen: React.FC<WritingHelperScreenProps> = ({
   const [showIterativeFeedback, setShowIterativeFeedback] = useState(false);
   const [currentVersions, setCurrentVersions] = useState<CreativeVersion[]>([]);
   const [availablePersonalities] = useState<string[]>(getAvailablePersonalities());
+
+  // Theme handling
+  const getTheme = () => {
+    return mode === 'writing' 
+      ? {
+          primary: '#ff69b4',
+          secondary: '#ffb6c1',
+          background: '#fff0f5',
+          text: '#4a4a4a'
+        }
+      : {
+          primary: '#2c5282',
+          secondary: '#4299e1',
+          background: '#ebf8ff',
+          text: '#2d3748'
+        };
+  };
+
+  const theme = getTheme();
+
+  // Mode switching
+  const handleModeSwitch = () => {
+    const newMode = mode === 'writing' ? 'report' : 'writing';
+    onModeChange?.(newMode);
+    
+    // Update creative session personality based on mode
+    setCreativeSession(prev => ({
+      ...prev,
+      controlSettings: {
+        ...prev.controlSettings,
+        yumiPersonality: newMode === 'writing' ? 'creative' : 'professional'
+      }
+    }));
+  };
 
   // Sidebar dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -458,233 +498,267 @@ const WritingHelperScreen: React.FC<WritingHelperScreenProps> = ({
     );
   };
 
-  return (
-    <div 
-      className="writing-helper-screen"
-      style={{
-        ...getBackgroundStyle(),
-        opacity: backgroundSettings.opacity
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-    >
-      {/* Header */}
-      <div className="screen-header">
-        <button className="back-btn" onClick={onBack}>
-          <IoArrowBack size={24} />
-        </button>
-        <h1>✍️ Writing Helper</h1>
-        <button 
-          className="customize-btn"
-          onClick={() => setShowCustomization(!showCustomization)}
-        >
-          <IoSettings size={24} />
-        </button>
+  // Header with mode indicator and back button
+  const renderHeader = () => (
+    <div className="writing-header" style={{ 
+      backgroundColor: theme.primary,
+      padding: '1rem',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    }}>
+      <button onClick={onBack} className="back-button" style={{
+        background: 'transparent',
+        border: 'none',
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        cursor: 'pointer',
+        fontSize: '1rem'
+      }}>
+        <IoArrowBack /> Back to Modes
+      </button>
+      <div className="mode-indicator" style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem'
+      }}>
+        {mode === 'writing' ? <IoPencil /> : <IoDocument />}
+        <span>{mode === 'writing' ? 'Writing Helper' : 'Report Writer'}</span>
       </div>
+      <button onClick={handleModeSwitch} style={{
+        background: theme.secondary,
+        border: 'none',
+        borderRadius: '4px',
+        padding: '0.5rem 1rem',
+        color: 'white',
+        cursor: 'pointer'
+      }}>
+        Switch to {mode === 'writing' ? 'Report' : 'Writing'} Mode
+      </button>
+    </div>
+  );
 
-      {/* Customization Panel */}
-      {showCustomization && (
-        <div className="customization-panel">
-          <h3>🎨 Customize Writing Helper</h3>
-          
-          <div className="customization-section">
-            <h4>Background</h4>
-            <div className="bg-type-selector">
-              <button 
-                className={backgroundSettings.type === 'solid' ? 'active' : ''}
-                onClick={() => setBackgroundSettings(prev => ({ ...prev, type: 'solid' }))}
-              >
-                <IoColorPalette size={16} />
-                Solid
-              </button>
-              <button 
-                className={backgroundSettings.type === 'gradient' ? 'active' : ''}
-                onClick={() => setBackgroundSettings(prev => ({ ...prev, type: 'gradient' }))}
-              >
-                🌈 Gradient
-              </button>
-              <button
-                className={backgroundSettings.type === 'image' ? 'active' : ''}
-                onClick={() => setBackgroundSettings(prev => ({ ...prev, type: 'image' }))}
-              >
-                <IoImage size={16} />
-                Image
-              </button>
-            </div>
+  return (
+    <div className="writing-helper-screen" style={{
+      backgroundColor: theme.background,
+      color: theme.text,
+      minHeight: '100vh'
+    }}>
+      {renderHeader()}
+      <div 
+        className="writing-helper-screen"
+        style={{
+          ...getBackgroundStyle(),
+          opacity: backgroundSettings.opacity
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        {/* Customization Panel */}
+        {showCustomization && (
+          <div className="customization-panel">
+            <h3>🎨 Customize Writing Helper</h3>
+            
+            <div className="customization-section">
+              <h4>Background</h4>
+              <div className="bg-type-selector">
+                <button 
+                  className={backgroundSettings.type === 'solid' ? 'active' : ''}
+                  onClick={() => setBackgroundSettings(prev => ({ ...prev, type: 'solid' }))}
+                >
+                  <IoColorPalette size={16} />
+                  Solid
+                </button>
+                <button 
+                  className={backgroundSettings.type === 'gradient' ? 'active' : ''}
+                  onClick={() => setBackgroundSettings(prev => ({ ...prev, type: 'gradient' }))}
+                >
+                  🌈 Gradient
+                </button>
+                <button
+                  className={backgroundSettings.type === 'image' ? 'active' : ''}
+                  onClick={() => setBackgroundSettings(prev => ({ ...prev, type: 'image' }))}
+                >
+                  <IoImage size={16} />
+                  Image
+                </button>
+              </div>
 
-            {backgroundSettings.type === 'solid' && (
-              <div className="color-picker">
+              {backgroundSettings.type === 'solid' && (
+                <div className="color-picker">
+                  <input 
+                    type="color" 
+                    value={backgroundSettings.color}
+                    onChange={(e) => setBackgroundSettings(prev => ({ ...prev, color: e.target.value }))}
+                  />
+                </div>
+              )}
+
+              {backgroundSettings.type === 'gradient' && (
+                <div className="gradient-presets">
+                  <button onClick={() => setBackgroundSettings(prev => ({ ...prev, gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }))}>
+                    Dark Blue
+                  </button>
+                  <button onClick={() => setBackgroundSettings(prev => ({ ...prev, gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }))}>
+                    Purple
+                  </button>
+                  <button onClick={() => setBackgroundSettings(prev => ({ ...prev, gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }))}>
+                    Pink
+                  </button>
+                </div>
+              )}
+
+              {backgroundSettings.type === 'image' && (
+                <div className="image-upload">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="upload-btn"
+                  >
+                    <IoCloudUpload size={16} />
+                    Upload Background
+                  </button>
+                </div>
+              )}
+
+              <div className="opacity-slider">
+                <label>Opacity: {Math.round(backgroundSettings.opacity * 100)}%</label>
                 <input 
-                  type="color" 
-                  value={backgroundSettings.color}
-                  onChange={(e) => setBackgroundSettings(prev => ({ ...prev, color: e.target.value }))}
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  value={backgroundSettings.opacity}
+                  onChange={(e) => setBackgroundSettings(prev => ({ ...prev, opacity: parseFloat(e.target.value) }))}
                 />
               </div>
-            )}
+            </div>
 
-            {backgroundSettings.type === 'gradient' && (
-              <div className="gradient-presets">
-                <button onClick={() => setBackgroundSettings(prev => ({ ...prev, gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }))}>
-                  Dark Blue
+            <div className="customization-section">
+              <h4>Sidebar Settings</h4>
+              <div className="sidebar-options">
+                <button onClick={togglePosition}>
+                  <IoSwapHorizontal size={16} />
+                  Switch to {sidebarPosition === 'left' ? 'Right' : 'Left'}
                 </button>
-                <button onClick={() => setBackgroundSettings(prev => ({ ...prev, gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }))}>
-                  Purple
-                </button>
-                <button onClick={() => setBackgroundSettings(prev => ({ ...prev, gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }))}>
-                  Pink
+                <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
+                  {sidebarCollapsed ? <IoMenu size={16} /> : <IoClose size={16} />}
+                  {sidebarCollapsed ? 'Expand' : 'Collapse'}
                 </button>
               </div>
-            )}
+            </div>
+          </div>
+        )}
 
-            {backgroundSettings.type === 'image' && (
-              <div className="image-upload">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="upload-btn"
-                >
-                  <IoCloudUpload size={16} />
-                  Upload Background
-                </button>
+        {/* Main Content Editor */}
+        <div className={`content-area ${sidebarCollapsed ? 'sidebar-collapsed' : ''} sidebar-${sidebarPosition}`}>
+          <textarea
+            className="main-editor"
+            value={content}
+            onChange={(e) => onContentChange(e.target.value)}
+            placeholder="Start writing your creative content..."
+          />
+        </div>
+
+        {/* Draggable Sidebar */}
+        <div 
+          ref={sidebarRef}
+          className={`writing-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarPosition}`}
+          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        >
+          {/* Sidebar Header */}
+          <div className="sidebar-header" onMouseDown={handleMouseDown}>
+            <div className="sidebar-controls">
+              <button 
+                className="collapse-btn"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              >
+                {sidebarCollapsed ? <IoMenu size={20} /> : <IoClose size={20} />}
+              </button>
+              <button className="position-btn" onClick={togglePosition}>
+                <IoSwapHorizontal size={20} />
+              </button>
+            </div>
+            {!sidebarCollapsed && <h3>Writing Tools</h3>}
+          </div>
+
+          {/* Tools */}
+          {!sidebarCollapsed && (
+            <div className="sidebar-content">
+              <div className="tools-grid">
+                {writingTools.map(tool => (
+                  <button
+                    key={tool.id}
+                    className={`tool-btn ${activeTool === tool.id ? 'active' : ''}`}
+                    style={{ '--category-color': getCategoryColor(tool.category) } as React.CSSProperties}
+                    onClick={() => handleToolClick(tool.id)}
+                  >
+                    <span className="tool-icon">{tool.icon}</span>
+                    <span className="tool-label">{tool.label}</span>
+                  </button>
+                ))}
               </div>
-            )}
 
-            <div className="opacity-slider">
-              <label>Opacity: {Math.round(backgroundSettings.opacity * 100)}%</label>
-              <input 
-                type="range"
-                min="0.1"
-                max="1"
-                step="0.1"
-                value={backgroundSettings.opacity}
-                onChange={(e) => setBackgroundSettings(prev => ({ ...prev, opacity: parseFloat(e.target.value) }))}
-              />
+              {/* Tool Panel */}
+              {renderToolPanel()}
             </div>
-          </div>
+          )}
 
-          <div className="customization-section">
-            <h4>Sidebar Settings</h4>
-            <div className="sidebar-options">
-              <button onClick={togglePosition}>
-                <IoSwapHorizontal size={16} />
-                Switch to {sidebarPosition === 'left' ? 'Right' : 'Left'}
-              </button>
-              <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
-                {sidebarCollapsed ? <IoMenu size={16} /> : <IoClose size={16} />}
-                {sidebarCollapsed ? 'Expand' : 'Collapse'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content Editor */}
-      <div className={`content-area ${sidebarCollapsed ? 'sidebar-collapsed' : ''} sidebar-${sidebarPosition}`}>
-        <textarea
-          className="main-editor"
-          value={content}
-          onChange={(e) => onContentChange(e.target.value)}
-          placeholder="Start writing your creative content..."
-        />
-      </div>
-
-      {/* Draggable Sidebar */}
-      <div 
-        ref={sidebarRef}
-        className={`writing-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarPosition}`}
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-      >
-        {/* Sidebar Header */}
-        <div className="sidebar-header" onMouseDown={handleMouseDown}>
-          <div className="sidebar-controls">
-            <button 
-              className="collapse-btn"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            >
-              {sidebarCollapsed ? <IoMenu size={20} /> : <IoClose size={20} />}
-            </button>
-            <button className="position-btn" onClick={togglePosition}>
-              <IoSwapHorizontal size={20} />
-            </button>
-          </div>
-          {!sidebarCollapsed && <h3>Writing Tools</h3>}
-        </div>
-
-        {/* Tools */}
-        {!sidebarCollapsed && (
-          <div className="sidebar-content">
-            <div className="tools-grid">
+          {/* Collapsed Icons */}
+          {sidebarCollapsed && (
+            <div className="collapsed-icons">
               {writingTools.map(tool => (
                 <button
                   key={tool.id}
-                  className={`tool-btn ${activeTool === tool.id ? 'active' : ''}`}
-                  style={{ '--category-color': getCategoryColor(tool.category) } as React.CSSProperties}
-                  onClick={() => handleToolClick(tool.id)}
+                  className="collapsed-tool-btn"
+                  onClick={() => {
+                    setSidebarCollapsed(false);
+                    handleToolClick(tool.id);
+                  }}
+                  title={tool.label}
                 >
-                  <span className="tool-icon">{tool.icon}</span>
-                  <span className="tool-label">{tool.label}</span>
+                  {tool.icon}
                 </button>
               ))}
             </div>
+          )}
+        </div>
 
-            {/* Tool Panel */}
-            {renderToolPanel()}
-          </div>
-        )}
+        {/* AI Assistant */}
+        <AIAssistant 
+          isOpen={showAI}
+          onClose={() => setShowAI(false)}
+          mode="writing-helper"
+          floatingMode={!showAI}
+        />
 
-        {/* Collapsed Icons */}
-        {sidebarCollapsed && (
-          <div className="collapsed-icons">
-            {writingTools.map(tool => (
-              <button
-                key={tool.id}
-                className="collapsed-tool-btn"
-                onClick={() => {
-                  setSidebarCollapsed(false);
-                  handleToolClick(tool.id);
-                }}
-                title={tool.label}
-              >
-                {tool.icon}
-              </button>
-            ))}
-          </div>
+        {/* Creative Control Panel */}
+        <CreativeControlPanel
+          currentSettings={creativeSession.controlSettings}
+          onSettingsChange={handleCreativeSettingsChange}
+          userHistory={creativeSession.userHistory}
+          availablePersonalities={availablePersonalities}
+          mode="writing"
+        />
+
+        {/* Iterative Feedback Panel */}
+        {showIterativeFeedback && currentVersions.length > 0 && (
+          <IterativeFeedbackPanel
+            versions={currentVersions}
+            onVersionSelect={handleVersionSelect}
+            onRequestRefinement={handleRequestRefinement}
+            currentPersonality={creativeSession.controlSettings.yumiPersonality}
+            refinementSuggestions={[
+              'Improve clarity',
+              'Add examples',
+              'Enhance flow',
+              'Adjust tone',
+              'Simplify language',
+              'Add emotion'
+            ]}
+          />
         )}
       </div>
-
-      {/* AI Assistant */}
-      <AIAssistant 
-        isOpen={showAI}
-        onClose={() => setShowAI(false)}
-        mode="writing-helper"
-        floatingMode={!showAI}
-      />
-
-      {/* Creative Control Panel */}
-      <CreativeControlPanel
-        currentSettings={creativeSession.controlSettings}
-        onSettingsChange={handleCreativeSettingsChange}
-        userHistory={creativeSession.userHistory}
-        availablePersonalities={availablePersonalities}
-        mode="writing"
-      />
-
-      {/* Iterative Feedback Panel */}
-      {showIterativeFeedback && currentVersions.length > 0 && (
-        <IterativeFeedbackPanel
-          versions={currentVersions}
-          onVersionSelect={handleVersionSelect}
-          onRequestRefinement={handleRequestRefinement}
-          currentPersonality={creativeSession.controlSettings.yumiPersonality}
-          refinementSuggestions={[
-            'Improve clarity',
-            'Add examples',
-            'Enhance flow',
-            'Adjust tone',
-            'Simplify language',
-            'Add emotion'
-          ]}
-        />
-      )}
     </div>
   );
 };

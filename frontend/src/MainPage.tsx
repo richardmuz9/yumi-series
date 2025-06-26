@@ -13,7 +13,7 @@ import './main.css';
 import './components/ModeLauncher.css';
 import { useLanguagePersistence } from './hooks/useLanguagePersistence';
 import { useTranslation } from 'react-i18next';
-import ChargePage from './components/ChargePage';
+
 
 interface BillingInfoWithUser extends BillingInfo {
   stripeCustomerId?: string;

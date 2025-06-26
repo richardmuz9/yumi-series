@@ -37,7 +37,7 @@ import {
   ImageAnalysisResult,
   BrushSettings
 } from '../types'
-import { IoSettings, IoCloudUpload, IoImage, IoColorPalette, IoLibrary, IoTime, IoBrush } from 'react-icons/io5'
+import { IoSettings, IoCloudUpload, IoImage, IoColorPalette, IoLibrary, IoTime, IoBrush, IoArrowBack } from 'react-icons/io5'
 import { FaFeatherAlt } from 'react-icons/fa'
 import { PEN_CONFIGURATIONS, getPenConfig, EYELASH_PRESET, HAIR_STRAND_PRESET } from '../config/penConfigs'
 
@@ -174,6 +174,85 @@ export const CreationMode: React.FC<CreationModeProps> = ({
     locked: false
   }])
   const [activeLayerId, setActiveLayerId] = useState('base')
+
+  // Sidebar state
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  // Handle drag start
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (sidebarRef.current) {
+      setIsDragging(true);
+      const rect = sidebarRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+  };
+
+  // Handle drag end
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Enhanced sidebar dragging with viewport bounds
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && sidebarRef.current) {
+      const rect = sidebarRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate new position with bounds checking
+      let newX = e.clientX - dragOffset.x;
+      let newY = e.clientY - dragOffset.y;
+      
+      // Enforce viewport bounds
+      newX = Math.max(0, Math.min(newX, viewportWidth - rect.width));
+      newY = Math.max(0, Math.min(newY, viewportHeight - rect.height));
+      
+      // Update sidebar position
+      if (sidebarRef.current) {
+        sidebarRef.current.style.left = `${newX}px`;
+        sidebarRef.current.style.top = `${newY}px`;
+      }
+    }
+  };
+
+  // Fixed header with back button
+  const renderHeader = () => (
+    <div className="creation-mode-header" style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '60px',
+      backgroundColor: '#1a1a2e',
+      color: 'white',
+      display: 'flex',
+      alignItems: 'center',
+      padding: '0 20px',
+      zIndex: 1000,
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    }}>
+      <button 
+        onClick={onBack}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          cursor: 'pointer',
+          fontSize: '16px'
+        }}
+      >
+        <IoArrowBack /> Back to Modes
+      </button>
+    </div>
+  );
 
   useEffect(() => {
     if (user) {
@@ -632,7 +711,8 @@ export const CreationMode: React.FC<CreationModeProps> = ({
   }
 
   return (
-    <div className="creation-mode">
+    <div className="creation-mode" style={{ paddingTop: '60px' }}>
+      {renderHeader()}
       {/* Icon Bar */}
       <IconBar
         mode="creative"
