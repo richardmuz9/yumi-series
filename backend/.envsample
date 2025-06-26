@@ -1,0 +1,25 @@
+# API Keys - Replace with your own values
+OPENAI_API_KEY=your_openai_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret_here
+
+# Database
+DATABASE_URL="file:./database.sqlite"
+
+# Authentication
+JWT_SECRET=your_jwt_secret_here
+COOKIE_SECRET=your_cookie_secret_here
+
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+
+# Optional Proxy Configuration
+# PROXY_HOST=127.0.0.1
+# PROXY_PORT=7890
+
+# Optional AI Service Keys
+# HUGGINGFACE_API_KEY=your_huggingface_key_here
+# QWEN_API_KEY=your_qwen_key_here
