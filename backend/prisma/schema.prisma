@@ -262,4 +262,45 @@ model TokenTransaction {
   createdAt       DateTime @default(now())
 
   @@index([userId])
+}
+
+model MangaProject {
+  id        String        @id @default(uuid())
+  title     String
+  style     String
+  metadata  String       // JSON string
+  settings  String       // JSON string
+  created   DateTime     @default(now())
+  modified  DateTime     @updatedAt
+  chapters  MangaChapter[]
+  characters String      // JSON array string of character IDs
+}
+
+model MangaChapter {
+  id        String     @id @default(uuid())
+  title     String
+  project   MangaProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  pages     MangaPage[]
+  writingSource String?  // JSON string
+}
+
+model MangaPage {
+  id          String   @id @default(uuid())
+  pageNumber  Int
+  layout      String   // JSON string
+  chapter     MangaChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId   String
+  panels      Panel[]
+  notes       String?
+}
+
+model Panel {
+  id          String   @id @default(uuid())
+  background  String?  // JSON string
+  characters  String   // JSON array string of character data
+  dialogues   String   // JSON array string of dialogues
+  effects     String   // JSON array string of effects
+  page        MangaPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  pageId      String
 } 

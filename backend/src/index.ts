@@ -132,6 +132,7 @@ import billingRouter from './modules/billing'
 import artworkRouter from './modules/artwork'
 import authRouter from './auth-routes'
 import configRouter from './modules/shared/configRoutes'
+import { mangaRouter } from './modules/manga/routes'
 import { rateLimit } from 'express-rate-limit'
 import cors from 'cors'
 import debug from 'debug'
@@ -189,6 +190,9 @@ log('Artwork router stack:', artworkRouter.stack)
 
 log('Registering config routes')
 app.use('/api/config', configRouter)
+
+log('Registering manga routes')
+app.use('/api/manga', mangaRouter)
 
 // Setup feature-specific routes
 log('Setting up writing helper routes')
