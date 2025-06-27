@@ -1,3 +1,8 @@
+import express from 'express';
 import mangaRoutes from './modules/manga/routes';
 
-app.use('/api/manga', mangaRoutes); 
+const app = express();
+
+app.use('/api/manga', mangaRoutes);
+
+export default app; 

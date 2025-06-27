@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
-import { MangaProject, MangaChapter, MangaPage, Panel, AIAssistantPrompt } from './types';
+import { MangaProject, MangaChapter, MangaPage, Panel, AIAssistantPrompt, MangaStyle } from './types';
 import { WritingProject } from '../writinghelper/types';
 import { Character } from '../../types/shared';
 import { aiController } from '../shared/aiController';
@@ -14,15 +14,21 @@ export class MangaService {
         id: uuidv4(),
         title,
         style,
-        metadata: metadata as any,
-        created: new Date().toISOString(),
-        modified: new Date().toISOString(),
-        settings: {},
-        chapters: []
+        metadata: JSON.stringify(metadata),
+        created: new Date(),
+        modified: new Date(),
+        settings: JSON.stringify({}),
+        characters: JSON.stringify([])
       }
     });
 
-    return project as unknown as MangaProject;
+    return {
+      ...project,
+      metadata: JSON.parse(project.metadata),
+      settings: JSON.parse(project.settings),
+      characters: JSON.parse(project.characters),
+      chapters: []
+    } as MangaProject;
   }
 
   async getProject(id: string): Promise<MangaProject> {
@@ -37,8 +43,7 @@ export class MangaService {
               }
             }
           }
-        },
-        characters: true
+        }
       }
     });
 
@@ -46,19 +51,77 @@ export class MangaService {
       throw new Error('Project not found');
     }
 
-    return project as unknown as MangaProject;
+    return {
+      ...project,
+      metadata: JSON.parse(project.metadata),
+      settings: JSON.parse(project.settings),
+      characters: JSON.parse(project.characters),
+      chapters: project.chapters.map(chapter => ({
+        ...chapter,
+        writingSource: chapter.writingSource ? JSON.parse(chapter.writingSource) : null,
+        pages: chapter.pages.map(page => ({
+          ...page,
+          layout: JSON.parse(page.layout),
+          panels: page.panels.map(panel => ({
+            ...panel,
+            background: panel.background ? JSON.parse(panel.background) : null,
+            characters: JSON.parse(panel.characters),
+            dialogues: JSON.parse(panel.dialogues),
+            effects: JSON.parse(panel.effects)
+          }))
+        }))
+      }))
+    } as MangaProject;
   }
 
   async updateProject(id: string, data: Partial<MangaProject>): Promise<MangaProject> {
+    const { chapters, ...rest } = data;
+    
+    const updateData = {
+      ...rest,
+      modified: new Date(),
+      metadata: data.metadata ? JSON.stringify(data.metadata) : undefined,
+      settings: data.settings ? JSON.stringify(data.settings) : undefined,
+      characters: data.characters ? JSON.stringify(data.characters) : undefined
+    };
+
     const project = await prisma.mangaProject.update({
       where: { id },
-      data: {
-        ...data,
-        modified: new Date().toISOString()
+      data: updateData,
+      include: {
+        chapters: {
+          include: {
+            pages: {
+              include: {
+                panels: true
+              }
+            }
+          }
+        }
       }
     });
 
-    return project as unknown as MangaProject;
+    return {
+      ...project,
+      metadata: JSON.parse(project.metadata),
+      settings: JSON.parse(project.settings),
+      characters: JSON.parse(project.characters),
+      chapters: project.chapters.map(chapter => ({
+        ...chapter,
+        writingSource: chapter.writingSource ? JSON.parse(chapter.writingSource) : null,
+        pages: chapter.pages.map(page => ({
+          ...page,
+          layout: JSON.parse(page.layout),
+          panels: page.panels.map(panel => ({
+            ...panel,
+            background: panel.background ? JSON.parse(panel.background) : null,
+            characters: JSON.parse(panel.characters),
+            dialogues: JSON.parse(panel.dialogues),
+            effects: JSON.parse(panel.effects)
+          }))
+        }))
+      }))
+    } as MangaProject;
   }
 
   async deleteProject(id: string): Promise<void> {
@@ -73,11 +136,15 @@ export class MangaService {
         id: uuidv4(),
         title,
         projectId,
-        pages: []
+        writingSource: null
       }
     });
 
-    return chapter as unknown as MangaChapter;
+    return {
+      ...chapter,
+      writingSource: null,
+      pages: []
+    } as MangaChapter;
   }
 
   async addPage(chapterId: string, layout: MangaPage['layout']): Promise<MangaPage> {
@@ -95,30 +162,48 @@ export class MangaService {
         id: uuidv4(),
         pageNumber: (chapter.pages?.length || 0) + 1,
         chapterId,
-        layout: layout as any,
-        panels: []
+        layout: JSON.stringify(layout),
+        notes: null
       }
     });
 
-    return page as unknown as MangaPage;
+    return {
+      ...page,
+      layout: JSON.parse(page.layout),
+      panels: []
+    } as MangaPage;
   }
 
   async updatePanel(id: string, data: Partial<Panel>): Promise<Panel> {
+    const updateData = {
+      background: data.background ? JSON.stringify(data.background) : undefined,
+      characters: data.characters ? JSON.stringify(data.characters) : undefined,
+      dialogues: data.dialogues ? JSON.stringify(data.dialogues) : undefined,
+      effects: data.effects ? JSON.stringify(data.effects) : undefined
+    };
+
     const panel = await prisma.panel.update({
       where: { id },
-      data: data as any
+      data: updateData
     });
 
-    return panel as unknown as Panel;
+    return {
+      ...panel,
+      background: panel.background ? JSON.parse(panel.background) : null,
+      characters: JSON.parse(panel.characters),
+      dialogues: JSON.parse(panel.dialogues),
+      effects: JSON.parse(panel.effects)
+    } as Panel;
   }
 
   async generateAIAssistance(prompt: AIAssistantPrompt): Promise<string> {
     const systemPrompt = `You are a manga creation assistant. Help create ${prompt.type} based on the following context:
-    - Style: ${prompt.context?.style || 'default'}
+    - Style: ${prompt.context?.style || 'custom'}
     - Characters: ${prompt.context?.characters?.map(c => c.name).join(', ') || 'none specified'}
     - Mood: ${prompt.context?.mood || 'neutral'}`;
 
-    const response = await aiController.generateText({
+    // Using any here temporarily until we properly type the aiController
+    const response = await (aiController as any).generateText({
       systemPrompt,
       userPrompt: prompt.content,
       temperature: 0.7,
@@ -160,7 +245,7 @@ export class MangaService {
           type: 'scene',
           content: scene.description,
           context: {
-            style: project.style,
+            style: 'custom' as MangaStyle,
             mood: scene.mood
           }
         });

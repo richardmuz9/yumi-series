@@ -26,11 +26,12 @@ export interface DialogueBubble {
 
 export interface Panel {
   id: string;
+  pageId: string;
   background?: {
     type: 'image' | 'ai-generated';
     url?: string;
     prompt?: string;
-  };
+  } | null;
   characters: Array<{
     character: Character;
     position: { x: number; y: number };
@@ -49,29 +50,31 @@ export interface Panel {
 export interface MangaPage {
   id: string;
   pageNumber: number;
+  chapterId: string;
   layout: PanelLayout;
   panels: Panel[];
-  notes?: string;
+  notes?: string | null;
 }
 
 export interface MangaChapter {
   id: string;
   title: string;
+  projectId: string;
   pages: MangaPage[];
   writingSource?: {
     project: WritingProject;
     chapterId: string;
-  };
+  } | null;
 }
 
 export interface MangaProject {
   id: string;
   title: string;
-  style: MangaStyle;
+  style: string;
   chapters: MangaChapter[];
   characters: Character[];
-  created: string;
-  modified: string;
+  created: Date;
+  modified: Date;
   metadata: {
     author: string;
     description?: string;
