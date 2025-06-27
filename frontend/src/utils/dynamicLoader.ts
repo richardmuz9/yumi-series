@@ -11,19 +11,19 @@ const loadComponent = (key: string) => {
   try {
     switch (key) {
       case 'writing-helper':
-        return lazy(() => import('../writing-helper/WritingHelperScreen').catch(e => {
+        return lazy(() => import('../writing-helper/WritingHelperScreen').catch((e: Error) => {
           console.error(`Failed to load writing-helper:`, e);
           return { default: () => null };
         }));
       case 'anime-chara':
-        return lazy(() => import('../anime-chara-helper/AnimeCharaHelperApp').catch(e => {
+        return lazy(() => import('../anime-chara-helper/AnimeCharaHelperApp').catch((e: Error) => {
           console.error(`Failed to load anime-chara:`, e);
           return { default: () => null };
         }));
       default:
         throw new Error(`Unknown component: ${key}`);
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error in loadComponent for ${key}:`, error);
     return lazy(() => Promise.resolve({ default: () => null }));
   }
@@ -36,14 +36,14 @@ const preloadInstalledComponents = async () => {
     try {
       localStorage.setItem(testKey, 'test');
       localStorage.removeItem(testKey);
-    } catch (e: unknown) {
-      console.warn('localStorage not available:', e);
+    } catch (error: unknown) {
+      console.warn('localStorage not available:', error);
       return; // Exit early if localStorage is not available
     }
 
     // Get installed modes from modeManager
-    const installedModes = await modeManager.getInstalledModes().catch(e => {
-      console.warn('Failed to get installed modes:', e);
+    const installedModes = await modeManager.getInstalledModes().catch((error: unknown) => {
+      console.warn('Failed to get installed modes:', error);
       return ['writing-helper', 'anime-chara']; // Fallback to default modes
     });
 
@@ -56,17 +56,17 @@ const preloadInstalledComponents = async () => {
           // Trigger the lazy load
           const modulePromise = (component as any)._payload._result;
           if (modulePromise && typeof modulePromise.then === 'function') {
-            await modulePromise.catch(e => {
-              console.warn(`Non-critical: Failed to preload ${key}:`, e);
+            await modulePromise.catch((error: unknown) => {
+              console.warn(`Non-critical: Failed to preload ${key}:`, error);
             });
           }
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn(`Non-critical: Failed to preload component ${key}:`, error);
         // Continue with other components even if one fails
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.warn('Non-critical: Error in preloadInstalledComponents:', error);
     // Don't throw, just log warning as this is a preload operation
   }
@@ -86,7 +86,7 @@ export const dynamicLoader = {
       }
 
       return loadComponent(key);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Failed to load component for mode ${key}:`, error);
       return null;
     }
@@ -98,7 +98,7 @@ export const dynamicLoader = {
   preloadComponent: async (key: string): Promise<void> => {
     try {
       await dynamicLoader.loadComponent(key);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Failed to preload component ${key}:`, error);
     }
   },
@@ -114,7 +114,7 @@ export const dynamicLoader = {
   clearComponentCache: (key: string): void => {
     try {
       // Implementation needed
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Failed to clear component cache for ${key}:`, error);
     }
   },
@@ -125,7 +125,7 @@ export const dynamicLoader = {
   clearAllCache: () => {
     try {
       // Implementation needed
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to clear all component cache:', error);
     }
   },
@@ -137,7 +137,7 @@ export const dynamicLoader = {
     try {
       // Implementation needed
       return 0; // Placeholder return
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to get cache size:', error);
       return 0;
     }
@@ -150,7 +150,7 @@ export const dynamicLoader = {
     try {
       // Implementation needed
       return null; // Placeholder return
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Failed to get cached component ${key}:`, error);
       return null;
     }
