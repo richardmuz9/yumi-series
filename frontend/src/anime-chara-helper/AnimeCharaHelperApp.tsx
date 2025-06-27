@@ -4,10 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import AIAssistant from '../components/AIAssistant'
 import { IconButton } from '@mui/material'
 import { ArrowBack } from '@mui/icons-material'
-
-// Split mode components
 import { CreationMode } from './modes/CreationMode'
 import { ImageGenerationMode } from './modes/ImageGenerationMode'
+import { ModeToggle, YumiMode } from '../shared/components/ModeToggle'
 
 import './AnimeCharaHelper.css'
 import { Mode } from './types'
@@ -29,6 +28,7 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [selectedReferenceUrl, setSelectedReferenceUrl] = useState<string | null>(null)
   const [showYumiReferences, setShowYumiReferences] = useState(false)
+  const [yumiMode, setYumiMode] = useState<YumiMode>('戦おう一緒に')
 
   // Background settings (mainly for creation mode)
   const [backgroundSettings, setBackgroundSettings] = useState({
@@ -99,6 +99,19 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
       navigate(-1)
     }
   }
+
+  const handleGenerate = async (mode: YumiMode) => {
+    const strategy = mode === '戦おう一緒に' ? '３デザイン提案' :
+                    mode === '面倒いけどすごい' ? '詳細バリエーション' : '５キャラプロンプト＋配色';
+
+    try {
+      // TODO: Call the appropriate API endpoint with the strategy
+      console.log(`Generating with strategy: ${strategy}`);
+      // const result = await api.generateAnime(content, strategy);
+    } catch (error) {
+      console.error('Generation failed:', error);
+    }
+  };
 
   // Render the current mode
   const renderCurrentMode = () => {
@@ -252,6 +265,52 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
         mode="anime-chara-helper"
         floatingMode={!showAI}
       />
+
+      <div className="content-area">
+        <ModeToggle
+          mode={yumiMode}
+          onChange={setYumiMode}
+          domain="anime"
+        />
+        <textarea
+          className="prompt-input"
+          placeholder={
+            yumiMode === '戦おう一緒に' ? 'アイデアとあらすじを入力…' :
+            yumiMode === '面倒いけどすごい' ? 'できるだけ詳細に説明してください…' :
+            'アイデアだけを入力してください…'
+          }
+          style={{
+            width: '100%',
+            minHeight: '200px',
+            padding: '20px',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '8px',
+            fontSize: '16px',
+            lineHeight: '1.6',
+            resize: 'vertical',
+            marginBottom: '16px'
+          }}
+        />
+        <button 
+          className="generate-button"
+          onClick={() => handleGenerate(yumiMode)}
+          style={{
+            background: '#ff69b4',
+            color: 'white',
+            border: 'none',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            marginBottom: '16px',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          アウトラインを生成
+        </button>
+      </div>
     </div>
   )
 }

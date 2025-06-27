@@ -8,7 +8,7 @@ interface WritingScreenProps {
 
 type WritingMode = 'writing' | 'report';
 
-export const WritingScreen: React.FC<WritingScreenProps> = ({ onBack }) => {
+const WritingScreen: React.FC<WritingScreenProps> = ({ onBack }) => {
   const [mode, setMode] = useState<WritingMode>('writing');
   const [content, setContent] = useState('');
 
@@ -115,7 +115,7 @@ export const WritingScreen: React.FC<WritingScreenProps> = ({ onBack }) => {
             ? "Start writing your creative piece here..."
             : "Begin your professional report here..."
           }
-          style={{
+        style={{
             width: '100%',
             minHeight: '500px',
             padding: '20px',
@@ -131,4 +131,6 @@ export const WritingScreen: React.FC<WritingScreenProps> = ({ onBack }) => {
       </div>
     </div>
   );
-}; 
+};
+
+export default WritingScreen;

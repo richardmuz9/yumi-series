@@ -118,4 +118,47 @@ export interface Tool {
   component: React.ComponentType<any>;
 }
 
-export type ToolsConfig = Record<ToolKey, Tool>; 
+export type ToolsConfig = Record<ToolKey, Tool>;
+
+export interface WritingProject {
+  id: string;
+  title: string;
+  type: 'manga' | 'novel' | 'script';
+  chapters: Array<{
+    id: string;
+    title: string;
+    content: string;
+    scenes: Array<{
+      id: string;
+      description: string;
+      content: string;
+      characters: string[];
+      location?: string;
+      mood?: string;
+    }>;
+    metadata?: {
+      timeOfDay?: string;
+      weather?: string;
+      location?: string;
+      characters?: string[];
+    };
+  }>;
+  metadata: {
+    author: string;
+    description?: string;
+    genre?: string[];
+    targetAudience?: string;
+    status: 'draft' | 'in-progress' | 'complete';
+    created: string;
+    modified: string;
+  };
+  settings: {
+    language: string;
+    style?: string;
+    aiAssistance?: {
+      enabled: boolean;
+      model?: string;
+      temperature?: number;
+    };
+  };
+} 

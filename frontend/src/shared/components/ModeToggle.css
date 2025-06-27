@@ -1,0 +1,58 @@
+.mode-toggle-container {
+  background: rgba(30, 30, 40, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mode-toggle-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-toggle-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  font-weight: normal;
+  font-size: 14px;
+}
+
+.mode-toggle-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.mode-toggle-button.active {
+  background: rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Domain-specific themes */
+.mode-toggle-container.writing {
+  border-left: 3px solid #ff69b4;
+}
+
+.mode-toggle-container.anime {
+  border-left: 3px solid #4ade80;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .mode-toggle-buttons {
+    flex-direction: column;
+  }
+  
+  .mode-toggle-button {
+    width: 100%;
+    text-align: center;
+  }
+} 

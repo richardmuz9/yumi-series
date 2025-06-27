@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useStore } from '../store'
 import { useChat } from '../hooks/useChat'
+import { SenseiPanel } from './panels/SenseiPanel'
+import { OtakuPanel } from './panels/OtakuPanel'
 import './AIAssistant.css'
 
 // Import personality data with v1.2 hints
@@ -247,7 +249,7 @@ export default function AIAssistant({
   mode = 'main',
   floatingMode = false 
 }: AIAssistantProps) {
-  const [activeTab, setActiveTab] = useState<'chat' | 'faq' | 'models' | 'personality'>('chat')
+  const [activeTab, setActiveTab] = useState<'chat' | 'faq' | 'models' | 'personality' | 'japanese' | 'anime'>('chat')
   const [selectedFAQCategory, setSelectedFAQCategory] = useState<string>(mode)
   const [selectedModel, setSelectedModel] = useState<string>('qwen-turbo')
   const [selectedPersonality, setSelectedPersonality] = useState<string>('teacher')
@@ -545,11 +547,46 @@ export default function AIAssistant({
     </div>
   )
 
-  if (floatingMode && isMinimized) {
-    return renderFloatingIcon()
-  }
+  const getAvailableTabs = () => {
+    const baseTabs = [
+      { id: 'chat', label: 'Core' },
+      { id: 'faq', label: 'Tutorial' },
+      { id: 'models', label: 'Models' },
+      { id: 'personality', label: 'Personality' }
+    ];
 
-  if (!isOpen && !floatingMode) return null
+    if (selectedPersonality === 'teacher') {
+      baseTabs.push({ id: 'japanese', label: '日本語レッスン' });
+    }
+
+    if (selectedPersonality === 'otaku') {
+      baseTabs.push({ id: 'anime', label: 'Anime-トリビア' });
+    }
+
+    return baseTabs;
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'chat':
+        return renderChat();
+      case 'faq':
+        return renderFAQ();
+      case 'models':
+        return renderModels();
+      case 'personality':
+        return renderPersonality();
+      case 'japanese':
+        return <SenseiPanel />;
+      case 'anime':
+        return <OtakuPanel />;
+      default:
+        return renderChat();
+    }
+  };
+
+  if (!isOpen) return null;
+  if (isMinimized) return renderFloatingIcon();
 
   return (
     <div className="ai-assistant-overlay">
@@ -576,37 +613,19 @@ export default function AIAssistant({
         </div>
 
         <div className="ai-tabs">
-          <button 
-            className={activeTab === 'chat' ? 'active' : ''}
-            onClick={() => setActiveTab('chat')}
-          >
-            💬 Chat
-          </button>
-          <button 
-            className={activeTab === 'faq' ? 'active' : ''}
-            onClick={() => setActiveTab('faq')}
-          >
-            ❓ Tutorial
-          </button>
-          <button 
-            className={activeTab === 'personality' ? 'active' : ''}
-            onClick={() => setActiveTab('personality')}
-          >
-            👤 Personality
-          </button>
-          <button 
-            className={activeTab === 'models' ? 'active' : ''}
-            onClick={() => setActiveTab('models')}
-          >
-            🧠 Models
-          </button>
+          {getAvailableTabs().map(tab => (
+            <button
+              key={tab.id}
+              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id as typeof activeTab)}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         <div className="ai-content">
-          {activeTab === 'chat' && renderChat()}
-          {activeTab === 'faq' && renderFAQ()}
-          {activeTab === 'personality' && renderPersonality()}
-          {activeTab === 'models' && renderModels()}
+          {renderContent()}
         </div>
       </div>
     </div>

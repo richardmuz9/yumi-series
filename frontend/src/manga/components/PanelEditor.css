@@ -1,0 +1,232 @@
+.panel-editor {
+  display: flex;
+  gap: 2rem;
+  height: 100%;
+  padding: 1rem;
+  background: #1a1a1a;
+}
+
+.panel-canvas {
+  flex: 1;
+  position: relative;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  min-height: 600px;
+  display: grid;
+  gap: 2px;
+  background: #000;
+}
+
+.panel-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.character-element {
+  position: absolute;
+  cursor: move;
+  z-index: 2;
+  transition: transform 0.2s ease;
+}
+
+.character-element.selected {
+  outline: 2px solid #4ECDC4;
+  border-radius: 4px;
+}
+
+.character-element img {
+  max-height: 200px;
+  width: auto;
+  pointer-events: none;
+}
+
+.dialogue-bubble {
+  position: absolute;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  min-width: 100px;
+  max-width: 300px;
+  cursor: move;
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dialogue-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 20px;
+  border-width: 10px 10px 0;
+  border-style: solid;
+  border-color: #fff transparent transparent;
+}
+
+.dialogue-bubble.selected {
+  outline: 2px solid #FF6B6B;
+}
+
+.dialogue-bubble.shout {
+  background: #FFE66D;
+  font-weight: bold;
+  transform: scale(1.1);
+}
+
+.dialogue-bubble.whisper {
+  background: #f0f0f0;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.dialogue-bubble.thought {
+  border-radius: 24px;
+  background: #f8f8f8;
+}
+
+.dialogue-bubble.thought::before {
+  display: none;
+}
+
+.dialogue-bubble.monologue {
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+}
+
+.bubble-content {
+  outline: none;
+  min-height: 1em;
+}
+
+.panel-toolbar {
+  width: 280px;
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.character-list,
+.bubble-controls {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.character-list h4,
+.bubble-controls h4 {
+  color: #fff;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+.character-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.character-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 0.5rem;
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.character-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.character-thumb img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.character-thumb span {
+  display: block;
+  color: #fff;
+  font-size: 0.9rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bubble-controls button {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.bubble-controls button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.bubble-style-controls {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.bubble-style-controls select {
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.bubble-style-controls select option {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+/* Drag and drop visual feedback */
+.character-element.dragging {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.dialogue-bubble.dragging {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* Panel grid lines */
+.panel-canvas::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 1;
+} 

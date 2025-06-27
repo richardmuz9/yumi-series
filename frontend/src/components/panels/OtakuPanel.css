@@ -1,0 +1,555 @@
+.otaku-panel {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tab-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  font-size: 16px;
+}
+
+.tab-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tab-button.active {
+  background: rgba(102, 126, 234, 0.3);
+  font-weight: bold;
+}
+
+/* Trivia Section */
+.trivia-section {
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.trivia-card {
+  text-align: center;
+}
+
+.trivia-card h3 {
+  color: #fff;
+  margin: 0 0 16px 0;
+  font-size: 24px;
+}
+
+.trivia-category {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.trivia-question {
+  color: #fff;
+  font-size: 18px;
+  margin-bottom: 24px;
+  font-weight: bold;
+}
+
+.trivia-options {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.trivia-option {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-size: 16px;
+}
+
+.trivia-option:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.trivia-option.selected {
+  background: rgba(102, 126, 234, 0.3);
+}
+
+.trivia-option.correct {
+  background: rgba(72, 187, 120, 0.3);
+}
+
+.trivia-option.incorrect {
+  background: rgba(245, 101, 101, 0.3);
+}
+
+.trivia-feedback {
+  margin-top: 24px;
+  padding: 20px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.trivia-feedback p.correct {
+  color: #48bb78;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.trivia-feedback p.incorrect {
+  color: #f56565;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.trivia-feedback .explanation {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 12px 0;
+}
+
+.next-trivia-button {
+  background: #667eea;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: all 0.2s ease;
+}
+
+.next-trivia-button:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+/* News Section */
+.news-section {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.news-carousel {
+  position: relative;
+  height: 400px;
+}
+
+.news-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.news-card.active {
+  opacity: 1;
+}
+
+.news-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.news-content {
+  padding: 20px;
+}
+
+.news-content h3 {
+  color: #fff;
+  margin: 0 0 12px 0;
+  font-size: 20px;
+}
+
+.news-content p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 16px 0;
+  font-size: 16px;
+}
+
+.news-meta {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.carousel-dot.active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+/* Anime Chat */
+.anime-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mood-indicator {
+  background: linear-gradient(45deg, rgba(255, 105, 180, 0.2), rgba(147, 112, 219, 0.2));
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mood-level {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mood-emoji {
+  font-size: 24px;
+}
+
+.mood-text {
+  color: #fff;
+  font-weight: bold;
+}
+
+.unlock-message {
+  color: #ffd700;
+  font-size: 14px;
+  animation: fadeInOut 2s ease-in-out;
+}
+
+.chat-history {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.chat-entry {
+  margin-bottom: 16px;
+}
+
+.user-message,
+.yumi-message {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.user-message {
+  justify-content: flex-end;
+}
+
+.yumi-message {
+  justify-content: flex-start;
+}
+
+.message-text {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 12px;
+  color: #fff;
+  max-width: 70%;
+}
+
+.user-message .message-text {
+  background: rgba(102, 126, 234, 0.3);
+  margin-left: 16px;
+}
+
+.yumi-message .message-text {
+  margin-left: 12px;
+}
+
+.yumi-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.yumi-avatar-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.current-topic {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.topic-prompt {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.prompt-text {
+  color: #fff;
+  margin-left: 12px;
+  font-size: 16px;
+}
+
+.topic-input {
+  display: flex;
+  gap: 8px;
+}
+
+.topic-input input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.topic-input input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.topic-input button {
+  background: #667eea;
+  color: #fff;
+  border: none;
+  padding: 0 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.topic-input button:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.purity-test-button {
+  background: linear-gradient(45deg, rgba(255, 105, 180, 0.3), rgba(147, 112, 219, 0.3));
+  border: none;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: bold;
+}
+
+.purity-test-button:hover {
+  background: linear-gradient(45deg, rgba(255, 105, 180, 0.4), rgba(147, 112, 219, 0.4));
+  transform: translateY(-1px);
+}
+
+.weekly-recommendation {
+  flex: 1;
+}
+
+.weekly-recommendation h4 {
+  color: #fff;
+  margin: 0 0 12px 0;
+}
+
+.recommendation-card {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.recommendation-card img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.recommendation-content {
+  padding: 12px;
+}
+
+.recommendation-content h5 {
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.recommendation-content p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 12px 0;
+  font-size: 14px;
+}
+
+.yumi-thoughts {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.yumi-thoughts p {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Purity Test */
+.purity-test {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.back-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  align-self: flex-start;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.test-intro {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.test-intro h3 {
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.test-intro p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.test-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.question-card {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.category-tag {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.difficulty {
+  color: #ffd700;
+  font-size: 12px;
+}
+
+.question-text {
+  color: #fff;
+  font-size: 16px;
+  margin: 0 0 8px 0;
+}
+
+.context-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  margin: 0 0 16px 0;
+}
+
+.yumi-answer {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.answer-content p {
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.answer-content .reaction {
+  color: rgba(255, 255, 255, 0.8);
+  font-style: italic;
+  margin: 0;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+} 

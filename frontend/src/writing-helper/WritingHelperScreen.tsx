@@ -10,13 +10,13 @@ import {
   IoColorPalette
 } from 'react-icons/io5';
 import AIAssistant from '../components/AIAssistant';
-
-// Creative Control System
+import { useAuth } from '../hooks/useAuth';
 import { CreativeControlPanel } from '../shared/components/CreativeControlPanel';
 import { IterativeFeedbackPanel } from '../shared/components/IterativeFeedbackPanel';
 import { CreativeControlSettings, CreativeSession, CreativeVersion, CreativeFeedback } from '../shared/types/creativeModes';
 import { smartPromptEngine, createCreativeSession, updateUserHistory } from '../shared/services/smartPromptEngine';
 import { getAvailablePersonalities } from '../shared/services/yumiPersonalityService';
+import { ModeToggle, YumiMode } from '../shared/components/ModeToggle';
 
 interface WritingHelperScreenProps {
   content: string;
@@ -62,6 +62,7 @@ const WritingHelperScreen: React.FC<WritingHelperScreenProps> = ({
   const [showIterativeFeedback, setShowIterativeFeedback] = useState(false);
   const [currentVersions, setCurrentVersions] = useState<CreativeVersion[]>([]);
   const [availablePersonalities] = useState<string[]>(getAvailablePersonalities());
+  const [yumiMode, setYumiMode] = useState<YumiMode>('戦おう一緒に');
 
   // Sidebar dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -267,7 +268,7 @@ const WritingHelperScreen: React.FC<WritingHelperScreenProps> = ({
   const renderToolPanel = () => {
     if (!activeTool) return null;
 
-    const tool = writingTools.find(t => t.id === activeTool);
+    const tool = writingTools.map(t => t.id === activeTool ? t : null).find(t => t !== null);
     if (!tool) return null;
 
     return (
@@ -458,6 +459,33 @@ const WritingHelperScreen: React.FC<WritingHelperScreenProps> = ({
     );
   };
 
+  const getPlaceholder = (mode: YumiMode) => {
+    switch (mode) {
+      case '戦おう一緒に':
+        return 'アイデアとあらすじを入力…';
+      case '面倒いけどすごい':
+        return 'できるだけ詳細に説明してください…';
+      case '任せて':
+        return 'アイデアだけを入力してください…';
+    }
+  };
+
+  const handleGenerate = async (mode: YumiMode) => {
+    if (!content.trim()) return;
+
+    const strategy = mode === '戦おう一緒に' ? 'refine-3' :
+                    mode === '面倒いけどすごい' ? 'detail-amplify' : 'outline-5';
+
+    try {
+      // TODO: Call the appropriate API endpoint with the strategy
+      console.log(`Generating with strategy: ${strategy}`);
+      // const result = await api.generateWriting(content, strategy);
+      // onContentChange(result);
+    } catch (error) {
+      console.error('Generation failed:', error);
+    }
+  };
+
   return (
     <div 
       className="writing-helper-screen"
@@ -538,7 +566,7 @@ const WritingHelperScreen: React.FC<WritingHelperScreenProps> = ({
 
             {backgroundSettings.type === 'image' && (
               <div className="image-upload">
-                <button
+        <button
                   onClick={() => fileInputRef.current?.click()}
                   className="upload-btn"
                 >
@@ -571,20 +599,54 @@ const WritingHelperScreen: React.FC<WritingHelperScreenProps> = ({
               <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
                 {sidebarCollapsed ? <IoMenu size={16} /> : <IoClose size={16} />}
                 {sidebarCollapsed ? 'Expand' : 'Collapse'}
-              </button>
+        </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main Content Editor */}
+      {/* Main Content Area */}
       <div className={`content-area ${sidebarCollapsed ? 'sidebar-collapsed' : ''} sidebar-${sidebarPosition}`}>
+        <ModeToggle
+          mode={yumiMode}
+          onChange={setYumiMode}
+          domain="writing"
+        />
         <textarea
           className="main-editor"
           value={content}
           onChange={(e) => onContentChange(e.target.value)}
-          placeholder="Start writing your creative content..."
+          placeholder={getPlaceholder(yumiMode)}
+          style={{
+            width: '100%',
+            minHeight: '500px',
+            padding: '20px',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '8px',
+            fontSize: '16px',
+            lineHeight: '1.6',
+            resize: 'vertical'
+          }}
         />
+        <button
+          className="generate-button"
+          onClick={() => handleGenerate(yumiMode)}
+          style={{
+            background: '#ff69b4',
+            color: 'white',
+            border: 'none',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            marginTop: '16px',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          生成 ▶︎
+        </button>
       </div>
 
       {/* Draggable Sidebar */}

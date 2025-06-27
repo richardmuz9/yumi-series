@@ -1231,3 +1231,74 @@
   0% { box-shadow: 0 0 4px rgba(102, 126, 234, 0.3); }
   100% { box-shadow: 0 0 8px rgba(102, 126, 234, 0.6); }
 }
+
+.tab-navigation {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tab-navigation::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tab-navigation::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.tab-navigation::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.tab-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.tab-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tab-button.active {
+  background: rgba(102, 126, 234, 0.3);
+  font-weight: bold;
+}
+
+/* Personality-specific styles */
+.japanese-tab .tab-button {
+  font-family: "Noto Sans JP", sans-serif;
+}
+
+.anime-tab .tab-button {
+  background: linear-gradient(45deg, rgba(255, 105, 180, 0.3), rgba(147, 112, 219, 0.3));
+}
+
+.anime-tab .tab-button:hover {
+  background: linear-gradient(45deg, rgba(255, 105, 180, 0.4), rgba(147, 112, 219, 0.4));
+}
+
+.anime-tab .tab-button.active {
+  background: linear-gradient(45deg, rgba(255, 105, 180, 0.5), rgba(147, 112, 219, 0.5));
+}
+
+/* Assistant content area */
+.assistant-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  margin: 0 16px 16px;
+}
