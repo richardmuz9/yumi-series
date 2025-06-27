@@ -3,13 +3,22 @@
   command = "npm run build"
 
 [build.environment]
-  VITE_API_URL = "https://your-railway-app.up.railway.app"
-  VITE_FRONTEND_URL = "https://yumi77965.online"
+NODE_VERSION = "18"
+VITE_API_URL = "https://api.yumi77965.online"
+
+[context.production.environment]
+VITE_API_URL = "https://api.yumi77965.online"
+
+[context.deploy-preview.environment]
+VITE_API_URL = "https://api.yumi77965.online"
+
+[context.branch-deploy.environment]
+VITE_API_URL = "https://api.yumi77965.online"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+from = "/*"
+to = "/index.html"
+status = 200
 
 [context.production.environment]
   VITE_API_URL = "https://your-railway-app.up.railway.app"
