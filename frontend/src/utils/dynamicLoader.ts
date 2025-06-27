@@ -29,19 +29,46 @@ const loadComponent = (key: string) => {
   }
 };
 
-const preloadInstalledComponents = () => {
+const preloadInstalledComponents = async () => {
   try {
-    // Preload components that are installed by default
-    const defaultComponents = ['writing-helper', 'anime-chara'];
-    defaultComponents.forEach(key => {
-      try {
-        loadComponent(key);
-      } catch (error) {
-        console.error(`Failed to preload component ${key}:`, error);
-      }
+    // First check if localStorage is available
+    const testKey = 'yumi-test-storage';
+    try {
+      localStorage.setItem(testKey, 'test');
+      localStorage.removeItem(testKey);
+    } catch (e: unknown) {
+      console.warn('localStorage not available:', e);
+      return; // Exit early if localStorage is not available
+    }
+
+    // Get installed modes from modeManager
+    const installedModes = await modeManager.getInstalledModes().catch(e => {
+      console.warn('Failed to get installed modes:', e);
+      return ['writing-helper', 'anime-chara']; // Fallback to default modes
     });
+
+    // Preload each installed component
+    for (const key of installedModes) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 100)); // Add small delay between loads
+        const component = loadComponent(key);
+        if (component) {
+          // Trigger the lazy load
+          const modulePromise = (component as any)._payload._result;
+          if (modulePromise && typeof modulePromise.then === 'function') {
+            await modulePromise.catch(e => {
+              console.warn(`Non-critical: Failed to preload ${key}:`, e);
+            });
+          }
+        }
+      } catch (error) {
+        console.warn(`Non-critical: Failed to preload component ${key}:`, error);
+        // Continue with other components even if one fails
+      }
+    }
   } catch (error) {
-    console.error('Error in preloadInstalledComponents:', error);
+    console.warn('Non-critical: Error in preloadInstalledComponents:', error);
+    // Don't throw, just log warning as this is a preload operation
   }
 };
 

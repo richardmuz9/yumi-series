@@ -23,7 +23,7 @@ const LoadingComponent = () => (
   </div>
 );
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [isAssistantOpen, setAssistantOpen] = useState(false)
   const [content, setContent] = useState('')
   const [isAuthModalOpen, setAuthModalOpen] = useState(false)
@@ -35,11 +35,14 @@ const App: React.FC = () => {
     unregister();
 
     // Preload components with error handling
-    try {
-      dynamicLoader.preloadInstalledComponents();
-    } catch (e) {
-      console.warn('dynamicLoader.preload failed:', e);
-    }
+    const preload = async () => {
+      try {
+        await dynamicLoader.preloadInstalledComponents();
+      } catch (e) {
+        console.warn('dynamicLoader.preload failed:', e);
+      }
+    };
+    preload();
   }, []);
 
   const handleModeSelect = (mode: string) => {
@@ -56,39 +59,45 @@ const App: React.FC = () => {
   }
 
   return (
+    <div className="App">
+      <Suspense fallback={<CircularProgress />}>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/writing/*" element={
+            <WritingHelperScreen 
+              content={content}
+              onContentChange={setContent}
+              onBack={handleBack}
+            />
+          } />
+          <Route path="/writing-helper/*" element={
+            <WritingHelperScreen 
+              content={content}
+              onContentChange={setContent}
+              onBack={handleBack}
+            />
+          } />
+          <Route path="/anime-chara/*" element={<AnimeCharaHelperApp onBack={handleBack} />} />
+          <Route path="/manga/*" element={<MangaApp />} />
+          <Route path="/charge" element={<ChargePage />} />
+        </Routes>
+      </Suspense>
+      <AIAssistant />
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
+      />
+    </div>
+  )
+}
+
+const App: React.FC = () => {
+  return (
     <LanguageProvider>
-      <div className="App">
-        <Router>
-          <Suspense fallback={<CircularProgress />}>
-            <Routes>
-              <Route path="/" element={<MainPage />} />
-              <Route path="/writing/*" element={
-                <WritingHelperScreen 
-                  content={content}
-                  onContentChange={setContent}
-                  onBack={handleBack}
-                />
-              } />
-              <Route path="/writing-helper/*" element={
-                <WritingHelperScreen 
-                  content={content}
-                  onContentChange={setContent}
-                  onBack={handleBack}
-                />
-              } />
-              <Route path="/anime-chara/*" element={<AnimeCharaHelperApp onBack={handleBack} />} />
-              <Route path="/manga/*" element={<MangaApp />} />
-              <Route path="/charge" element={<ChargePage />} />
-            </Routes>
-          </Suspense>
-          <AIAssistant />
-          <AuthModal 
-            isOpen={isAuthModalOpen}
-            onClose={() => setAuthModalOpen(false)}
-            onSuccess={handleAuthSuccess}
-          />
-        </Router>
-      </div>
+      <Router>
+        <AppContent />
+      </Router>
     </LanguageProvider>
   )
 }
