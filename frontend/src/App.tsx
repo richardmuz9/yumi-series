@@ -1,15 +1,18 @@
 import React, { useState, Suspense, useEffect, lazy } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
 import { CircularProgress } from '@mui/material'
+import './App.css'
+import AIAssistant from './components/AIAssistant'
+import AuthModal from './components/AuthModal'
 import { LanguageProvider } from './contexts/LanguageContext'
 import { dynamicLoader } from './utils/dynamicLoader'
 
 // Lazy load components
 const MainPage = lazy(() => import('./MainPage'))
-const AIAssistant = lazy(() => import('./components/AIAssistant'))
 const ChargePage = lazy(() => import('./components/ChargePage'))
-const WritingHelperApp = lazy(() => import('./writing-helper/WritingHelperApp'))
 const AnimeCharaHelperApp = lazy(() => import('./anime-chara-helper/AnimeCharaHelperApp'))
+const MangaApp = lazy(() => import('./manga/MangaApp'))
+const WritingHelperScreen = lazy(() => import('./writing-helper/WritingHelperScreen'))
 
 // Loading component for suspense
 const LoadingComponent = () => (
@@ -20,7 +23,10 @@ const LoadingComponent = () => (
 );
 
 const App: React.FC = () => {
-  const [isAssistantOpen, setAssistantOpen] = useState(false);
+  const [isAssistantOpen, setAssistantOpen] = useState(false)
+  const [content, setContent] = useState('')
+  const [isAuthModalOpen, setAuthModalOpen] = useState(false)
+  const navigate = useNavigate()
 
   // Preload installed components on app start
   useEffect(() => {
@@ -32,35 +38,49 @@ const App: React.FC = () => {
   };
 
   const handleBack = () => {
-    // Handle back navigation
-  };
+    navigate('/')
+  }
+
+  const handleAuthSuccess = () => {
+    setAuthModalOpen(false)
+    // Additional success handling if needed
+  }
 
   return (
-    <Suspense fallback={<CircularProgress />}>
-      <LanguageProvider>
+    <LanguageProvider>
+      <div className="App">
         <Router>
-          <div className="app-container">
-            <Suspense fallback={<LoadingComponent />}>
-              <Routes>
-                <Route path="/" element={<MainPage />} />
-                <Route path="/writing" element={<WritingHelperApp />} />
-                <Route path="/writing-helper" element={<WritingHelperApp />} />
-                <Route path="/anime-chara" element={<AnimeCharaHelperApp onBack={handleBack} />} />
-                <Route path="/charge" element={<ChargePage onClose={() => {}} />} />
-              </Routes>
-            </Suspense>
-
-            {isAssistantOpen && (
-              <div className="ai-assistant-container">
-                <Suspense fallback={<LoadingComponent />}>
-                  <AIAssistant onClose={() => setAssistantOpen(false)} />
-                </Suspense>
-              </div>
-            )}
-          </div>
+          <Suspense fallback={<CircularProgress />}>
+            <Routes>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/writing/*" element={
+                <WritingHelperScreen 
+                  content={content}
+                  onContentChange={setContent}
+                  onBack={handleBack}
+                />
+              } />
+              <Route path="/writing-helper/*" element={
+                <WritingHelperScreen 
+                  content={content}
+                  onContentChange={setContent}
+                  onBack={handleBack}
+                />
+              } />
+              <Route path="/anime-chara/*" element={<AnimeCharaHelperApp onBack={handleBack} />} />
+              <Route path="/manga/*" element={<MangaApp />} />
+              <Route path="/charge" element={<ChargePage />} />
+            </Routes>
+          </Suspense>
+          <AIAssistant />
+          <AuthModal 
+            isOpen={isAuthModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+            onSuccess={handleAuthSuccess}
+          />
         </Router>
-      </LanguageProvider>
-    </Suspense>
+      </div>
+    </LanguageProvider>
   )
 }
 

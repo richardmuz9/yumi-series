@@ -10,7 +10,7 @@ type LazyComponentImport = () => Promise<LazyComponentModule>;
 const loadComponent = (key: string) => {
   switch (key) {
     case 'writing-helper':
-      return lazy(() => import('../writing-helper/WritingHelperApp'));
+      return lazy(() => import('../writing-helper/WritingHelperScreen'));
     case 'anime-chara':
       return lazy(() => import('../anime-chara-helper/AnimeCharaHelperApp'));
     default:
