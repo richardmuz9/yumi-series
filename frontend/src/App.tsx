@@ -6,6 +6,7 @@ import AIAssistant from './components/AIAssistant'
 import AuthModal from './components/AuthModal'
 import { LanguageProvider } from './contexts/LanguageContext'
 import { dynamicLoader } from './utils/dynamicLoader'
+import { unregister } from './serviceWorkerUnregister'
 
 // Lazy load components
 const MainPage = lazy(() => import('./MainPage'))
@@ -28,9 +29,17 @@ const App: React.FC = () => {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false)
   const navigate = useNavigate()
 
-  // Preload installed components on app start
+  // Unregister service worker and preload components on app start
   useEffect(() => {
-    dynamicLoader.preloadInstalledComponents();
+    // Unregister service worker
+    unregister();
+
+    // Preload components with error handling
+    try {
+      dynamicLoader.preloadInstalledComponents();
+    } catch (e) {
+      console.warn('dynamicLoader.preload failed:', e);
+    }
   }, []);
 
   const handleModeSelect = (mode: string) => {
