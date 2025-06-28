@@ -1,0 +1,43 @@
+{
+  "hero": {
+    "title": "AI搭載文章作成アシスタント",
+    "subtitle": "高度なAI技術で文章作成をサポート",
+    "cta": "始めましょう"
+  },
+  "features": {
+    "title": "機能一覧",
+    "writing": {
+      "title": "文章作成アシスタント",
+      "description": "文章作成をサポート"
+    },
+    "report": {
+      "title": "レポート作成",
+      "description": "プロフェッショナルなレポートを素早く作成"
+    },
+    "anime": {
+      "title": "アニメキャラクター作成",
+      "description": "ユニークなアニメキャラクターを作成"
+    },
+    "image": {
+      "title": "AI画像生成",
+      "description": "AIで魅力的な画像を生成"
+    }
+  },
+  "pricing": {
+    "title": "料金プラン",
+    "free": {
+      "title": "無料プラン",
+      "description": "個人利用向けの基本機能"
+    },
+    "pro": {
+      "title": "プロプラン",
+      "description": "プロフェッショナル向けの高度な機能"
+    }
+  },
+  "footer": {
+    "about": "会社概要",
+    "contact": "お問い合わせ",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー"
+  }
+} 

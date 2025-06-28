@@ -1,0 +1,39 @@
+{
+  "editor": {
+    "placeholder": "Start writing here...",
+    "wordCount": "{{count}} word",
+    "wordCount_plural": "{{count}} words",
+    "characterCount": "{{count}} character",
+    "characterCount_plural": "{{count}} characters"
+  },
+  "toolbar": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "heading": "Heading {{level}}",
+    "quote": "Quote",
+    "list": "List",
+    "link": "Link",
+    "image": "Image"
+  },
+  "suggestions": {
+    "title": "AI Suggestions",
+    "grammar": "Grammar",
+    "style": "Style",
+    "clarity": "Clarity",
+    "loading": "Analyzing your text...",
+    "noSuggestions": "No suggestions found"
+  },
+  "actions": {
+    "save": "Save Draft",
+    "export": "Export",
+    "share": "Share",
+    "analyze": "Analyze"
+  },
+  "formats": {
+    "docx": "Word Document",
+    "pdf": "PDF Document",
+    "txt": "Plain Text",
+    "markdown": "Markdown"
+  }
+} 

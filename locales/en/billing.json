@@ -1,0 +1,60 @@
+{
+  "title": "Billing & Subscription",
+  "packages": {
+    "title": "Token Packages",
+    "description": "Purchase tokens to use our services",
+    "items": {
+      "starter": {
+        "name": "Starter Pack",
+        "tokens": "{{count}} tokens",
+        "price": "{{price}} USD"
+      },
+      "creative": {
+        "name": "Creative Pack",
+        "tokens": "{{count}} tokens",
+        "price": "{{price}} USD"
+      }
+    }
+  },
+  "plans": {
+    "title": "Premium Plans",
+    "description": "Subscribe to unlock premium features",
+    "items": {
+      "pro": {
+        "name": "Pro Monthly",
+        "price": "{{price}} USD/month",
+        "features": {
+          "unlimited": "Unlimited AI Writing",
+          "image": "Image Generation",
+          "support": "Priority Support"
+        }
+      }
+    }
+  },
+  "payment": {
+    "methods": {
+      "title": "Payment Methods",
+      "stripe": "Credit Card (Stripe)",
+      "alipay": "Alipay"
+    },
+    "form": {
+      "cardNumber": "Card Number",
+      "expiry": "Expiry Date",
+      "cvc": "CVC",
+      "name": "Cardholder Name"
+    },
+    "status": {
+      "processing": "Processing payment...",
+      "success": "Payment successful!",
+      "error": "Payment failed. Please try again."
+    }
+  },
+  "usage": {
+    "title": "Usage Statistics",
+    "tokens": {
+      "total": "Total Tokens Used",
+      "remaining": "Remaining Tokens",
+      "free": "Free Tokens"
+    }
+  }
+} 

@@ -1,0 +1,43 @@
+{
+  "hero": {
+    "title": "AI 기반 글쓰기 도우미",
+    "subtitle": "고급 AI 기술로 글쓰기 향상",
+    "cta": "시작하기"
+  },
+  "features": {
+    "title": "주요 기능",
+    "writing": {
+      "title": "글쓰기 도우미",
+      "description": "글쓰기 작업 지원"
+    },
+    "report": {
+      "title": "보고서 작성기",
+      "description": "전문적인 보고서 빠르게 작성"
+    },
+    "anime": {
+      "title": "애니메이션 캐릭터 도우미",
+      "description": "독특한 애니메이션 캐릭터 생성"
+    },
+    "image": {
+      "title": "AI 이미지 생성",
+      "description": "AI로 멋진 이미지 생성"
+    }
+  },
+  "pricing": {
+    "title": "요금제",
+    "free": {
+      "title": "무료",
+      "description": "개인 사용을 위한 기본 기능"
+    },
+    "pro": {
+      "title": "프로",
+      "description": "전문가를 위한 고급 기능"
+    }
+  },
+  "footer": {
+    "about": "회사 소개",
+    "contact": "문의하기",
+    "terms": "이용약관",
+    "privacy": "개인정보 처리방침"
+  }
+} 

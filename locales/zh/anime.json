@@ -1,0 +1,35 @@
+{
+  "title": "动漫角色助手",
+  "description": "使用AI创建独特的动漫角色",
+  "modes": {
+    "creation": "角色创建",
+    "generation": "图像生成"
+  },
+  "character": {
+    "name": "角色名称",
+    "personality": "性格特征",
+    "appearance": "外观描述",
+    "background": "背景故事"
+  },
+  "generation": {
+    "style": "艺术风格",
+    "pose": "姿势",
+    "expression": "表情",
+    "outfit": "服装",
+    "background": "背景",
+    "generate": "生成图像",
+    "regenerate": "重新生成",
+    "save": "保存图像"
+  },
+  "prompts": {
+    "name": "输入角色名称...",
+    "personality": "描述角色的性格...",
+    "appearance": "描述角色的外观...",
+    "background": "编写角色的背景故事..."
+  },
+  "messages": {
+    "generating": "正在生成...",
+    "success": "生成成功！",
+    "error": "生成失败，请重试"
+  }
+} 

@@ -1,0 +1,52 @@
+{
+  "title": "Anime Character Helper",
+  "subtitle": "Create amazing anime characters with AI",
+  "modes": {
+    "creation": "Character Creation",
+    "generation": "AI Generation",
+    "editing": "Character Editing"
+  },
+  "tools": {
+    "brush": "Brush Tool",
+    "eraser": "Eraser",
+    "color_picker": "Color Picker",
+    "layers": "Layer Manager",
+    "templates": "Templates",
+    "pose_library": "Pose Library"
+  },
+  "features": {
+    "ai_generation": "AI Character Generation",
+    "pose_adjustment": "Pose Adjustment",
+    "color_customization": "Color Customization",
+    "style_transfer": "Style Transfer",
+    "background_removal": "Background Removal"
+  },
+  "character_parts": {
+    "hair": "Hair",
+    "eyes": "Eyes",
+    "face": "Face",
+    "clothing": "Clothing",
+    "accessories": "Accessories",
+    "background": "Background"
+  },
+  "styles": {
+    "kawaii": "Kawaii",
+    "realistic": "Realistic",
+    "chibi": "Chibi",
+    "manga": "Manga",
+    "anime": "Anime"
+  },
+  "actions": {
+    "generate": "Generate Character",
+    "randomize": "Randomize",
+    "save": "Save Character",
+    "export": "Export Image",
+    "share": "Share Creation"
+  },
+  "status": {
+    "generating": "Generating character...",
+    "processing": "Processing image...",
+    "saving": "Saving character...",
+    "loading": "Loading assets..."
+  }
+} 

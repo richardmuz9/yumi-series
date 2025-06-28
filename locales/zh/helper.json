@@ -1,0 +1,38 @@
+{
+  "title": "写作助手",
+  "description": "AI驱动的写作助手，帮助您创作优质内容",
+  "features": {
+    "grammar": "语法检查",
+    "style": "风格建议",
+    "tone": "语气调整",
+    "clarity": "清晰度优化"
+  },
+  "modes": {
+    "creative": "创意写作",
+    "academic": "学术写作",
+    "business": "商务写作",
+    "social": "社交媒体"
+  },
+  "suggestions": {
+    "title": "写作建议",
+    "loading": "正在分析您的文本...",
+    "noSuggestions": "没有发现需要改进的地方",
+    "types": {
+      "grammar": "语法",
+      "style": "风格",
+      "tone": "语气",
+      "clarity": "清晰度"
+    }
+  },
+  "actions": {
+    "analyze": "分析",
+    "suggest": "获取建议",
+    "apply": "应用建议",
+    "ignore": "忽略"
+  },
+  "feedback": {
+    "helpful": "有帮助",
+    "notHelpful": "没有帮助",
+    "thanks": "感谢您的反馈"
+  }
+} 

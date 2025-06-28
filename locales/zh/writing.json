@@ -1,0 +1,39 @@
+{
+  "editor": {
+    "placeholder": "在这里开始写作...",
+    "wordCount": "{{count}} 字",
+    "wordCount_plural": "{{count}} 字",
+    "characterCount": "{{count}} 个字符",
+    "characterCount_plural": "{{count}} 个字符"
+  },
+  "toolbar": {
+    "bold": "粗体",
+    "italic": "斜体",
+    "underline": "下划线",
+    "heading": "标题 {{level}}",
+    "quote": "引用",
+    "list": "列表",
+    "link": "链接",
+    "image": "图片"
+  },
+  "suggestions": {
+    "title": "AI 建议",
+    "grammar": "语法",
+    "style": "风格",
+    "clarity": "清晰度",
+    "loading": "正在分析您的文本...",
+    "noSuggestions": "没有找到建议"
+  },
+  "actions": {
+    "save": "保存草稿",
+    "export": "导出",
+    "share": "分享",
+    "analyze": "分析"
+  },
+  "formats": {
+    "docx": "Word文档",
+    "pdf": "PDF文档",
+    "txt": "纯文本",
+    "markdown": "Markdown"
+  }
+} 

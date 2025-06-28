@@ -1,0 +1,49 @@
+{
+  "title": "报告生成器",
+  "description": "快速生成专业报告",
+  "sections": {
+    "title": "标题",
+    "abstract": "摘要",
+    "introduction": "引言",
+    "methodology": "方法",
+    "results": "结果",
+    "discussion": "讨论",
+    "conclusion": "结论",
+    "references": "参考文献"
+  },
+  "templates": {
+    "title": "报告模板",
+    "business": "商业报告",
+    "technical": "技术报告",
+    "research": "研究报告",
+    "custom": "自定义模板"
+  },
+  "formatting": {
+    "title": "格式设置",
+    "font": "字体",
+    "size": "字号",
+    "spacing": "行距",
+    "margins": "页边距",
+    "alignment": "对齐方式"
+  },
+  "citations": {
+    "title": "引用管理",
+    "add": "添加引用",
+    "edit": "编辑引用",
+    "delete": "删除引用",
+    "style": "引用样式"
+  },
+  "export": {
+    "title": "导出",
+    "formats": {
+      "word": "Word文档",
+      "pdf": "PDF文档",
+      "html": "HTML文档"
+    },
+    "options": {
+      "includeCovers": "包含封面",
+      "includeToc": "包含目录",
+      "includeReferences": "包含参考文献"
+    }
+  }
+} 

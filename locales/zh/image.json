@@ -1,0 +1,39 @@
+{
+  "title": "AI图像生成",
+  "description": "使用AI生成精美图像",
+  "controls": {
+    "prompt": "提示词",
+    "style": "风格",
+    "size": "尺寸",
+    "quality": "质量",
+    "generate": "生成",
+    "regenerate": "重新生成",
+    "save": "保存",
+    "share": "分享"
+  },
+  "styles": {
+    "realistic": "写实",
+    "anime": "动漫",
+    "artistic": "艺术",
+    "sketch": "素描",
+    "custom": "自定义"
+  },
+  "sizes": {
+    "small": "小",
+    "medium": "中",
+    "large": "大",
+    "custom": "自定义"
+  },
+  "quality": {
+    "draft": "草稿",
+    "standard": "标准",
+    "high": "高质量"
+  },
+  "messages": {
+    "generating": "正在生成图像...",
+    "success": "生成成功！",
+    "error": "生成失败，请重试",
+    "saving": "正在保存...",
+    "saved": "保存成功！"
+  }
+} 

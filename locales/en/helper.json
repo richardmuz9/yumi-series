@@ -1,0 +1,50 @@
+{
+  "title": "Writing Helper",
+  "subtitle": "AI-powered writing assistance",
+  "modes": {
+    "creative": "Creative Writing",
+    "academic": "Academic Writing",
+    "business": "Business Writing",
+    "social": "Social Media"
+  },
+  "tools": {
+    "grammar": "Grammar Check",
+    "style": "Style Analysis",
+    "tone": "Tone Adjustment",
+    "clarity": "Clarity Enhancement",
+    "expand": "Content Expansion",
+    "summarize": "Summarization"
+  },
+  "suggestions": {
+    "improve_flow": "Improve sentence flow",
+    "add_details": "Add more details",
+    "simplify": "Simplify language",
+    "make_formal": "Make more formal",
+    "make_casual": "Make more casual",
+    "add_emotion": "Add emotional depth"
+  },
+  "features": {
+    "ai_continuation": "AI Continuation",
+    "smart_editing": "Smart Editing",
+    "version_history": "Version History",
+    "collaboration": "Real-time Collaboration",
+    "export_formats": "Multiple Export Formats"
+  },
+  "status": {
+    "analyzing": "Analyzing text...",
+    "generating": "Generating suggestions...",
+    "saving": "Saving changes...",
+    "processing": "Processing request..."
+  },
+  "placeholders": {
+    "start_writing": "Start writing your content here...",
+    "add_title": "Add a title for your document",
+    "describe_topic": "Describe what you want to write about"
+  },
+  "actions": {
+    "accept": "Accept",
+    "reject": "Reject",
+    "modify": "Modify",
+    "regenerate": "Regenerate"
+  }
+} 

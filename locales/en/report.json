@@ -1,0 +1,53 @@
+{
+  "title": "Report Helper",
+  "subtitle": "Create professional reports with AI assistance",
+  "buttons": {
+    "generate": "Generate Report",
+    "export": "Export PDF",
+    "save": "Save Draft",
+    "load": "Load Template"
+  },
+  "sections": {
+    "introduction": "Introduction",
+    "methodology": "Methodology",
+    "results": "Results",
+    "discussion": "Discussion",
+    "conclusion": "Conclusion",
+    "references": "References"
+  },
+  "features": {
+    "latex": "LaTeX Support",
+    "citations": "Citation Management",
+    "charts": "Chart Generator",
+    "plagiarism": "Plagiarism Check",
+    "collaboration": "Team Collaboration"
+  },
+  "templates": {
+    "scientific": "Scientific Paper",
+    "business": "Business Report",
+    "academic": "Academic Essay",
+    "technical": "Technical Documentation"
+  },
+  "tools": {
+    "equation": "Equation Builder",
+    "figure": "Figure Manager",
+    "table": "Table Editor",
+    "bibliography": "Bibliography"
+  },
+  "status": {
+    "generating": "Generating report...",
+    "checking": "Checking for plagiarism...",
+    "exporting": "Exporting PDF...",
+    "saving": "Saving draft..."
+  },
+  "errors": {
+    "generation_failed": "Report generation failed",
+    "export_failed": "PDF export failed",
+    "save_failed": "Failed to save draft"
+  },
+  "tips": {
+    "latex_formatting": "Use LaTeX formatting for mathematical expressions",
+    "proper_citations": "Add proper citations to avoid plagiarism",
+    "structured_content": "Structure your content with clear headings"
+  }
+} 

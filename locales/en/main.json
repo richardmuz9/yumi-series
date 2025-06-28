@@ -1,0 +1,43 @@
+{
+  "hero": {
+    "title": "AI-Powered Writing Assistant",
+    "subtitle": "Enhance your writing with advanced AI technology",
+    "cta": "Get Started"
+  },
+  "features": {
+    "title": "Features",
+    "writing": {
+      "title": "Writing Assistant",
+      "description": "Get help with your writing tasks"
+    },
+    "report": {
+      "title": "Report Writer",
+      "description": "Generate professional reports quickly"
+    },
+    "anime": {
+      "title": "Anime Character Helper",
+      "description": "Create unique anime characters"
+    },
+    "image": {
+      "title": "AI Image Generation",
+      "description": "Generate stunning images with AI"
+    }
+  },
+  "pricing": {
+    "title": "Pricing",
+    "free": {
+      "title": "Free",
+      "description": "Basic features for personal use"
+    },
+    "pro": {
+      "title": "Pro",
+      "description": "Advanced features for professionals"
+    }
+  },
+  "footer": {
+    "about": "About Us",
+    "contact": "Contact",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  }
+} 

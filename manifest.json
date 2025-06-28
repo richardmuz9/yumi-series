@@ -1,0 +1,94 @@
+{
+  "name": "Yumi Series - AI-Powered Creative Suite",
+  "short_name": "Yumi Series",
+  "description": "Complete AI-powered platform for writing, web building, report generation, anime design, and study guidance",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["productivity", "education", "utilities", "graphics"],
+  "icons": [
+    {
+      "src": "/yumi-tusr.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512.svg", 
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-narrow.svg",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Mobile view of Yumi Series dashboard"
+    },
+    {
+      "src": "/screenshot-wide.svg", 
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Desktop view of Yumi Series platform"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Writing Helper",
+      "short_name": "Write",
+      "description": "AI-powered content creation",
+      "url": "/?mode=writing-helper",
+      "icons": [{ "src": "/pwa-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Anime Designer",
+      "short_name": "Design",
+      "description": "Character creation and art",
+      "url": "/?mode=anime-chara-helper",
+      "icons": [{ "src": "/pwa-192.svg", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["image/*", "text/*", ".pdf", ".docx"]
+        }
+      ]
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+yumi",
+      "url": "/?action=%s"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"]
+} 

@@ -1,0 +1,55 @@
+{
+  "title": "AI Image Generation",
+  "subtitle": "Generate stunning images with artificial intelligence",
+  "prompts": {
+    "describe_image": "Describe the image you want to create",
+    "style_preference": "Choose your preferred style",
+    "add_details": "Add specific details or elements"
+  },
+  "styles": {
+    "photorealistic": "Photorealistic",
+    "artistic": "Artistic",
+    "cartoon": "Cartoon",
+    "oil_painting": "Oil Painting",
+    "watercolor": "Watercolor",
+    "digital_art": "Digital Art",
+    "sketch": "Sketch"
+  },
+  "settings": {
+    "resolution": "Resolution",
+    "aspect_ratio": "Aspect Ratio",
+    "quality": "Quality",
+    "iterations": "Iterations",
+    "creativity": "Creativity Level"
+  },
+  "features": {
+    "batch_generation": "Batch Generation",
+    "style_mixing": "Style Mixing",
+    "upscaling": "Image Upscaling",
+    "variation_generation": "Generate Variations",
+    "background_removal": "Background Removal"
+  },
+  "actions": {
+    "generate": "Generate Image",
+    "regenerate": "Regenerate",
+    "download": "Download",
+    "save_to_library": "Save to Library",
+    "share": "Share Image"
+  },
+  "status": {
+    "generating": "Generating image...",
+    "processing": "Processing request...",
+    "upscaling": "Upscaling image...",
+    "saving": "Saving to library..."
+  },
+  "errors": {
+    "generation_failed": "Image generation failed",
+    "invalid_prompt": "Invalid prompt provided",
+    "quota_exceeded": "Generation quota exceeded"
+  },
+  "tips": {
+    "detailed_prompts": "Use detailed prompts for better results",
+    "style_combinations": "Try combining different styles",
+    "experiment": "Experiment with different settings"
+  }
+} 

@@ -1,0 +1,60 @@
+{
+  "title": "Download Yumi Series",
+  "subtitle": "Get the app on your favorite platform",
+  "platforms": {
+    "windows": "Windows",
+    "macos": "macOS",
+    "linux": "Linux",
+    "android": "Android",
+    "ios": "iOS",
+    "web": "Web App"
+  },
+  "features": {
+    "offline_mode": "Offline Mode",
+    "sync_across_devices": "Sync Across Devices",
+    "faster_performance": "Faster Performance",
+    "native_integration": "Native Integration",
+    "push_notifications": "Push Notifications"
+  },
+  "requirements": {
+    "title": "System Requirements",
+    "windows_req": "Windows 10 or later",
+    "macos_req": "macOS 10.15 or later",
+    "linux_req": "Ubuntu 18.04 or equivalent",
+    "android_req": "Android 8.0 or later",
+    "ios_req": "iOS 13.0 or later",
+    "ram": "4GB RAM minimum",
+    "storage": "2GB free storage"
+  },
+  "buttons": {
+    "download_now": "Download Now",
+    "view_in_store": "View in Store",
+    "direct_download": "Direct Download",
+    "beta_version": "Beta Version",
+    "stable_version": "Stable Version"
+  },
+  "status": {
+    "downloading": "Downloading...",
+    "installing": "Installing...",
+    "ready": "Ready to install",
+    "checking": "Checking for updates..."
+  },
+  "versions": {
+    "latest": "Latest Version",
+    "beta": "Beta Version",
+    "stable": "Stable Release",
+    "preview": "Preview Build"
+  },
+  "help": {
+    "installation_guide": "Installation Guide",
+    "troubleshooting": "Troubleshooting",
+    "contact_support": "Contact Support",
+    "system_compatibility": "Check Compatibility"
+  },
+  "benefits": {
+    "no_browser_needed": "No browser needed",
+    "better_performance": "Better performance",
+    "offline_access": "Offline access",
+    "desktop_notifications": "Desktop notifications"
+  }
+} 

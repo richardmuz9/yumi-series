@@ -1,0 +1,43 @@
+{
+  "hero": {
+    "title": "AI智能写作助手",
+    "subtitle": "使用先进AI技术提升您的写作",
+    "cta": "立即开始"
+  },
+  "features": {
+    "title": "功能特点",
+    "writing": {
+      "title": "写作助手",
+      "description": "帮助您完成写作任务"
+    },
+    "report": {
+      "title": "报告生成器",
+      "description": "快速生成专业报告"
+    },
+    "anime": {
+      "title": "动漫角色助手",
+      "description": "创建独特的动漫角色"
+    },
+    "image": {
+      "title": "AI图像生成",
+      "description": "使用AI生成精美图像"
+    }
+  },
+  "pricing": {
+    "title": "价格方案",
+    "free": {
+      "title": "免费版",
+      "description": "个人使用的基本功能"
+    },
+    "pro": {
+      "title": "专业版",
+      "description": "专业用户的高级功能"
+    }
+  },
+  "footer": {
+    "about": "关于我们",
+    "contact": "联系我们",
+    "terms": "服务条款",
+    "privacy": "隐私政策"
+  }
+} 
