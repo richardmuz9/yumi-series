@@ -4,10 +4,10 @@ import { BillingInfo } from '../types/billing';
 
 // Get the environment
 const isDev = import.meta.env.DEV;
-const BILLING_BASE = import.meta.env.VITE_API_URL || (isDev ? 'http://localhost:3001' : 'http://137.184.89.215:3001');
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : 'https://137.184.89.215:3001');
 
 const billingApi = axios.create({
-  baseURL: BILLING_BASE,
+  baseURL: API_BASE,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -22,7 +22,7 @@ billingApi.interceptors.request.use(
     // Log request details in development
     if (isDev) {
       console.log('[Billing][Request]', config.method?.toUpperCase(), config.url);
-      console.log('[Billing][Request] URL:', `${BILLING_BASE}${config.url}`);
+      console.log('[Billing][Request] URL:', `${API_BASE}${config.url}`);
       console.log('[Billing][Request] Headers:', config.headers);
   }
   return config;

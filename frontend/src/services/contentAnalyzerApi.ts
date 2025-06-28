@@ -1,6 +1,8 @@
 import { apiClient } from './api';
 import { AxiosResponse } from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : 'https://137.184.89.215:3001');
+
 export interface ReadabilityMetrics {
   score: number;
   grade: string;

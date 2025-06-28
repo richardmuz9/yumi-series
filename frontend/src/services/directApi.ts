@@ -2,6 +2,8 @@
 // NOTE: Replace these with your actual API keys in production
 const QWEN_API_KEY = process.env.QWEN_API_KEY
 
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : 'https://137.184.89.215:3001');
+
 export interface DirectChatRequest {
   message: string
   provider: 'qwen'

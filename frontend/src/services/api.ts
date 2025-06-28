@@ -15,7 +15,7 @@ import { getAuthToken } from '../hooks/useAuth';
 
 // Get the environment
 const isDev = import.meta.env.DEV;
-const API_BASE = import.meta.env.VITE_API_URL || (isDev ? 'http://localhost:3000' : 'http://137.184.89.215:3001');
+const API_BASE = import.meta.env.VITE_API_URL || (isDev ? 'http://localhost:3000' : 'https://137.184.89.215:3001');
 
 // Create axios instance
 export const api = axios.create({
