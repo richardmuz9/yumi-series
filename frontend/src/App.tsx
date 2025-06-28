@@ -1,5 +1,5 @@
 import React, { useState, Suspense, useEffect, lazy } from 'react'
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom'
 import { CircularProgress } from '@mui/material'
 import './App.css'
 import AIAssistant from './components/AIAssistant'
@@ -50,7 +50,11 @@ const AppContent: React.FC = () => {
   };
 
   const handleBack = () => {
-    navigate('/')
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/");
+    }
   }
 
   const handleAuthSuccess = () => {
@@ -80,7 +84,7 @@ const AppContent: React.FC = () => {
               <Route path="/anime-chara/*" element={<AnimeCharaHelperApp onBack={handleBack} />} />
               <Route path="/manga/*" element={<MangaApp />} />
               <Route path="/charge" element={<ChargePage />} />
-          <Route path="*" element={<MainPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
           <AIAssistant />
