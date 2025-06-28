@@ -1,25 +1,26 @@
-# API Keys - Replace with your own values
-OPENAI_API_KEY=your_openai_api_key_here
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-STRIPE_SECRET_KEY=your_stripe_secret_key_here
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret_here
-
-# Database
-DATABASE_URL="file:./database.sqlite"
-
-# Authentication
-JWT_SECRET=your_jwt_secret_here
-COOKIE_SECRET=your_cookie_secret_here
-
-# Server Configuration
+OPENAI_API_KEY=
+OPENROUTER_API_KEY=
+QWEN_API_KEY=
+CLAUDE_API_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+JWT_SECRET=
+ALIPAY_PUBLIC_KEY=
+ALIPAY_PRIVATE_KEY=
+ALIPAY_APP_ID=
+NODE_ENV=production
+FRONTEND_URL=https://yumi77965.online
+PROXY_HOST=127.0.0.1
+PROXY_PORT=7890
+LOCAL_IP=192.168.40.100
 PORT=3001
-NODE_ENV=development
-
-# Optional Proxy Configuration
-# PROXY_HOST=127.0.0.1
-# PROXY_PORT=7890
-
-# Optional AI Service Keys
-# HUGGINGFACE_API_KEY=your_huggingface_key_here
-# QWEN_API_KEY=your_qwen_key_here
+CORS_ORIGINS=https://yumi77965.online,http://137.184.89.215,http://localhost:5173,http://localhost:3000
+HF_TOKENS=
+UNSPLASH_ACCESS_KEY=
+PCHECK_API_TOKEN=
+EDENAI_PLAG_KEY=
+YOUR_DOMAIN=https://yumi77965.online
+API_URL=http://137.184.89.215
+BACKEND_URL=http://137.184.89.215
+DATABASE_URL=./file/data/database
+STRIPE_PUBLISHABLE_KEY=

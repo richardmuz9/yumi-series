@@ -31,7 +31,7 @@ const qwenHeaders = {
 
 interface AIRequest {
   content: string;
-  provider?: 'openai' | 'claude' | 'qwen';
+  provider?: 'openai' | 'claude' | 'qwen' | 'google';
   action: 'enhance' | 'analyze' | 'suggest' | 'translate' | 'summarize';
   options?: {
     style?: string;
@@ -155,6 +155,25 @@ const processWithQwen = async (prompt: string): Promise<string> => {
   });
 };
 
+const processWithGemini = async (prompt: string, model: string = 'gemini-pro'): Promise<string> => {
+  return processWithRetry(async () => {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`)
+    }
+    
+    const result = await response.json()
+    return result.candidates[0].content.parts[0].text
+  });
+};
+
 export const processAIRequest = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { content, provider, action, options }: AIRequest = req.body;
@@ -183,6 +202,9 @@ export const processAIRequest = async (req: AuthenticatedRequest, res: Response)
         break;
       case 'qwen':
         result = await processWithQwen(prompt);
+        break;
+      case 'google':
+        result = await processWithGemini(prompt);
         break;
       default:
         result = await processWithOpenAI(prompt);

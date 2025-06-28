@@ -42,6 +42,23 @@
         "temperature": 0.7,
         "topP": 1
       }
+    },
+    "google": {
+      "defaultModel": "gemini-pro",
+      "models": ["gemini-pro", "gemini-flash"],
+      "apiKey": "YOUR_GEMINI_API_KEY",
+      "gemini-pro": {
+        "name": "gemini-pro",
+        "maxTokens": 30000,
+        "temperature": 0.7,
+        "topP": 1
+      },
+      "gemini-flash": {
+        "name": "gemini-flash",
+        "maxTokens": 8000,
+        "temperature": 0.7,
+        "topP": 1
+      }
     }
   }
 } 

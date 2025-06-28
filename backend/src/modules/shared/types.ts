@@ -3,11 +3,15 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { AuthRequest } from '../../auth'
 
 // CORS configuration
-const isDev = process.env.NODE_ENV === 'development';
-const allowedOrigins = isDev ? ['http://localhost:8000', 'http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:8000'] : process.env.CORS_ORIGINS?.split(',') || [];
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://yumi77965.online'
+];
 
 export const corsOptions = {
-  origin: isDev ? true : (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
