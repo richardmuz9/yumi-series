@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
+interface AuthResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+  };
+}
+
+interface ErrorResponse {
+  message: string;
+  code?: string;
+}
+
 interface User {
   id: string;
   email: string;
@@ -51,14 +64,31 @@ export const useAuth = () => {
       });
   }, []);
 
-  const login = (newToken: string) => {
-    setAuthToken(newToken);
-    setToken(newToken);
+  const login = async (email: string, password: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    return api
+      .post<AuthResponse>('/auth/login', { email, password })
+      .then((response) => {
+        setAuthToken(response.data.token);
+        setToken(response.data.token);
+        setIsAuthenticated(true);
+      })
+      .catch((err: { response?: { data: ErrorResponse } }) => {
+        const message = err.response?.data?.message || 'Login failed';
+        setError(message);
+        throw new Error(message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const logout = () => {
     removeAuthToken();
     setToken(null);
+    setIsAuthenticated(false);
   };
 
   return {

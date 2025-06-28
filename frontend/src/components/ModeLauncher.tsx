@@ -1,5 +1,5 @@
 import React from 'react';
-import type { BillingInfo } from '../services/billingApi';
+import type { BillingInfo } from '../types/billing';
 import './ModeLauncher.css';
 
 interface ModeLauncherProps {

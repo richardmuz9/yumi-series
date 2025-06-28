@@ -12,7 +12,17 @@ import './AnimeCharaHelper.css'
 import { Mode } from './types'
 
 interface AnimeCharaHelperAppProps {
-  onBack?: () => void
+  onBack: () => void
+}
+
+type BackgroundType = 'solid' | 'gradient' | 'image'
+
+interface BackgroundSettings {
+  type: BackgroundType
+  color: string
+  gradient: string
+  image: string
+  opacity: number
 }
 
 const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => {
@@ -20,7 +30,7 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
   const navigate = useNavigate()
 
   // Mode state - defaults to creation mode
-  const [mode, setMode] = useState<Mode>('creative')
+  const [mode, setMode] = useState<'creation' | 'generation'>('creation')
 
   // Shared state between modes
   const [showAI, setShowAI] = useState(false)
@@ -29,19 +39,17 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
   const [selectedReferenceUrl, setSelectedReferenceUrl] = useState<string | null>(null)
   const [showYumiReferences, setShowYumiReferences] = useState(false)
   const [yumiMode, setYumiMode] = useState<YumiMode>('戦おう一緒に')
-
-  // Background settings (mainly for creation mode)
-  const [backgroundSettings, setBackgroundSettings] = useState({
-    type: 'solid' as 'solid' | 'gradient' | 'image',
-    color: '#2a2a3e',
-    gradient: 'linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%)',
+  const [backgroundSettings, setBackgroundSettings] = useState<BackgroundSettings>({
+    type: 'solid',
+    color: '#ffffff',
+    gradient: 'linear-gradient(45deg, #f3f3f3, #ffffff)',
     image: '',
-    opacity: 0.95
+    opacity: 1
   })
 
   // File upload handler
   const handleFileUpload = (files: File[]) => {
-    setUploadedFiles(prev => [...prev, ...files])
+    setUploadedFiles(files)
     
     // Handle background image upload for creation mode
     if (files[0] && backgroundSettings.type === 'image') {
@@ -54,23 +62,17 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
       }
       reader.readAsDataURL(files[0])
     }
-    
-    console.log('Files uploaded:', files.map(f => f.name))
   }
 
   // Yumi reference handlers
   const handleYumiReferenceSelect = (url: string) => {
     setSelectedReferenceUrl(url)
-    console.log('Yumi reference selected:', url)
+    setShowYumiReferences(false)
   }
 
   // Mode switching
-  const switchToCreationMode = () => {
-    setMode('creative')
-  }
-
-  const switchToAIMode = () => {
-    setMode('ai-generate')
+  const handleModeChange = (newMode: 'creation' | 'generation') => {
+    setMode(newMode)
   }
 
   // Background style helper (for creation mode)
@@ -93,11 +95,7 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
   }
 
   const handleBack = () => {
-    if (onBack) {
       onBack()
-    } else {
-      navigate(-1)
-    }
   }
 
   const handleGenerate = async (mode: YumiMode) => {
@@ -115,18 +113,10 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
 
   // Render the current mode
   const renderCurrentMode = () => {
-    if (mode === 'ai-generate') {
+    if (mode === 'generation') {
       return (
         <ImageGenerationMode
           onBack={handleBack}
-          onSwitchToCreation={switchToCreationMode}
-          uploadedFiles={uploadedFiles}
-          onFileUpload={handleFileUpload}
-          selectedReferenceUrl={selectedReferenceUrl}
-          showCustomization={showCustomization}
-          onCustomizeToggle={() => setShowCustomization(!showCustomization)}
-          showYumiReferences={showYumiReferences}
-          setShowYumiReferences={setShowYumiReferences}
           onYumiReferenceSelect={handleYumiReferenceSelect}
         />
       )
@@ -154,13 +144,12 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
       className="anime-chara-helper-app"
       style={{
         // Only apply background for creation mode
-        ...(mode === 'creative' ? {
+        ...(mode === 'creation' ? {
         ...getBackgroundStyle(),
         opacity: backgroundSettings.opacity
         } : {})
       }}
     >
-      {onBack && (
         <IconButton 
           className="back-button"
           onClick={handleBack}
@@ -168,20 +157,19 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
         >
           <ArrowBack />
         </IconButton>
-      )}
 
       {/* Mode Switch Buttons (floating) */}
       <div className="mode-switcher">
         <button
-          onClick={switchToCreationMode}
-          className={`mode-btn ${mode === 'creative' ? 'active' : ''}`}
+          onClick={() => handleModeChange('creation')}
+          className={`mode-btn ${mode === 'creation' ? 'active' : ''}`}
           title="Creation Mode v1.2"
         >
           🎨 Create
         </button>
         <button
-          onClick={switchToAIMode}
-          className={`mode-btn ${mode === 'ai-generate' ? 'active' : ''}`}
+          onClick={() => handleModeChange('generation')}
+          className={`mode-btn ${mode === 'generation' ? 'active' : ''}`}
           title="AI Generation Mode"
         >
           🤖 AI Generate
@@ -192,7 +180,7 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
       {renderCurrentMode()}
 
       {/* Shared Customization Panel for Background (Creation Mode Only) */}
-      {showCustomization && mode === 'creative' && (
+      {showCustomization && mode === 'creation' && (
         <div className="shared-customization-panel">
           <h3>🌈 Background Settings</h3>
           
@@ -200,59 +188,23 @@ const AnimeCharaHelperApp: React.FC<AnimeCharaHelperAppProps> = ({ onBack }) => 
             <h4>Background Type</h4>
             <div className="bg-type-selector">
               <button 
-                className={backgroundSettings.type === 'solid' ? 'active' : ''}
                 onClick={() => setBackgroundSettings(prev => ({ ...prev, type: 'solid' }))}
+                className={`bg-type-btn ${backgroundSettings.type === 'solid' ? 'active' : ''}`}
               >
-                🎨 Solid
+                Solid
               </button>
               <button 
-                className={backgroundSettings.type === 'gradient' ? 'active' : ''}
                 onClick={() => setBackgroundSettings(prev => ({ ...prev, type: 'gradient' }))}
+                className={`bg-type-btn ${backgroundSettings.type === 'gradient' ? 'active' : ''}`}
               >
-                🌈 Gradient
+                Gradient
               </button>
               <button
-                className={backgroundSettings.type === 'image' ? 'active' : ''}
                 onClick={() => setBackgroundSettings(prev => ({ ...prev, type: 'image' }))}
+                className={`bg-type-btn ${backgroundSettings.type === 'image' ? 'active' : ''}`}
               >
-                🖼️ Image
+                Image
               </button>
-            </div>
-
-            {backgroundSettings.type === 'solid' && (
-              <div className="color-picker">
-                <input 
-                  type="color" 
-                  value={backgroundSettings.color}
-                  onChange={(e) => setBackgroundSettings(prev => ({ ...prev, color: e.target.value }))}
-                />
-              </div>
-            )}
-
-            {backgroundSettings.type === 'gradient' && (
-              <div className="gradient-presets">
-                <button onClick={() => setBackgroundSettings(prev => ({ ...prev, gradient: 'linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%)' }))}>
-                  Dark Purple
-                </button>
-                <button onClick={() => setBackgroundSettings(prev => ({ ...prev, gradient: 'linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)' }))}>
-                  Pink
-                </button>
-                <button onClick={() => setBackgroundSettings(prev => ({ ...prev, gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }))}>
-                  Blue
-                </button>
-              </div>
-            )}
-
-            <div className="opacity-slider">
-              <label>Opacity: {Math.round(backgroundSettings.opacity * 100)}%</label>
-              <input 
-                type="range"
-                min="0.1"
-                max="1"
-                step="0.1"
-                value={backgroundSettings.opacity}
-                onChange={(e) => setBackgroundSettings(prev => ({ ...prev, opacity: parseFloat(e.target.value) }))}
-              />
             </div>
           </div>
         </div>

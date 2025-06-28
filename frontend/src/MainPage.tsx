@@ -5,8 +5,8 @@ import AIAssistant from './components/AIAssistant';
 import { AuthModal } from './components/AuthModal';
 import { DownloadSection } from './components/DownloadSection';
 import LayoutCustomizer from './components/LayoutCustomizer';
-import { billingApi } from './services/billingApi';
-import type { BillingInfo } from './services/billingApi';
+import { getBillingInfo } from './services/billingApi';
+import type { BillingInfo } from './types/billing';
 import WritingHelperScreen from './writing-helper/WritingHelperScreen';
 import AnimeCharaHelperApp from './anime-chara-helper/AnimeCharaHelperApp';
 import './main.css';
@@ -15,28 +15,22 @@ import { useLanguagePersistence } from './hooks/useLanguagePersistence';
 import { useTranslation } from 'react-i18next';
 import ChargePage from './components/ChargePage';
 
-interface BillingInfoWithUser extends BillingInfo {
-  stripeCustomerId?: string;
-  subscription?: {
-    status: 'active' | 'inactive' | 'cancelled';
-    plan: 'free' | 'pro';
-    nextBillingDate: string;
-  };
-}
-
-// Helper function to convert UserBillingInfo to BillingInfoWithUser
-const convertToBillingInfo = (info: any): BillingInfoWithUser => {
+const convertToBillingInfo = (info: any): BillingInfo => {
   return {
-    tokens: info.credits || 0,
-    dailyTokensRemaining: info.subscription?.plan === 'pro' ? 1000 : 100,
-    blessingActive: info.subscription?.status === 'active' && info.subscription?.plan === 'pro',
+    tokens: info.tokens || 0,
+    dailyTokensRemaining: info.dailyTokensRemaining || 0,
+    blessingActive: info.blessingActive || false,
     stripeCustomerId: info.stripeCustomerId,
-    subscription: info.subscription
+    subscription: info.subscription,
+    freeTokensRemaining: info.freeTokensRemaining || {
+      openai: 0,
+      claude: 0,
+      qwen: 0
+    }
   };
 };
 
-// Helper function to format token counts
-const formatTokenCount = (count: number) => {
+const formatTokenCount = (count: number): string => {
   if (count >= 1000000) {
     return `${(count / 1000000).toFixed(1)}M`;
   }
@@ -52,22 +46,21 @@ const MainPage: React.FC = () => {
   const [installingModes] = useState<Set<string>>(new Set(['writing', 'anime']));
   const { t } = useTranslation('main');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [userBillingInfo, setUserBillingInfo] = useState<BillingInfoWithUser | null>(null);
+  const [userBillingInfo, setUserBillingInfo] = useState<BillingInfo | null>(null);
   const [showDownload, setShowDownload] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [showModeLauncher, setShowModeLauncher] = useState(false);
   const [currentMode, setCurrentMode] = useState<'main' | 'writing' | 'anime'>('main');
-  const [content, setContent] = useState(''); // For writing mode
+  const [content, setContent] = useState('');
 
-  // Use language persistence hook
   useLanguagePersistence();
 
   useEffect(() => {
     const init = async () => {
       try {
         setLoading(true);
-        const info = await billingApi.getBillingInfo();
+        const info = await getBillingInfo();
         setUserBillingInfo(convertToBillingInfo(info));
       } catch (error) {
         console.error('Failed to fetch billing info:', error);
@@ -80,7 +73,6 @@ const MainPage: React.FC = () => {
   }, []);
 
   const handleModeSelect = async (mode: string) => {
-    // Remove the token check since it's too restrictive
     if (mode === 'writing' || mode === 'anime') {
       setCurrentMode(mode);
       setShowModeLauncher(false);
@@ -95,7 +87,6 @@ const MainPage: React.FC = () => {
     );
   }
 
-  // Render the selected mode
   if (currentMode === 'writing') {
     return (
       <WritingHelperScreen
@@ -116,9 +107,7 @@ const MainPage: React.FC = () => {
 
   return (
     <div className="main-page" style={{ backgroundImage: "url('/yumi-tusr.png')" }}>
-      {/* Top Navigation Icons */}
       <div className="top-nav-icons">
-        {/* Left side - Sign In */}
         <div className="nav-left">
           <button 
             className="nav-icon-btn sign-in-btn"
@@ -129,7 +118,6 @@ const MainPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Right side - Settings, Download and Mode List */}
         <div className="nav-right">
           <button 
             className="nav-icon-btn settings-btn"
@@ -158,9 +146,7 @@ const MainPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="main-content">
-        {/* Hero Section */}
         <div className="hero-overlay">
           <section className="hero-section">
             <div className="yumi-series-title">
@@ -174,7 +160,6 @@ const MainPage: React.FC = () => {
         </div>
       </main>
 
-      {/* Floating AI Assistant */}
       <div className="ai-assistant-container">
         <button 
           className="ai-assistant-btn"
@@ -190,7 +175,6 @@ const MainPage: React.FC = () => {
         )}
       </div>
 
-      {/* Charge Button */}
       <div className="charge-sidebar">
         <button 
           className="charge-button"
@@ -204,7 +188,6 @@ const MainPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Modals */}
       {showAuthModal && (
         <AuthModal
           isOpen={showAuthModal}

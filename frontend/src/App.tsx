@@ -36,11 +36,11 @@ const AppContent: React.FC = () => {
 
     // Preload components with error handling
     const preload = async () => {
-      try {
+    try {
         await dynamicLoader.preloadInstalledComponents();
-      } catch (e) {
-        console.warn('dynamicLoader.preload failed:', e);
-      }
+    } catch (e) {
+      console.warn('dynamicLoader.preload failed:', e);
+    }
     };
     preload();
   }, []);
@@ -59,35 +59,36 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="App">
-      <Suspense fallback={<CircularProgress />}>
-        <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/writing/*" element={
-            <WritingHelperScreen 
-              content={content}
-              onContentChange={setContent}
-              onBack={handleBack}
-            />
-          } />
-          <Route path="/writing-helper/*" element={
-            <WritingHelperScreen 
-              content={content}
-              onContentChange={setContent}
-              onBack={handleBack}
-            />
-          } />
-          <Route path="/anime-chara/*" element={<AnimeCharaHelperApp onBack={handleBack} />} />
-          <Route path="/manga/*" element={<MangaApp />} />
-          <Route path="/charge" element={<ChargePage />} />
-        </Routes>
-      </Suspense>
-      <AIAssistant />
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        onSuccess={handleAuthSuccess}
-      />
+      <div className="App">
+          <Suspense fallback={<CircularProgress />}>
+            <Routes>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/writing/*" element={
+                <WritingHelperScreen 
+                  content={content}
+                  onContentChange={setContent}
+                  onBack={handleBack}
+                />
+              } />
+              <Route path="/writing-helper/*" element={
+                <WritingHelperScreen 
+                  content={content}
+                  onContentChange={setContent}
+                  onBack={handleBack}
+                />
+              } />
+              <Route path="/anime-chara/*" element={<AnimeCharaHelperApp onBack={handleBack} />} />
+              <Route path="/manga/*" element={<MangaApp />} />
+              <Route path="/charge" element={<ChargePage />} />
+          <Route path="*" element={<MainPage />} />
+            </Routes>
+          </Suspense>
+          <AIAssistant />
+          <AuthModal 
+            isOpen={isAuthModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+            onSuccess={handleAuthSuccess}
+          />
     </div>
   )
 }
@@ -97,7 +98,7 @@ const App: React.FC = () => {
     <LanguageProvider>
       <Router>
         <AppContent />
-      </Router>
+        </Router>
     </LanguageProvider>
   )
 }

@@ -1,23 +1,22 @@
-console.log('\n🔍 Checking environment variables...\n');
-
-// Required variables
-const requiredVars = [
+const requiredEnvVars = [
   'VITE_API_URL',
   'VITE_FRONTEND_URL'
 ];
 
-let missingVars = false;
+console.log('\n🔍 Checking environment variables...\n');
 
-requiredVars.forEach(varName => {
-  if (!process.env[varName]) {
-    console.error('\x1b[31m%s\x1b[0m', `❌ Missing required environment variable: ${varName}`);
-    missingVars = true;
+let missingVars = [];
+
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.error(`❌ Missing required environment variable: ${envVar}`);
+    missingVars.push(envVar);
   }
-});
+}
 
-if (missingVars) {
+if (missingVars.length > 0) {
   console.log('\n📝 Please create a .env file with the following variables:\n');
-  console.error('\x1b[36m%s\x1b[0m', '   VITE_API_URL=https://api.yumi77965.online');
+  console.error('\x1b[36m%s\x1b[0m', '   VITE_API_URL=http://137.184.89.215:3001');
   console.error('\x1b[36m%s\x1b[0m', '   VITE_FRONTEND_URL=https://yumi77965.online');
   console.log('\nOr for local development:');
   console.error('\x1b[36m%s\x1b[0m', '   VITE_API_URL=http://localhost:3000');
@@ -25,4 +24,4 @@ if (missingVars) {
   process.exit(1);
 }
 
-console.log('\x1b[32m%s\x1b[0m', '✅ All required environment variables are set!\n'); 
+console.log('✅ All required environment variables are set!\n'); 

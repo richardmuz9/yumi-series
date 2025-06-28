@@ -3,12 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { IconButton } from '@mui/material'
 import { ArrowBack } from '@mui/icons-material'
 import TokenUsageDisplay from './TokenUsageDisplay'
-import { billingApi } from '../services/billingApi'
-import type { BillingInfo } from '../services/billingApi'
+import { getBillingInfo, createPaymentSession } from '../services/billingApi'
+import type { BillingInfo } from '../types/billing'
 import './ChargePage.css'
 
+interface TokenPackage {
+  id: string;
+  label: string;
+  price: number;
+  tokens: number;
+  description: string;
+  recommended?: boolean;
+  popular?: boolean;
+}
+
 // Define token packages with correct amounts
-const TOKEN_PACKAGES = [
+const TOKEN_PACKAGES: TokenPackage[] = [
   {
     id: 'basic',
     label: 'Basic',
@@ -89,7 +99,7 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
       try {
         setLoading(true)
         setError(null)
-        const info = await billingApi.getBillingInfo()
+        const info = await getBillingInfo()
         setBillingInfo(info)
       } catch (error) {
         console.error('[Billing] Error loading data:', error)
@@ -105,8 +115,9 @@ const ChargePage: React.FC<ChargePageProps> = ({ onClose }) => {
   const handlePurchase = async (packageId: string) => {
     try {
       setProcessingPayment(packageId)
-      const { url } = await billingApi.initiatePayment(packageId)
-      window.location.href = url
+      const sessionId = await createPaymentSession(packageId)
+      // Redirect to the payment page using the session ID
+      window.location.href = `/api/billing/checkout/${sessionId}`
     } catch (error) {
       console.error('[Billing] Payment error:', error)
       setError('Failed to process payment. Please try again.')

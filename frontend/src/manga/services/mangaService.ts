@@ -1,5 +1,5 @@
 import { api } from '../../services/api';
-import { MangaProject, MangaPage, Panel, PanelLayout } from '../types/manga';
+import { MangaProject, MangaPage, Panel, PanelLayout, LayoutTemplate } from '../types/manga';
 import { Character } from '../../anime-chara-helper/types';
 import { WritingProject } from '../../writing-helper/types';
 
@@ -99,5 +99,17 @@ export const mangaService = {
   async exportProject(projectId: string, format: 'png' | 'pdf' | 'web'): Promise<string> {
     const response = await api.post(`/api/manga/projects/${projectId}/export`, { format });
     return response.data.url;
-  },
+  }
+};
+
+export const generateLayout = async (prompt: string): Promise<LayoutTemplate> => {
+  return api.post<LayoutTemplate>('/api/manga/layout', { prompt }).then((response) => response.data);
+};
+
+export const savePage = async (page: MangaPage): Promise<void> => {
+  return api.post('/api/manga/save', page).then(() => undefined);
+};
+
+export const getPages = async (): Promise<MangaPage[]> => {
+  return api.get<MangaPage[]>('/api/manga/pages').then((response) => response.data);
 }; 

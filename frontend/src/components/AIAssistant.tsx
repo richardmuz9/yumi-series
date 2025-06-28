@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
 import { useChat } from '../hooks/useChat'
 import { SenseiPanel } from './panels/SenseiPanel'
@@ -195,11 +196,11 @@ const FAQ_DATA = {
     },
     {
       q: "What AI models do you offer?",
-      a: "We offer Qwen-Turbo (free), GPT-4 (paid), and Claude-3 (paid). Each model has different strengths for various tasks."
+      a: "We offer Qwen-Turbo (free), Gemini Flash (free), GPT-4 (paid), Claude-3 (paid), and Gemini Pro (paid). Each model has different strengths for various tasks."
     },
     {
       q: "Which model should I choose?",
-      a: "Qwen-Turbo: Great for general tasks and beginners. GPT-4: Best for complex reasoning and creative writing. Claude-3: Excellent for analysis and research tasks."
+      a: "Qwen-Turbo/Gemini Flash: Great for general tasks and beginners. GPT-4: Best for complex reasoning and creative writing. Claude-3: Excellent for analysis and research tasks. Gemini Pro: Advanced reasoning with multimodal capabilities."
     },
     {
       q: "How do credits work?",
@@ -220,6 +221,13 @@ const MODELS = {
     strengths: ['Quick responses', 'General knowledge', 'Code assistance'],
     recommended: ['Beginners', 'Daily tasks', 'Learning']
   },
+  'gemini-flash': {
+    name: 'Gemini Flash',
+    type: 'free',
+    description: 'Fast and cost-effective Gemini model',
+    strengths: ['Quick responses', 'Good reasoning', 'Multimodal support'],
+    recommended: ['Quick tasks', 'Learning', 'General use']
+  },
   'gpt-4': {
     name: 'GPT-4',
     type: 'paid',
@@ -233,6 +241,13 @@ const MODELS = {
     description: 'Excellent for analysis and research',
     strengths: ['Academic writing', 'Data analysis', 'Detailed explanations'],
     recommended: ['Academic work', 'Research papers', 'Technical writing']
+  },
+  'gemini-pro': {
+    name: 'Gemini Pro',
+    type: 'paid',
+    description: 'Advanced Gemini model with superior reasoning',
+    strengths: ['Advanced reasoning', 'Multimodal capabilities', 'Creative tasks'],
+    recommended: ['Complex projects', 'Creative work', 'Advanced analysis']
   }
 }
 
@@ -249,6 +264,7 @@ export default function AIAssistant({
   mode = 'main',
   floatingMode = false 
 }: AIAssistantProps) {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<'chat' | 'faq' | 'models' | 'personality' | 'japanese' | 'anime'>('chat')
   const [selectedFAQCategory, setSelectedFAQCategory] = useState<string>(mode)
   const [selectedModel, setSelectedModel] = useState<string>('qwen-turbo')
@@ -263,10 +279,20 @@ export default function AIAssistant({
     const personalityContext = `You are ${currentPersonality.name}. ${currentPersonality.description}. ${currentPersonality.traits.join(', ')}.`
     const modeContext = mode !== 'main' ? `The user is currently in ${mode} mode.` : ''
     
+    // Determine provider based on selected model
+    let provider = 'qwen'
+    if (selectedModel.startsWith('gpt-')) {
+      provider = 'openai'
+    } else if (selectedModel.startsWith('claude-')) {
+      provider = 'anthropic'
+    } else if (selectedModel.startsWith('gemini-')) {
+      provider = 'google'
+    }
+    
     sendMessage(message, {
       context: {
-        provider: 'qwen',
-        model: 'qwen-turbo',
+        provider: provider,
+        model: selectedModel,
         personality: personalityContext,
         mode: modeContext
       }
@@ -324,7 +350,9 @@ export default function AIAssistant({
       <div className="chat-header">
         <div className="chat-header-main">
           <h4>Chat with {currentPersonality.name}</h4>
-          <p>Current Model: <span className="model-badge qwen">Qwen-Turbo (Free)</span></p>
+          <p>Current Model: <span className={`model-badge ${MODELS[selectedModel as keyof typeof MODELS]?.type}`}>
+            {MODELS[selectedModel as keyof typeof MODELS]?.name} ({MODELS[selectedModel as keyof typeof MODELS]?.type === 'free' ? 'Free' : 'Paid'})
+          </span></p>
         </div>
         <div className="personality-display">
           <img 
@@ -585,6 +613,10 @@ export default function AIAssistant({
     }
   };
 
+  const handleBack = () => {
+    navigate('/')
+  }
+
   if (!isOpen) return null;
   if (isMinimized) return renderFloatingIcon();
 
@@ -606,6 +638,13 @@ export default function AIAssistant({
                 ➖
               </button>
             )}
+            <button 
+              className="back-btn" 
+              onClick={handleBack}
+              title="Go Back"
+            >
+              ⬅️
+            </button>
             {onClose && (
               <button className="close-btn" onClick={onClose}>×</button>
             )}

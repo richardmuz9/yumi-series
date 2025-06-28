@@ -14,29 +14,18 @@ import { CharacterData, DrawingTool } from '../types'
 import { IoArrowBack } from 'react-icons/io5'
 import { Sidebar } from '../../shared/components/Sidebar'
 
+interface ImageGenStatus {
+  hasAccess: boolean;
+  freeTrialsUsed: number;
+}
+
 interface ImageGenerationModeProps {
-  onBack: () => void
-  onSwitchToCreation: () => void
-  uploadedFiles: File[]
-  onFileUpload: (files: File[]) => void
-  selectedReferenceUrl: string | null
-  showCustomization: boolean
-  onCustomizeToggle: () => void
-  showYumiReferences: boolean
-  setShowYumiReferences: (show: boolean) => void
-  onYumiReferenceSelect: (url: string) => void
+  onBack: () => void;
+  onYumiReferenceSelect: (url: string) => void;
 }
 
 export const ImageGenerationMode: React.FC<ImageGenerationModeProps> = ({
   onBack,
-  onSwitchToCreation,
-  uploadedFiles,
-  onFileUpload,
-  selectedReferenceUrl,
-  showCustomization,
-  onCustomizeToggle,
-  showYumiReferences,
-  setShowYumiReferences,
   onYumiReferenceSelect
 }) => {
   const navigate = useNavigate()
@@ -85,14 +74,12 @@ export const ImageGenerationMode: React.FC<ImageGenerationModeProps> = ({
   ]
 
   useEffect(() => {
-    if (user) {
-      // Check image generation access and free trial usage
-      api.get('/api/billing/image-gen-status').then(response => {
+    // Check image generation access on mount
+    api.get<ImageGenStatus>('/api/billing/image-gen-status').then((response) => {
         setHasImageGenAccess(response.data.hasAccess)
         setFreeTrialsUsed(response.data.freeTrialsUsed || 0)
       }).catch(console.error)
-    }
-  }, [user])
+  }, [])
 
   const handleToolChange = (tool: string) => {
     if (tool === 'ai-outline') {
@@ -127,7 +114,7 @@ export const ImageGenerationMode: React.FC<ImageGenerationModeProps> = ({
     setShowPaymentDialog(false)
     setHasImageGenAccess(true)
     // Refresh the billing status
-    api.get('/api/billing/image-gen-status').then(response => {
+    api.get<ImageGenStatus>('/api/billing/image-gen-status').then((response) => {
       setHasImageGenAccess(response.data.hasAccess)
       setFreeTrialsUsed(response.data.freeTrialsUsed || 0)
     }).catch(console.error)

@@ -1,28 +1,78 @@
 import axios, { AxiosResponse } from 'axios';
 import { getAuthToken } from '../hooks/useAuth';
+import { BillingInfo } from '../types/billing';
 
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001',
-  withCredentials: true
+// Get the environment
+const isDev = import.meta.env.DEV;
+const BILLING_BASE = import.meta.env.VITE_API_URL || (isDev ? 'http://localhost:3001' : 'http://137.184.89.215:3001');
+
+const billingApi = axios.create({
+  baseURL: BILLING_BASE,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    'Has-Cookie-Credentials': 'include'
+  }
 });
 
-// Add request interceptor to include auth token
-apiClient.interceptors.request.use((config) => {
-  const token = getAuthToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Add request interceptor for logging
+billingApi.interceptors.request.use(
+  config => {
+    // Log request details in development
+    if (isDev) {
+      console.log('[Billing][Request]', config.method?.toUpperCase(), config.url);
+      console.log('[Billing][Request] URL:', `${BILLING_BASE}${config.url}`);
+      console.log('[Billing][Request] Headers:', config.headers);
   }
   return config;
-});
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
 
-// Add response interceptor to handle errors
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized error (e.g., redirect to login)
-      console.error('Authentication error:', error);
+// Add response interceptor for retries
+billingApi.interceptors.response.use(
+  response => response,
+  async error => {
+    const config = error.config;
+    
+    // Only retry on network errors or 5xx server errors
+    const shouldRetry = (
+      !config.retryCount || 
+      config.retryCount < 3
+    ) && (
+      !error.response || 
+      (error.response.status >= 500 && error.response.status <= 599)
+    );
+
+    if (shouldRetry) {
+      config.retryCount = (config.retryCount || 0) + 1;
+      const delay = Math.pow(2, config.retryCount - 1) * 500; // Exponential backoff
+      
+      if (isDev) {
+        console.log('[Billing] Request failed (attempt ' + config.retryCount + '/4):', {
+          error: error.message,
+          type: error.response ? 'HTTP' : 'NETWORK',
+          isRetryable: true
+        });
+        console.log('[Billing] Retrying in ' + delay + 'ms...');
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return billingApi(config);
     }
+
+    if (isDev) {
+      console.log('[Billing][Error]', config.method?.toUpperCase(), config.url, 'failed:', {
+        error: error.message,
+        type: error.response ? 'HTTP' : 'NETWORK',
+        isRetryable: shouldRetry,
+        retryCount: config.retryCount
+      });
+    }
+
     return Promise.reject(error);
   }
 );
@@ -125,17 +175,6 @@ export interface UserBillingInfo {
   dailyTokensRemaining?: number;
 }
 
-export interface BillingInfo {
-  tokens: number;
-  dailyTokensRemaining: number;
-  blessingActive: boolean;
-  freeTokensRemaining?: {
-    openai: number;
-    claude: number;
-    qwen: number;
-  };
-}
-
 export interface PaymentResponse {
   url: string;
 }
@@ -144,81 +183,71 @@ interface CheckoutResponse {
   url: string;
 }
 
-export const billingApi = {
-  getBillingInfo: async (): Promise<BillingInfo> => {
+export const getBillingInfo = async (): Promise<BillingInfo> => {
     try {
-      const response: AxiosResponse<BillingInfo> = await apiClient.get('/api/billing/info');
+    const response = await billingApi.get('/api/billing/info');
       return response.data;
     } catch (error) {
       console.error('Failed to fetch billing info:', error);
       throw error;
     }
-  },
+};
 
-  async getPackagesAndPlans(): Promise<{
-    packages: TokenPackage[];
-    plans: PremiumPlan[];
-  }> {
+export const createPaymentSession = async (packageId: string): Promise<string> => {
     try {
-      const response = await apiClient.get('/api/billing/packages');
-      return response.data;
+    const response = await billingApi.post('/api/billing/create-session', { packageId });
+    return response.data.sessionId;
     } catch (error) {
-      console.error('Failed to fetch packages and plans:', error);
+    console.error('Failed to create payment session:', error);
       throw error;
     }
-  },
+};
 
-  async createStripeCheckout(packageId?: string, planId?: string): Promise<string> {
+export const checkPaymentStatus = async (sessionId: string): Promise<boolean> => {
     try {
-      const response: AxiosResponse<CheckoutResponse> = await apiClient.post('/api/billing/checkout/stripe', {
-        packageId,
-        planId
-      });
-      return response.data.url;
+    const response = await billingApi.get(`/api/billing/check-session/${sessionId}`);
+    return response.data.paid;
     } catch (error) {
-      console.error('Failed to create Stripe checkout:', error);
-      throw new Error('Payment service temporarily unavailable');
+    console.error('Failed to check payment status:', error);
+    throw error;
     }
-  },
+};
 
-  async createAlipayCheckout(packageId?: string, planId?: string): Promise<string> {
+export const getTokenBalance = async (): Promise<number> => {
     try {
-      const response: AxiosResponse<CheckoutResponse> = await apiClient.post('/api/billing/checkout/alipay', {
-        packageId,
-        planId
-      });
-      return response.data.url;
+    const response = await billingApi.get('/api/billing/tokens');
+    return response.data.balance;
     } catch (error) {
-      console.error('Failed to create Alipay checkout:', error);
-      throw new Error('Payment service temporarily unavailable');
-    }
-  },
-
-  async initiatePayment(packageId: string, provider: 'stripe' | 'alipay' = 'stripe'): Promise<PaymentResponse> {
-    try {
-      const response = await apiClient.post('/api/billing/payment', {
-        packageId,
-        provider
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Failed to initiate payment:', error);
-      throw new Error('Payment service temporarily unavailable');
-    }
-  },
-
-  needsTokenPurchase(billingInfo: BillingInfo): boolean {
-    return billingInfo.tokens < 1000;
-  },
-
-  needsPremiumPlan(billingInfo: BillingInfo): boolean {
-    return !billingInfo.blessingActive;
-  },
-
-  getTokensRemaining(billingInfo: BillingInfo, provider?: 'openai' | 'claude' | 'qwen'): number {
-    if (provider && billingInfo.freeTokensRemaining) {
-      return billingInfo.freeTokensRemaining[provider];
-    }
-    return billingInfo.tokens;
+    console.error('Failed to get token balance:', error);
+    throw error;
   }
+};
+
+export const deductTokens = async (amount: number, reason: string): Promise<number> => {
+    try {
+    const response = await billingApi.post('/api/billing/deduct', { amount, reason });
+    return response.data.newBalance;
+    } catch (error) {
+    console.error('Failed to deduct tokens:', error);
+    throw error;
+    }
+};
+
+export const addTokens = async (amount: number, reason: string): Promise<number> => {
+  try {
+    const response = await billingApi.post('/api/billing/add', { amount, reason });
+    return response.data.newBalance;
+  } catch (error) {
+    console.error('Failed to add tokens:', error);
+    throw error;
+  }
+};
+
+export default {
+  getBillingInfo,
+  createPaymentSession,
+  checkPaymentStatus,
+  getTokenBalance,
+  deductTokens,
+  addTokens
 }; 

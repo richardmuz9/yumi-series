@@ -11,54 +11,80 @@ import {
   UserBillingInfo
 } from './types';
 import axios from 'axios';
+import { getAuthToken } from '../hooks/useAuth';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Get the environment
+const isDev = import.meta.env.DEV;
+const API_BASE = import.meta.env.VITE_API_URL || (isDev ? 'http://localhost:3000' : 'http://137.184.89.215:3001');
 
+// Create axios instance
 export const api = axios.create({
-  baseURL,
-  timeout: 30000,
+  baseURL: API_BASE,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    'Has-Cookie-Credentials': 'include'
   }
 });
 
-// Add request interceptor
+// Add request interceptor for retries
 api.interceptors.request.use(
-  (config) => {
-    // Get token from localStorage
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  config => {
+    // Log request details in development
+    if (isDev) {
+      console.log('[API][Request]', config.method?.toUpperCase(), config.url);
+      console.log('[API][Request] URL:', `${API_BASE}${config.url}`);
+      console.log('[API][Request] Headers:', config.headers);
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
 
-// Add response interceptor
+// Add response interceptor for retries
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response) {
-      // Handle specific error cases
-      switch (error.response.status) {
-        case 401:
-          // Unauthorized - clear token and redirect to login
-          localStorage.removeItem('auth_token');
-          window.location.href = '/login';
-          break;
-        case 403:
-          // Forbidden - redirect to upgrade page
-          window.location.href = '/charge';
-          break;
-        case 429:
-          // Rate limit exceeded
-          console.warn('Rate limit exceeded. Please try again later.');
-          break;
+  response => response,
+  async error => {
+    const config = error.config;
+    
+    // Only retry on network errors or 5xx server errors
+    const shouldRetry = (
+      !config.retryCount || 
+      config.retryCount < 3
+    ) && (
+      !error.response || 
+      (error.response.status >= 500 && error.response.status <= 599)
+    );
+
+    if (shouldRetry) {
+      config.retryCount = (config.retryCount || 0) + 1;
+      const delay = Math.pow(2, config.retryCount - 1) * 500; // Exponential backoff
+      
+      if (isDev) {
+        console.log('[API] Request failed (attempt ' + config.retryCount + '/4):', {
+          error: error.message,
+          type: error.response ? 'HTTP' : 'NETWORK',
+          isRetryable: true
+        });
+        console.log('[API] Retrying in ' + delay + 'ms...');
       }
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return api(config);
     }
+
+    if (isDev) {
+      console.log('[API][Error]', config.method?.toUpperCase(), config.url, 'failed:', {
+        error: error.message,
+        type: error.response ? 'HTTP' : 'NETWORK',
+        isRetryable: shouldRetry,
+        retryCount: config.retryCount
+      });
+    }
+
     return Promise.reject(error);
   }
 );
@@ -120,7 +146,7 @@ async function fetchWithRetry(
 export class ApiClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string = baseURL) {
+  constructor(baseUrl: string = API_BASE) {
     this.baseUrl = baseUrl;
   }
 
@@ -236,7 +262,7 @@ export const generateAnimeCharacter = (prompt: string, settings: AIGenerationSet
   apiClient.generateAnimeCharacter(prompt, settings);
 
 class AuthService {
-  private baseUrl = baseURL;
+  private baseUrl = API_BASE;
 
   async signup(email: string, username: string, password: string): Promise<AuthResponse> {
     try {
@@ -356,3 +382,5 @@ class AuthService {
 }
 
 export const authService = new AuthService(); 
+
+export default api; 

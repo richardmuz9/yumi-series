@@ -7,22 +7,26 @@ type LazyComponentModule = {
 
 type LazyComponentImport = () => Promise<LazyComponentModule>;
 
+// Define supported components with proper typing
+const SUPPORTED_COMPONENTS: Record<string, () => Promise<{ default: ComponentType<any> }>> = {
+  'writing-helper': () => import('../writing-helper/WritingHelperScreen'),
+  'anime-chara-helper': () => import('../anime-chara-helper/AnimeCharaHelperApp'),
+  'manga': () => import('../manga/MangaApp'),
+  'charge-page': () => import('../components/ChargePage'),
+};
+
 const loadComponent = (key: string) => {
   try {
-    switch (key) {
-      case 'writing-helper':
-        return lazy(() => import('../writing-helper/WritingHelperScreen').catch((e: Error) => {
-          console.error(`Failed to load writing-helper:`, e);
-          return { default: () => null };
-        }));
-      case 'anime-chara':
-        return lazy(() => import('../anime-chara-helper/AnimeCharaHelperApp').catch((e: Error) => {
-          console.error(`Failed to load anime-chara:`, e);
-          return { default: () => null };
-        }));
-      default:
-        throw new Error(`Unknown component: ${key}`);
+    const loader = SUPPORTED_COMPONENTS[key as keyof typeof SUPPORTED_COMPONENTS];
+    if (!loader) {
+      console.warn(`Skipping unknown component: ${key}`);
+      return lazy(() => Promise.resolve({ default: () => null }));
     }
+
+    return lazy(() => loader().catch((e: Error) => {
+      console.error(`Failed to load ${key}:`, e);
+      return { default: () => null } as { default: ComponentType<any> };
+    }));
   } catch (error: unknown) {
     console.error(`Error in loadComponent for ${key}:`, error);
     return lazy(() => Promise.resolve({ default: () => null }));
@@ -44,11 +48,16 @@ const preloadInstalledComponents = async () => {
     // Get installed modes from modeManager
     const installedModes = await modeManager.getInstalledModes().catch((error: unknown) => {
       console.warn('Failed to get installed modes:', error);
-      return ['writing-helper', 'anime-chara']; // Fallback to default modes
+      return Object.keys(SUPPORTED_COMPONENTS); // Fallback to all supported components
     });
 
     // Preload each installed component
     for (const key of installedModes) {
+      if (!SUPPORTED_COMPONENTS[key as keyof typeof SUPPORTED_COMPONENTS]) {
+        console.warn(`Skipping preload of unknown component: ${key}`);
+        continue;
+      }
+
       try {
         await new Promise(resolve => setTimeout(resolve, 100)); // Add small delay between loads
         const component = loadComponent(key);
@@ -76,28 +85,24 @@ export const dynamicLoader = {
   /**
    * Load a component dynamically with installation check
    */
-  loadComponent: async (key: string): Promise<ComponentType<any> | null> => {
-    try {
-      // Check if mode is installed
-      const isInstalled = await modeManager.isModeInstalled(key);
-      if (!isInstalled) {
-        console.warn(`Mode ${key} is not installed. Cannot load component.`);
-        return null;
-      }
-
-      return loadComponent(key);
-    } catch (error: unknown) {
-      console.error(`Failed to load component for mode ${key}:`, error);
-      return null;
-    }
-  },
+  loadComponent,
 
   /**
    * Preload a component (cache it without rendering)
    */
   preloadComponent: async (key: string): Promise<void> => {
+    if (!SUPPORTED_COMPONENTS[key as keyof typeof SUPPORTED_COMPONENTS]) {
+      console.warn(`Cannot preload unknown component: ${key}`);
+      return;
+    }
     try {
-      await dynamicLoader.loadComponent(key);
+      const component = loadComponent(key);
+      if (component) {
+        const modulePromise = (component as any)._payload._result;
+        if (modulePromise && typeof modulePromise.then === 'function') {
+          await modulePromise;
+        }
+      }
     } catch (error: unknown) {
       console.error(`Failed to preload component ${key}:`, error);
     }
@@ -112,46 +117,35 @@ export const dynamicLoader = {
    * Clear component cache for a specific mode
    */
   clearComponentCache: (key: string): void => {
-    try {
-      // Implementation needed
-    } catch (error: unknown) {
-      console.error(`Failed to clear component cache for ${key}:`, error);
-    }
+    // No-op for now - implement if needed
+    console.warn('clearComponentCache not implemented');
   },
 
   /**
    * Clear all component cache
    */
   clearAllCache: () => {
-    try {
-      // Implementation needed
-    } catch (error: unknown) {
-      console.error('Failed to clear all component cache:', error);
-    }
+    // No-op for now - implement if needed
+    console.warn('clearAllCache not implemented');
   },
 
   /**
    * Get size of component cache
    */
   getCacheSize: () => {
-    try {
-      // Implementation needed
-      return 0; // Placeholder return
-    } catch (error: unknown) {
-      console.error('Failed to get cache size:', error);
-      return 0;
-    }
+    return Object.keys(SUPPORTED_COMPONENTS).length;
   },
 
   /**
    * Get cached component without loading
    */
   getCachedComponent: (key: string): LazyComponentModule | null => {
+    if (!SUPPORTED_COMPONENTS[key as keyof typeof SUPPORTED_COMPONENTS]) {
+      return null;
+    }
     try {
-      // Implementation needed
-      return null; // Placeholder return
-    } catch (error: unknown) {
-      console.error(`Failed to get cached component ${key}:`, error);
+      return require(`../${key}`);
+    } catch {
       return null;
     }
   }

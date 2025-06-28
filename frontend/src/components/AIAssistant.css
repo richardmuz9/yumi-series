@@ -48,6 +48,13 @@
   margin: 0;
 }
 
+.header-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.minimize-btn,
+.back-btn,
 .close-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
@@ -63,6 +70,8 @@
   justify-content: center;
 }
 
+.minimize-btn:hover,
+.back-btn:hover,
 .close-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
