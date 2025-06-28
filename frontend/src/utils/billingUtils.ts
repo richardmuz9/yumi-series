@@ -301,7 +301,10 @@ export function getModelDisplayName(modelId: string): string {
     'qwen-vl-plus': 'Qwen VL Plus',
     'qwen-vl-max': 'Qwen VL Max',
     'deepseek/deepseek-chat': 'DeepSeek Chat',
-    'deepseek/deepseek-coder': 'DeepSeek Coder'
+    'deepseek/deepseek-coder': 'DeepSeek Coder',
+    'gemini-pro': 'Gemini Pro',
+    'gemini-1.5-flash': 'Gemini 1.5 Flash',
+    'gemini-pro-vision': 'Gemini Pro Vision',
   }
   
   return modelNames[modelId] || modelId
@@ -313,6 +316,7 @@ export function getProviderInfo(provider: string): { name: string; icon: string;
     openai: { name: 'OpenAI', icon: '🤖', color: 'purple' },
     claude: { name: 'Claude', icon: '🧠', color: 'orange' },
     qwen: { name: 'Qwen', icon: '🚀', color: 'blue' },
+    gemini: { name: 'Gemini', icon: '🔷', color: 'teal' },
   }
   
   return providers[provider as keyof typeof providers] || { name: provider, icon: '⚡', color: 'gray' }
@@ -334,4 +338,5 @@ export const PROVIDER_METADATA = {
   openai: { name: 'OpenAI', icon: '🤖', color: 'purple' },
   claude: { name: 'Claude', icon: '🧠', color: 'orange' },
   qwen: { name: 'Qwen', icon: '🚀', color: 'blue' },
+  gemini: { name: 'Gemini', icon: '🔷', color: 'teal' },
 } as const

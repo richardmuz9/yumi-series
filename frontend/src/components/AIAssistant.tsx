@@ -248,6 +248,20 @@ const MODELS = {
     description: 'Advanced Gemini model with superior reasoning',
     strengths: ['Advanced reasoning', 'Multimodal capabilities', 'Creative tasks'],
     recommended: ['Complex projects', 'Creative work', 'Advanced analysis']
+  },
+  'gemini-1.5-flash': {
+    name: 'Gemini 1.5 Flash',
+    type: 'free',
+    description: 'Fast and efficient Gemini model',
+    strengths: ['Quick responses', 'Good reasoning', 'Multimodal support'],
+    recommended: ['Quick tasks', 'Learning', 'General use']
+  },
+  'gemini-pro-vision': {
+    name: 'Gemini Pro Vision',
+    type: 'paid',
+    description: 'Gemini model with vision capabilities',
+    strengths: ['Image understanding', 'Multimodal tasks'],
+    recommended: ['Image tasks', 'Creative work']
   }
 }
 
@@ -286,7 +300,7 @@ export default function AIAssistant({
     } else if (selectedModel.startsWith('claude-')) {
       provider = 'anthropic'
     } else if (selectedModel.startsWith('gemini-')) {
-      provider = 'google'
+      provider = 'gemini'
     }
     
     sendMessage(message, {

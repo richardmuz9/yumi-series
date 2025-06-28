@@ -13,12 +13,13 @@ interface AppState {
   mode: 'agent' | 'assistant'
   messages: Message[]
   previewCode: string
-  provider: 'openai' | 'qwen' | 'claude'
+  provider: 'openai' | 'qwen' | 'claude' | 'gemini'
   model: string
   availableModels: {
     openai: string[]
     qwen: string[]
     claude: string[]
+    gemini: string[]
   }
   isLoading: boolean
   currentView: 'chat' | 'archive' | 'writing-helper'
@@ -26,9 +27,9 @@ interface AppState {
   showLayoutCustomizer: boolean
   installedModes: string[]
   setMode: (mode: 'agent' | 'assistant') => void
-  setProvider: (provider: 'openai' | 'qwen' | 'claude') => void
+  setProvider: (provider: 'openai' | 'qwen' | 'claude' | 'gemini') => void
   setModel: (model: string) => void
-  setAvailableModels: (models: { openai: string[], qwen: string[], claude: string[] }) => void
+  setAvailableModels: (models: { openai: string[], qwen: string[], claude: string[], gemini: string[] }) => void
   addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void
   clearMessages: () => void
   archiveMessages: () => void
@@ -68,6 +69,11 @@ export const useStore = create<AppState>((set, get) => ({
       'claude-3-5-sonnet-20240620',
       'claude-3-sonnet-20240229',
       'claude-3-haiku-20240307'
+    ],
+    gemini: [
+      'gemini-pro',
+      'gemini-1.5-flash',
+      'gemini-pro-vision'
     ]
   },
   isLoading: false,
